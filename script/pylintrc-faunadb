@@ -1,0 +1,5 @@
+
+[BASIC]
+indent-string='  '
+indent-after-paren=2
+disable=too-few-public-methods, locally-disabled
