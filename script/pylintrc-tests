@@ -2,4 +2,4 @@
 [BASIC]
 indent-string='  '
 indent-after-paren=2
-disable=missing-docstring, no-name-in-module, import-error, locally-disabled, too-many-instance-attributes
+disable=missing-docstring, no-member, no-name-in-module, no-self-use, import-error, invalid-name, locally-disabled, too-many-instance-attributes

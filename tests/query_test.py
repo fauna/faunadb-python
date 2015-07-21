@@ -1,14 +1,12 @@
 from faunadb.connection import NotFound
-from faunadb.client import Client
-from faunadb import query
+from faunadb.errors import InvalidQuery
 from faunadb.objects import Obj, Ref
+from faunadb import query
 from test_case import FaunaTestCase, random_email, random_password
 
 class QueryTest(FaunaTestCase):
   def setUp(self):
     super(QueryTest, self).setUp()
-    self.client = Client(self.server_connection)
-    self.client_client = Client(self.client_connection)
 
   def test_post(self):
     data = Obj(name="Arawn", email=random_email(), password=random_password())
@@ -41,3 +39,9 @@ class QueryTest(FaunaTestCase):
     user = self.test_post()
     self.client.query(query.delete(user["ref"]))
     self.assertRaises(NotFound, lambda: self.client.query(query.get(user["ref"])))
+
+  def test_allowed_params(self):
+    user = self.test_post()
+    copy = self.client.query(query.get(user["ref"], {"ts": user["ts"]}))
+    assert user == copy
+    self.assertRaises(InvalidQuery, lambda: query.get(user["ref"], {"tee ess": 123}))

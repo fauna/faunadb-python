@@ -4,9 +4,10 @@ from time import time
 
 from requests import codes, Request, Session
 
-from faunadb.errors import BadRequest, MethodNotAllowed, NotFound, PermissionDenied, Unauthorized
-from faunadb._json import to_json, to_json_pretty
-from faunadb._util import Spreader
+from .errors import BadRequest, FaunaHTTPError, InternalError, MethodNotAllowed, NotFound,\
+  PermissionDenied, Unauthorized, UnavailableError
+from ._json import to_json, to_json_pretty
+from ._util import Spreader
 
 class Connection(object):
   """
@@ -95,7 +96,8 @@ class Connection(object):
       self.logger.debug(' ' * indent + line)
 
   def _execute(self, action, path, data=None, query=None):
-    "Perfomrs an HTTP action, logs it, and looks for errors."
+    "Performs an HTTP action, logs it, and looks for errors."
+    # pylint: disable=too-many-branches
 
     if self.logger is not None:
       self._log(0, "Fauna %s /%s%s" % (action.upper(), path, _query_string_for_logging(query)))
@@ -140,8 +142,12 @@ class Connection(object):
       raise NotFound(response)
     elif code == codes["method_not_allowed"]:
       raise MethodNotAllowed(response)
+    elif code == codes["internal_server_error"]:
+      raise InternalError(response)
+    elif code == codes["unavailable"]:
+      raise UnavailableError(response)
     else:
-      response.raise_for_status()
+      raise FaunaHTTPError(response)
 
   def _execute_without_logging(self, action, path, data, query):
     "Performs an HTTP action."
@@ -155,6 +161,8 @@ def _query_string_for_logging(query):
 
   if query:
     return "?" + "&".join((k + "=" + v for k, v in query.iteritems()))
+  else:
+    return ""
 
 # user:pass -> (user, pass)
 def _credentials_from_string(secret):

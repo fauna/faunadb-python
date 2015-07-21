@@ -5,6 +5,20 @@ class FaunaError(Exception):
   def __init__(self, message):
     super(FaunaError, self).__init__(message)
 
+class InvalidQuery(FaunaError):
+  "Thrown when a query is malformed."
+  pass
+
+class DatabaseError(FaunaError):
+  "Thrown when the database behaves in an unexpected way."
+  pass
+
+class InvalidValue(FaunaError):
+  "Thrown when bad data is put into a Field of a Model."
+  def __init__(self, message="The field value is not valid."):
+    super(InvalidValue, self).__init__(message)
+
+#region HTTPError
 class FaunaHTTPError(FaunaError):
   "Error in FaunaDB server connection."
 
@@ -38,9 +52,11 @@ class MethodNotAllowed(FaunaHTTPError):
   "HTTP 405 Error."
   pass
 
-class UnavailableError(FaunaError):
+class InternalError(FaunaHTTPError):
+  "HTTP 500 Error."
   pass
 
-class InvalidQuery(FaunaError):
-  "Thrown when a query is malformed."
+class UnavailableError(FaunaHTTPError):
+  "HTTP 503 Error."
   pass
+#endregion

@@ -3,6 +3,9 @@ from faunadb.connection import NotFound
 from faunadb.objects import Ref
 from test_case import FaunaTestCase, random_email, random_password
 
+def _assert_is_headers(headers):
+  assert "content-type" in headers
+
 class ClientTest(FaunaTestCase):
   def setUp(self):
     super(ClientTest, self).setUp()
@@ -40,7 +43,8 @@ class ClientTest(FaunaTestCase):
 
   def test_delete(self):
     user = self.test_post()
-    self.client.delete(user["ref"])
+    headers = self.client.delete(user["ref"])
+    _assert_is_headers(headers)
     self.assertRaises(NotFound, lambda: self.client.get(user["ref"]))
 
   def test_refs(self):

@@ -1,6 +1,7 @@
 from faunadb.client import Client
 from faunadb.connection import Connection, NotFound
 from faunadb.objects import Ref
+from faunadb import query
 
 from os import environ
 from strgen import StringGenerator
@@ -13,6 +14,8 @@ _FAUNA_PORT = environ['FAUNA_PORT']
 
 class FaunaTestCase(TestCase):
   def setUp(self):
+    super(FaunaTestCase, self).setUp()
+
     self.domain = _FAUNA_DOMAIN
     self.scheme = _FAUNA_SCHEME
     self.port = _FAUNA_PORT
@@ -22,22 +25,22 @@ class FaunaTestCase(TestCase):
     test_db = Ref("databases/faunadb-python-test")
 
     try:
-      root_client.delete(test_db.ref_str)
+      root_client.query(query.delete(test_db))
     except NotFound:
       pass
-    root_client.post("databases", {"name": "faunadb-python-test"})
 
-    server_key = root_client.post(
-      "keys",
-      {"database": test_db, "role": "server"})["secret"]
-    client_key = root_client.post(
-      "keys",
-      {"database": test_db, "role": "client"})["secret"]
+    root_client.query(query.create(Ref("databases"), query.quote({"name": "faunadb-python-test"})))
+
+    def get_key(role):
+      return root_client.query(
+        query.create(Ref("keys"), query.quote({"database": test_db, "role": role})))["secret"]
+
+    server_key = get_key("server")
+    client_key = get_key("client")
 
     self.server_connection = connection(server_key)
     self.client_connection = connection(client_key)
-
-    super(FaunaTestCase, self).setUp()
+    self.client = Client(self.server_connection)
 
   def tearDown(self):
     pass

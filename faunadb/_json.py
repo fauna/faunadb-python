@@ -2,30 +2,32 @@
 
 from json import dumps, loads, JSONEncoder
 
-from faunadb.objects import Ref, Set, Obj, Event
+from .errors import DatabaseError
+from .objects import Ref, Set, Obj
 
 def parse_json(json_string):
   "Parses a JSON string into a dict containing types from faunadb.objects."
   return loads(json_string, object_hook=_parse_json_hook)
 
-
 def _parse_json_hook(dct):
   "Looks for FaunaDB types in a JSON object and converts to them if possible."
   if "@ref" in dct:
-    assert len(dct) == 1
+    if len(dct) != 1:
+      raise DatabaseError("@ref must appear alone.")
     return Ref(dct["@ref"])
   if "@obj" in dct:
-    assert len(dct) == 1
+    if len(dct) != 1:
+      raise DatabaseError("@obj must appear alone.")
     return Obj(**dct["@obj"])
   if "@set" in dct:
-    assert len(dct) == 1
+    if len(dct) != 1:
+      raise DatabaseError("@set must appear alone.")
     dct = dct["@set"]
-    assert len(dct) == 2
+    if len(dct) != 2:
+      raise DatabaseError('@set must have a value with only "match" and "index" keys.')
     return Set(dct["match"], dct["index"])
-  #if "ts" in dct and "action" in dct and "resource" in dct:
-  #  assert len(dct) == 3
-  #  return Event(dct["ts"], dct["action"], dct["resource"])
-  return dct
+  else:
+    return dct
 
 
 def to_json(dct, **opts):
@@ -46,14 +48,20 @@ class _FaunaJSONEncoder(JSONEncoder):
 
   # pylint: disable=method-hidden
   def default(self, obj):
-    if isinstance(obj, Ref):
-      return {"@ref": obj.ref_str}
-    if isinstance(obj, Set):
-      return {"@set": {"match": obj.match, "index": obj.index}}
-    if isinstance(obj, Obj):
-      return {"object": obj.dct}
-    if isinstance(obj, Event):
-      dct = {"ts": obj.ts, "action": obj.action, "resource": obj.resource}
-      return {k: v for k, v in dct.iteritems() if v is not None}
+    if hasattr(obj, "to_fauna_json"):
+      return _to_fauna_json_recursive(obj)
     else:
       return JSONEncoder.default(self, obj)
+
+def _to_fauna_json_recursive(obj):
+  """
+  Calls to_fauna on obj if possible.
+  Recursively calls .to_fauna() on the results of that too.
+  This ensures that objects implementing to_fauna don't need to call it recursively theirselves.
+  """
+
+  dct = obj.to_fauna_json()
+  for key, value in dct.iteritems():
+    if hasattr(value, "to_fauna"):
+      dct[key] = _to_fauna_json_recursive(value)
+  return dct

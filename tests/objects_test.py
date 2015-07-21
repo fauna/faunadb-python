@@ -2,9 +2,9 @@ from faunadb.objects import Event, Obj, Ref, Set
 from faunadb._json import parse_json, to_json
 from test_case import FaunaTestCase
 
-class ClientTest(FaunaTestCase):
+class ObjectsTest(FaunaTestCase):
   def setUp(self):
-    super(ClientTest, self).setUp()
+    super(ObjectsTest, self).setUp()
 
     user = Ref("users/123")
     json_user = '{"@ref": "users/123"}'
@@ -21,8 +21,6 @@ class ClientTest(FaunaTestCase):
 
   def test_parse(self):
     for obj, json in self.object_to_json.iteritems():
-      print parse_json(json)
-      print obj
       assert parse_json(json) == obj
     assert parse_json('{"@obj": {"a": 1, "b": 2}}') == Obj(a=1, b=2)
 
