@@ -98,31 +98,6 @@ class Set(object):
     return not self == other
 
 
-class Obj(object):
-  "FaunaDB object. See https://faunadb.com/documentation#queries-values."
-
-  def __init__(self, **kwargs):
-    self.dct = kwargs
-
-  @override
-  def to_fauna_json(self):
-    # pylint: disable=missing-docstring
-    return {"object": self.dct}
-
-  @override
-  def __str__(self):
-    parts = [k + "=" + str(v) for k, v in self.dct.iteritems()]
-    return "Obj(%s)" % ", ".join(parts)
-
-  @override
-  def __eq__(self, other):
-    return isinstance(other, Obj) and self.dct == other.dct
-
-  @override
-  def __ne__(self, other):
-    return not self == other
-
-
 class Event(object):
   "FaunaDB Event. See http://localhost:3000/documentation#queries-values."
 

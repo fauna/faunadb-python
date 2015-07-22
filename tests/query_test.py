@@ -1,6 +1,6 @@
 from faunadb.connection import NotFound
 from faunadb.errors import InvalidQuery
-from faunadb.objects import Obj, Ref
+from faunadb.objects import Ref
 from faunadb import query
 from test_case import FaunaTestCase, random_email, random_password
 
@@ -9,17 +9,17 @@ class QueryTest(FaunaTestCase):
     super(QueryTest, self).setUp()
 
   def test_post(self):
-    data = Obj(name="Arawn", email=random_email(), password=random_password())
+    data = query.object(name="Arawn", email=random_email(), password=random_password())
     return self.client.query(query.create(Ref('users'), data))
 
   def test_put(self):
     user = self.test_post()
-    data = Obj(data=Obj(pockets=2))
+    data = query.object(data=query.object(pockets=2))
     user = self.client.query(query.replace(user["ref"], data))
 
     assert user["data"]["pockets"] == 2
 
-    data = Obj(data=Obj(apples=3))
+    data = query.object(data=query.object(apples=3))
     user = self.client.query(query.replace(user["ref"], data))
 
     assert "pockets" not in user["data"]
@@ -27,9 +27,9 @@ class QueryTest(FaunaTestCase):
 
   def test_patch(self):
     user = self.test_post()
-    data = Obj(data=Obj(pockets=2))
+    data = query.object(data=query.object(pockets=2))
     user = self.client.query(query.update(user["ref"], data))
-    data = Obj(data=Obj(apples=3))
+    data = query.object(data=query.object(apples=3))
     user = self.client.query(query.update(user["ref"], data))
 
     assert user["data"]["pockets"] == 2

@@ -3,7 +3,7 @@
 from json import dumps, loads, JSONEncoder
 
 from .errors import DatabaseError
-from .objects import Ref, Set, Obj
+from .objects import Ref, Set
 
 def parse_json(json_string):
   "Parses a JSON string into a dict containing types from faunadb.objects."
@@ -18,7 +18,7 @@ def _parse_json_hook(dct):
   if "@obj" in dct:
     if len(dct) != 1:
       raise DatabaseError("@obj must appear alone.")
-    return Obj(**dct["@obj"])
+    return dct["@obj"]
   if "@set" in dct:
     if len(dct) != 1:
       raise DatabaseError("@set must appear alone.")

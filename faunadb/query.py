@@ -2,6 +2,9 @@
 Constructors for creating queries to be passed into Client.query.
 See also use the constructors in faunadb.objects.
 For query documentation see <https://faunadb.com/documentation#guide-queries>.
+
+When constructing queries, you must use these functions or constructors from objects.py.
+For passing raw data to a query, use query.object or query.quote.
 """
 
 from .errors import InvalidQuery
@@ -25,6 +28,10 @@ def if_expr(condition, true_expr, false_expr):
 def do(expressions):
   "See https://faunadb.com/documentation#queries-basic_forms."
   return {"do": expressions}
+
+def object(**keys_vals):
+  "See https://faunadb.com/documentation#queries-basic_forms."
+  return {"object": keys_vals}
 
 def quote(expr):
   "See https://faunadb.com/documentation#queries-basic_forms."

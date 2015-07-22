@@ -1,4 +1,4 @@
-from faunadb.objects import Event, Obj, Ref, Set
+from faunadb.objects import Event, Ref, Set
 from faunadb._json import parse_json, to_json
 from test_case import FaunaTestCase
 
@@ -22,12 +22,11 @@ class ObjectsTest(FaunaTestCase):
   def test_parse(self):
     for obj, json in self.object_to_json.iteritems():
       assert parse_json(json) == obj
-    assert parse_json('{"@obj": {"a": 1, "b": 2}}') == Obj(a=1, b=2)
+    assert parse_json('{"@obj": {"a": 1, "b": 2}}') == {"a": 1, "b": 2}
 
   def test_to_json(self):
     for obj, json in self.object_to_json.iteritems():
       assert to_json(obj) == json
-    assert to_json(Obj(a=1, b=2)) == '{"object": {"a": 1, "b": 2}}'
     assert to_json(Event(123, "create", Ref("users/123"))) == \
       '{"action": "create", "resource": {"@ref": "users/123"}, "ts": 123}'
     assert to_json(Event(123, None, None)) == '{"ts": 123}'
