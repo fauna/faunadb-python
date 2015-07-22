@@ -1,6 +1,5 @@
 from faunadb.errors import InvalidValue
 from faunadb.model import Converter, Field, Model, RefConverter
-from faunadb._util import override
 
 from test_case import FaunaTestCase
 
@@ -11,13 +10,11 @@ class ConverterTest(FaunaTestCase):
     class DoubleConverter(Converter):
       # pylint: disable=no-self-use
 
-      @override(Converter)
       def raw_to_value(self, raw):
         half = len(raw) / 2
         assert raw[:half] == raw[half:]
         return raw[:half]
 
-      @override(Converter)
       def value_to_raw(self, value):
         return value + value
 
@@ -65,12 +62,12 @@ class ConverterTest(FaunaTestCase):
     def set_field():
       it.ref_field = other
     self.assertRaises(InvalidValue, set_field)
-    other.create()
+    other.save()
     set_field()
     assert it.get_raw("ref_field") == other.ref
     assert it.ref_field == other
 
-    it.create()
+    it.save()
     it.ref_field = it
     assert it.get_raw("ref_field") == it.ref
     assert it.ref_field == it

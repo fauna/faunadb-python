@@ -9,6 +9,7 @@ from .errors import BadRequest, FaunaHTTPError, InternalError, MethodNotAllowed,
 from ._json import to_json, to_json_pretty
 from ._util import Spreader
 
+
 class Connection(object):
   """
   Stores info for communicating with a FaunaDB server.
@@ -51,12 +52,13 @@ class Connection(object):
 
     self.session = Session()
     if secret is not None:
-      self.session.auth = self.credentials = _credentials_from_string(secret)
-      self.session.headers.update({
-        "Accept-Encoding": "gzip",
-        "Content-Type": "application/json;charset=utf-8"
-      })
-      self.session.timeout = timeout
+      self.session.auth = self.credentials = Connection._credentials_from_string(secret)
+
+    self.session.headers.update({
+      "Accept-Encoding": "gzip",
+      "Content-Type": "application/json;charset=utf-8"
+    })
+    self.session.timeout = timeout
 
     self.base_url = "%s://%s:%s" % (self.scheme, self.domain, self.port)
 
@@ -77,30 +79,31 @@ class Connection(object):
     return self._execute("POST", path, data or {})
 
   def put(self, path, data=None):
-    "Like Connection.post, but is a PUT."
+    """Like Connection.post, but is a PUT."""
     return self._execute("PUT", path, data or {})
 
   def patch(self, path, data=None):
-    "Like Connection.post, but is a PATCH."
+    """Like Connection.post, but is a PATCH."""
     return self._execute("PATCH", path, data or {})
 
   def delete(self, path, data=None):
-    "Like Connection.post, but is a DELETE and returns only headers."
-    return self._execute("DELETE", path, data or {})[1]
+    """Like Connection.post, but is a DELETE."""
+    return self._execute("DELETE", path, data or {})
 
   def _log(self, indent, logged):
-    "Indents `logged` before sending it to self.logger."
-
+    """Indents `logged` before sending it to self.logger."""
     for line in logged.split('\n'):
       print line
       self.logger.debug(' ' * indent + line)
 
   def _execute(self, action, path, data=None, query=None):
-    "Performs an HTTP action, logs it, and looks for errors."
+    """Performs an HTTP action, logs it, and looks for errors."""
     # pylint: disable=too-many-branches
-
     if self.logger is not None:
-      self._log(0, "Fauna %s /%s%s" % (action.upper(), path, _query_string_for_logging(query)))
+      self._log(0, "Fauna %s /%s%s" % (
+        action.upper(),
+        path,
+        Connection._query_string_for_logging(query)))
       if hasattr(self, "credentials"):
         self._log(2, "Credentials: %s:%s" % self.credentials)
       if data:
@@ -129,46 +132,45 @@ class Connection(object):
     else:
       response = self._execute_without_logging(action, path, data, query)
 
+    # pylint: disable=no-member
     code = response.status_code
     if 200 <= code <= 299:
       return (response.text, response.headers)
-    elif code == codes["bad_request"]:
+    elif code == codes.bad_request:
       raise BadRequest(response)
-    elif code == codes["unauthorized"]:
+    elif code == codes.unauthorized:
       raise Unauthorized(response)
-    elif code == codes["forbidden"]:
+    elif code == codes.forbidden:
       raise PermissionDenied(response)
-    elif code == codes["not_found"]:
+    elif code == codes.not_found:
       raise NotFound(response)
-    elif code == codes["method_not_allowed"]:
+    elif code == codes.method_not_allowed:
       raise MethodNotAllowed(response)
-    elif code == codes["internal_server_error"]:
+    elif code == codes.internal_server_error:
       raise InternalError(response)
-    elif code == codes["unavailable"]:
+    elif code == codes.unavailable:
       raise UnavailableError(response)
     else:
       raise FaunaHTTPError(response)
 
   def _execute_without_logging(self, action, path, data, query):
-    "Performs an HTTP action."
-
+    """Performs an HTTP action."""
     url = self.base_url + "/" + path
     req = Request(action, url, params=query, data=to_json(data))
     return self.session.send(self.session.prepare_request(req))
 
-def _query_string_for_logging(query):
-  "Converts a query dict to URL params."
-
-  if query:
+  @staticmethod
+  def _query_string_for_logging(query):
+    """Converts a query dict to URL params."""
+    if not query:
+      return ""
     return "?" + "&".join((k + "=" + v for k, v in query.iteritems()))
-  else:
-    return ""
 
-# user:pass -> (user, pass)
-def _credentials_from_string(secret):
-  "Converts a username:password string to (username, password)."
-
-  pair = secret.split(":", 1)
-  if len(pair) == 1:
-    pair.append('')
-  return tuple(pair)
+  # user:pass -> (user, pass)
+  @staticmethod
+  def _credentials_from_string(secret):
+    """Converts a username:password string to (username, password)."""
+    pair = secret.split(":", 1)
+    if len(pair) == 1:
+      pair.append('')
+    return tuple(pair)

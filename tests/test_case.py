@@ -32,8 +32,9 @@ class FaunaTestCase(TestCase):
     root_client.query(query.create(Ref("databases"), query.quote({"name": "faunadb-python-test"})))
 
     def get_key(role):
-      return root_client.query(
-        query.create(Ref("keys"), query.quote({"database": test_db, "role": role})))["secret"]
+      db = query.quote({"database": test_db, "role": role})
+      response = root_client.query(query.create(Ref("keys"), db))
+      return response.resource["secret"]
 
     server_key = get_key("server")
     client_key = get_key("client")

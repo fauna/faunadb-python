@@ -6,10 +6,10 @@ class ObjectsTest(FaunaTestCase):
   def setUp(self):
     super(ObjectsTest, self).setUp()
 
-    user = Ref("users/123")
+    user = Ref("users", "123")
     json_user = '{"@ref": "users/123"}'
 
-    index = Ref("indexes/users_by_bff")
+    index = Ref("indexes", "users_by_bff")
     json_index = '{"@ref": "indexes/users_by_bff"}'
 
     self.object_to_json = {
@@ -30,3 +30,14 @@ class ObjectsTest(FaunaTestCase):
     assert to_json(Event(123, "create", Ref("users/123"))) == \
       '{"action": "create", "resource": {"@ref": "users/123"}, "ts": 123}'
     assert to_json(Event(123, None, None)) == '{"ts": 123}'
+
+  def test_ref(self):
+    blobs = Ref("classes/blobs")
+    ref = Ref(blobs, "123")
+    assert ref.to_class() == blobs
+    assert ref.id() == "123"
+
+    keys = Ref("keys")
+    ref = Ref(keys, "123")
+    assert ref.to_class() == keys
+    assert ref.id() == "123"

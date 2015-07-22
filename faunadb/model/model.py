@@ -1,21 +1,20 @@
 from ..errors import InvalidQuery, DatabaseError
-from .._util import override
 from .model_meta_class import ModelMetaClass
-from ._util import converted_field_name, raw_field_name
+
 
 class Model(object):
   """
   Base class for all models.
   These classes represent values to be fetched from or sent to the database.
   They are the link between Python classes and FaunaDB classes.
-  The basic format is:
+  The basic format is::
 
     class MyModel(Model):
       __fauna_class_name__ = 'my_models'
       my_field = Field()
 
-  All models have `ref` and `ts` properties, as well as properties for every field specified.
-  Give a class fields by assigning new class properties whose values are `Field`s.
+  All models have "ref" and "ts" properties, as well as properties for every field specified.
+  Give a class fields by assigning new class properties whose values are Fields.
   """
 
   # Pylint doesn't recognize properties added by ModelMetaClass (class_ref, fields)
@@ -33,12 +32,12 @@ class Model(object):
     Timestamp of latest database save.
     None if this is a new instance.
     """
-    if data:
-      for field_name in self.__class__.fields:
-        setattr(self, field_name, data.get(field_name))
+    self.changed_fields = set()
+    for field_name in self.__class__.fields:
+      setattr(self, field_name, data.get(field_name))
 
   def id(self):
-    "The id portion of this instance's ref."
+    """The id portion of this instance's ref."""
     if self.is_new_instance():
       raise InvalidQuery("Instance has not been saved to the database, so no id exists.")
     return self.ref.id()
@@ -50,68 +49,65 @@ class Model(object):
     """
     return self.ref is None
 
-  def create(self):
+  def save(self, replace=False):
+    """
+    Saves this instance to the database.
+    If this is a new instance, creates it and sets self.ref.
+    Otherwise, updates any changed fields.
+    :param replace:
+    If true, this will update all fields using a "replace" query instead of "update".
+    See https://faunadb.com/documentation#queries-write_functions.
+    """
+    if self.is_new_instance():
+      self._create()
+    elif replace:
+      self._replace()
+    else:
+      self._update()
+    self.changed_fields.clear()
+
+  def delete(self):
+    """Removes this instance from the database."""
+    if self.is_new_instance():
+      raise InvalidQuery("Instance does not exist in the database.")
+    resource = self.client.delete(self.ref)
+    self.ref = None
+    self.ts = None
+    return resource
+
+  def _create(self):
     """
     Saves this to the database for the first time.
 
     Sets self.ref and self.ts.
     Calling this will cause self.is_new_instance() to be False.
     """
-    if not self.is_new_instance():
-      raise InvalidQuery("Record has already been saved to the database. Use `update`.")
-    response = self.client.post(self.__class__.class_ref, {"data": self})
-    self.ref = response["ref"]
-    self.ts = response["ts"]
+    resource = self.client.post(self.__class__.class_ref, {"data": self}).resource
+    self.ref = resource["ref"]
+    self.ts = resource["ts"]
 
-  def update(self):
+  def _replace(self):
     """
     Sends a complete copy of this to the database to update all fields.
     Fails if there is no instance to update. (Use `create()` first.)
     Updates self.ts.
     """
-    if self.is_new_instance():
-      raise InvalidQuery("Record does not yet exist in the database. Use `create`.")
-    response = self.client.put(self.ref, {"data": self})
-    if self.ref != response["ref"]:
+    resource = self.client.put(self.ref, {"data": self}).resource
+    if self.ref != resource["ref"]:
       raise DatabaseError("Response ref is different than this instance's.")
-    self.ts = response["ts"]
+    self.ts = resource["ts"]
 
-  def patch(self, **patched_fields):
+  def _update(self):
     """
-    Updates several fields and saves the changes to the database.
-    It is not recommended to call "patch" if you are possibly changing other values as well.
+    Updates only the fields that have changed.
+    If a concurrent process
     """
-
-    for field_name, value in patched_fields.iteritems():
-      setattr(self, field_name, value)
-    self.do_patch(*patched_fields.iterkeys())
-
-  def do_patch(self, *patched_field_names):
-    """
-    Sends new values for `patched_field_names` to the database.
-    Does not update any other values.
-    This can be dangerous if `patched_field_names` does not contain every changed value,
-    so it is usually better to call `patch()`.
-    """
-
-    if self.is_new_instance():
-      raise InvalidQuery("Record does not yet exist in the database.")
-
-    patch_dict = {field_name: self.get_raw(field_name) for field_name in patched_field_names}
-
-    response = self.client.patch(self.ref, {"data": patch_dict})
-    if self.ref != response["ref"]:
-      raise DatabaseError("Response ref is different than this instance's.")
-    self.ts = response["ts"]
-
-  def delete(self):
-    "Removes this instance from the database."
-    if self.is_new_instance():
-      raise InvalidQuery("Record does not exist in the database.")
-    response = self.client.delete(self.ref)
-    self.ref = None
-    self.ts = None
-    return response
+    if self.changed_fields:
+      changed_values = {field_name: self.get_raw(field_name) for field_name in self.changed_fields}
+      resource = self.client.patch(self.ref, {"data": changed_values}).resource
+      if self.ref != resource["ref"]:
+        raise DatabaseError("Response ref is different than this instance's.")
+      self.ts = resource["ts"]
   #endregion
 
   #region Standard methods
@@ -138,7 +134,6 @@ class Model(object):
   #endregion
 
   #region Conversion
-  @override
   def to_fauna_json(self):
     # pylint: disable=missing-docstring
     dct = {}
@@ -155,21 +150,34 @@ class Model(object):
     If this instance was created through converted values,
     this is the result of field.converter.value_to_raw.
     """
-    return getattr(self, raw_field_name(field_name))
+    return getattr(self, Model.raw_field_name(field_name))
 
   def _get_converted(self, field_name):
-    "Gets the converted value for a field, or None if that has not been set."
-    return getattr(self, converted_field_name(field_name))
+    """Gets the converted value for a field, or None if that has not been set."""
+    return getattr(self, Model.converted_field_name(field_name))
 
   def _set_raw(self, field_name, value):
     """
     Sets the __raw_xxx hidden field.
     Not safe to call unless __converted_xxx is set to None or to the conversion of the raw value.
     """
-    setattr(self, raw_field_name(field_name), value)
+    setattr(self, Model.raw_field_name(field_name), value)
 
   def _set_converted(self, field_name, value):
-    "Sets the converted value for a field."
-    setattr(self, converted_field_name(field_name), value)
+    """Sets the converted value for a field."""
+    setattr(self, Model.converted_field_name(field_name), value)
+
+  def _has_converted(self, field_name):
+    """Whether the field has been converted yet."""
+    return hasattr(self, Model.converted_field_name(field_name))
   #endregion
 
+  @staticmethod
+  def raw_field_name(field_name):
+    """Property name for raw value."""
+    return "__raw_" + field_name
+
+  @staticmethod
+  def converted_field_name(field_name):
+    """Property name for converted value."""
+    return "__converted_" + field_name

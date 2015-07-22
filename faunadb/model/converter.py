@@ -1,6 +1,7 @@
-"Converter and common Converter subclasses."
+"""Converter and common Converter subclasses."""
 
 from ..errors import InvalidValue
+
 
 class Converter(object):
   """
@@ -24,6 +25,7 @@ class Converter(object):
     """
     raise NotImplementedError
 
+
 class RefConverter(Converter):
   """
   Uses Refs as raw values and model instances as converted values.
@@ -45,7 +47,7 @@ class RefConverter(Converter):
     self.nullable = nullable
 
   def value_to_raw(self, value):
-    "Gets the Ref for a model instance."
+    """Gets the Ref for a model instance."""
     if value is None:
       if not self.nullable:
         raise InvalidValue("The reference must exist.")
@@ -55,7 +57,7 @@ class RefConverter(Converter):
     return value.ref
 
   def raw_to_value(self, raw):
-    "Fetches the data for a Ref and creates a Model instance."
+    """Fetches the data for a Ref and creates a Model instance."""
     if raw is None:
       if not self.nullable:
         InvalidValue("The reference must exist.")

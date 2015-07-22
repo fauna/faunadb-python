@@ -16,7 +16,7 @@ class ModelTest(FaunaTestCase):
     self.MyModel = MyModel
 
   def test_persistence(self):
-    it = self.MyModel(self.client, number=1, letter='a')
+    it = self.MyModel(self.client, number=1, letter="a")
 
     def get():
       return self.MyModel.get(self.client, it.ref)
@@ -24,34 +24,57 @@ class ModelTest(FaunaTestCase):
     assert it.is_new_instance()
     self.assertRaises(NotFound, get)
 
-    it.create()
+    it.save()
     assert not it.is_new_instance()
     assert get() == it
 
     it.number = 2
-    it.update()
-    assert get() == it
-
-    it.patch(number=3)
-    assert it.number == 3
+    assert it.changed_fields == {"number"}
+    it.save()
+    assert it.changed_fields == set()
     assert get() == it
 
     it.delete()
 
-    self.assertRaises(InvalidQuery, it.update)
-    self.assertRaises(InvalidQuery, lambda: it.patch(field=2))
     self.assertRaises(InvalidQuery, it.delete)
 
+  def test_replace(self):
+    it = self.MyModel(self.client, number=1, letter="a")
+    it.save()
+    def get():
+      return self.MyModel.get(self.client, it.ref)
+    copy = get()
+
+    copy.number = 2
+    copy.save()
+
+    it.letter = "b"
+    # This will only update the "letter" property.
+    it.save()
+
+    assert get().number == 2
+    assert get().letter == "b"
+
+    copy.number = 3
+    copy.save()
+
+    it.letter = "c"
+    it.save(replace=True)
+
+    assert get() == it
+
+
   def test_ref_ts(self):
-    it = self.MyModel(self.client, number=1, letter='a')
+    it = self.MyModel(self.client, number=1, letter="a")
 
     assert it.ref is None and it.ts is None
 
-    it.create()
+    it.save()
     assert it.ref is not None and it.ts is not None
     ref1 = it.ref
     ts1 = it.ts
 
-    it.patch(number=2)
+    it.number = 2
+    it.save()
     assert it.ref is ref1
     assert it.ts is not None and it.ts != ts1
