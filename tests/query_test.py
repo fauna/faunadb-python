@@ -1,5 +1,4 @@
-from faunadb.connection import NotFound
-from faunadb.errors import InvalidQuery
+from faunadb.errors import InvalidQuery, NotFound
 from faunadb.objects import Ref
 from faunadb import query
 from test_case import FaunaTestCase, random_email, random_password

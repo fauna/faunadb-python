@@ -7,7 +7,6 @@ Contents:
    :maxdepth: 2
 
    client
-   connection
    query
    objects
    model

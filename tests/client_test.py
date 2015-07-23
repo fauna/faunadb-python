@@ -1,7 +1,6 @@
-from faunadb.client import Client
-from faunadb.connection import NotFound
+from faunadb.errors import NotFound, Unauthorized
 from faunadb.objects import Ref
-from test_case import FaunaTestCase, random_email, random_password
+from test_case import get_client, FaunaTestCase, random_email, random_password
 
 def _assert_is_headers(headers):
   assert "content-type" in headers
@@ -9,8 +8,6 @@ def _assert_is_headers(headers):
 class ClientTest(FaunaTestCase):
   def setUp(self):
     super(ClientTest, self).setUp()
-    self.client = Client(self.server_connection)
-    self.client_client = Client(self.client_connection)
 
   def _create_user(self):
     return self.client.post("users", {
@@ -18,6 +15,10 @@ class ClientTest(FaunaTestCase):
       "email": random_email(),
       "password": random_password()
     }).resource
+
+  def test_get_with_invalid_key(self):
+    client = get_client("bad_key")
+    self.assertRaises(Unauthorized, lambda: client.get("users/instances"))
 
   def test_get(self):
     self.client.get("users")

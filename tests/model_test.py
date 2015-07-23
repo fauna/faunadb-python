@@ -1,4 +1,4 @@
-from faunadb.errors import InvalidQuery, NotFound
+from faunadb.errors import InvalidQuery
 from faunadb.model import Field, Model
 
 from test_case import FaunaTestCase
@@ -22,7 +22,6 @@ class ModelTest(FaunaTestCase):
       return self.MyModel.get(self.client, it.ref)
 
     assert it.is_new_instance()
-    self.assertRaises(NotFound, get)
 
     it.save()
     assert not it.is_new_instance()

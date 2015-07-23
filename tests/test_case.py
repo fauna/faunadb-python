@@ -1,5 +1,5 @@
 from faunadb.client import Client
-from faunadb.connection import Connection, NotFound
+from faunadb.errors import BadRequest
 from faunadb.objects import Ref
 from faunadb import query
 
@@ -20,34 +20,31 @@ class FaunaTestCase(TestCase):
     self.scheme = _FAUNA_SCHEME
     self.port = _FAUNA_PORT
 
-    self.root_connection = connection(_FAUNA_ROOT_KEY)
-    root_client = Client(self.root_connection)
+    self.root_client = get_client(_FAUNA_ROOT_KEY)
     test_db = Ref("databases/faunadb-python-test")
 
     try:
-      root_client.query(query.delete(test_db))
-    except NotFound:
+      self.root_client.query(query.delete(test_db))
+    except BadRequest:
       pass
 
-    root_client.query(query.create(Ref("databases"), query.quote({"name": "faunadb-python-test"})))
+    create_db = query.create(Ref("databases"), query.quote({"name": "faunadb-python-test"}))
+    self.root_client.query(create_db)
 
     def get_key(role):
       db = query.quote({"database": test_db, "role": role})
-      response = root_client.query(query.create(Ref("keys"), db))
+      response = self.root_client.query(query.create(Ref("keys"), db))
       return response.resource["secret"]
 
     server_key = get_key("server")
-    client_key = get_key("client")
 
-    self.server_connection = connection(server_key)
-    self.client_connection = connection(client_key)
-    self.client = Client(self.server_connection)
+    self.client = get_client(server_key)
 
   def tearDown(self):
     pass
 
-def connection(secret):
-  return Connection(
+def get_client(secret):
+  return Client(
     domain=_FAUNA_DOMAIN,
     scheme=_FAUNA_SCHEME,
     port=_FAUNA_PORT,
