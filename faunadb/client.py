@@ -23,7 +23,7 @@ class Client(object):
   Response dict will also have "headers" containing HTTP headers of the response.
   """
 
-  # pylint: disable=too-many-arguments
+  # pylint: disable=too-many-arguments, too-many-instance-attributes
   def __init__(
       self,
       logger=None,
@@ -31,7 +31,8 @@ class Client(object):
       scheme="https",
       port=None,
       timeout=60,
-      secret=None):
+      secret=None,
+      api_version=None):
     """
     :param logger:
       A Logger object.
@@ -51,6 +52,8 @@ class Client(object):
     self.logger = logger
     self.domain = domain
     self.scheme = scheme
+    self.api_version = api_version
+    # TODO: Why these defaults?
     self.port = (443 if scheme == "https" else 80) if port is None else port
 
     if environ.get("FAUNA_DEBUG"):
@@ -160,7 +163,8 @@ class Client(object):
   def _execute_without_logging(self, action, path, data, query):
     """Performs an HTTP action."""
     url = self.base_url + "/" + path
-    req = Request(action, url, params=query, data=to_json(data))
+    headers = {"x-faunadb-api-version": self.api_version} if self.api_version else None
+    req = Request(action, url, headers=headers, params=query, data=to_json(data))
     return self.session.send(self.session.prepare_request(req))
 
   @staticmethod
@@ -192,7 +196,7 @@ class Client(object):
     """Converts a query dict to URL params."""
     if not query:
       return ""
-    return "?" + "&".join((k + "=" + v for k, v in query.iteritems()))
+    return "?" + "&".join(("%s=%s" % (k, v) for k, v in query.iteritems()))
 
   # user:pass -> (user, pass)
   @staticmethod
@@ -211,6 +215,7 @@ class Response(object):
 
   @staticmethod
   def from_requests_response(response):
+    """Creates a Response from the response returned by the `requests` module."""
     return Response(parse_json(response.text)["resource"], response.headers)
 
   def __init__(self, resource, headers):

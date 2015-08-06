@@ -10,12 +10,12 @@ class ConverterTest(FaunaTestCase):
     class DoubleConverter(Converter):
       # pylint: disable=no-self-use
 
-      def raw_to_value(self, raw):
+      def raw_to_value(self, raw, model):
         half = len(raw) / 2
         assert raw[:half] == raw[half:]
         return raw[:half]
 
-      def value_to_raw(self, value):
+      def value_to_raw(self, value, model):
         return value + value
 
     class MyModel(Model):
@@ -69,5 +69,9 @@ class ConverterTest(FaunaTestCase):
 
     it.save()
     it.ref_field = it
+
     assert it.get_raw("ref_field") == it.ref
     assert it.ref_field == it
+
+    it.save()
+    assert self.MyModel.get(self.client, it.ref).ref_field.ref == it.ref

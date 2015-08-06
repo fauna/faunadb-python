@@ -33,8 +33,10 @@ class Model(object):
     None if this is a new instance.
     """
     self.changed_fields = set()
-    for field_name in self.__class__.fields:
-      setattr(self, field_name, data.get(field_name))
+
+    if data:
+      for field_name in self.__class__.fields:
+        setattr(self, field_name, data.get(field_name))
 
   def id(self):
     """The id portion of this instance's ref."""
@@ -130,7 +132,7 @@ class Model(object):
 
   def __repr__(self):
     fields = [field + "=" + str(getattr(self, field)) for field in self.__class__.fields]
-    return "%s(ref=%s, ts=%s, %s)" % (self.__class__.__name__, self.ref, self.ts, fields)
+    return "%s(ref=%s, ts=%s, %s)" % (self.__class__.__name__, self.ref, self.ts, ', '.join(fields))
   #endregion
 
   #region Conversion

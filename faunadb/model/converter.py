@@ -10,7 +10,7 @@ class Converter(object):
   dicts, lists, numbers, strings, and types from faunadb.objects.
   """
 
-  def raw_to_value(self, raw):
+  def raw_to_value(self, raw, model):
     """
     Converts a value from the database into a converted value.
 
@@ -18,7 +18,7 @@ class Converter(object):
     """
     raise NotImplementedError
 
-  def value_to_raw(self, value):
+  def value_to_raw(self, value, model):
     """
     Converts a value to prepare for storage in the database.
     The "raw" value may contain objects with `to_fauna` implemented.
@@ -46,7 +46,7 @@ class RefConverter(Converter):
     self.referenced_model_class = referenced_model_class
     self.nullable = nullable
 
-  def value_to_raw(self, value):
+  def value_to_raw(self, value, model):
     """Gets the Ref for a model instance."""
     if value is None:
       if not self.nullable:
@@ -56,10 +56,10 @@ class RefConverter(Converter):
       raise InvalidValue("The referenced instance must be saved to the database first.")
     return value.ref
 
-  def raw_to_value(self, raw):
+  def raw_to_value(self, raw, model):
     """Fetches the data for a Ref and creates a Model instance."""
     if raw is None:
       if not self.nullable:
         InvalidValue("The reference must exist.")
       return None
-    return self.referenced_model_class.find(raw)
+    return self.referenced_model_class.get(model.client, raw)
