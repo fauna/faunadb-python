@@ -3,6 +3,7 @@ from faunadb.errors import BadRequest
 from faunadb.objects import Ref
 from faunadb import query
 
+from logging import getLogger, WARNING
 from os import environ
 from strgen import StringGenerator
 from unittest import TestCase
@@ -15,6 +16,9 @@ _FAUNA_PORT = environ['FAUNA_PORT']
 class FaunaTestCase(TestCase):
   def setUp(self):
     super(FaunaTestCase, self).setUp()
+
+    # Turn off annoying logging about reset connections.
+    getLogger("requests").setLevel(WARNING)
 
     self.domain = _FAUNA_DOMAIN
     self.scheme = _FAUNA_SCHEME

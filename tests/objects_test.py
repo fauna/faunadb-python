@@ -15,7 +15,7 @@ class ObjectsTest(FaunaTestCase):
     self.object_to_json = {
       user: json_user,
       index: json_index,
-      Set(user, index):
+      Set.match(user, index):
         '{"@set": {"index": %s, "match": %s}}' % (json_index, json_user)
     }
 

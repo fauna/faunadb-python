@@ -3,6 +3,7 @@ from functools import partial
 from ..helpers import page_through_query
 from ..objects import Ref, Set
 from .. import query
+from ..query import NoVal
 from .field import Field
 
 class ModelMetaClass(type):
@@ -59,7 +60,10 @@ class ModelMetaClass(type):
 
   def get(cls, client, ref):
     """Gets the instance of this class specified by `ref`."""
-    resource = client.get(ref).resource
+    return cls._get_from_raw(client, client.get(ref).resource)
+
+  def _get_from_raw(cls, client, resource):
+    """Given raw JSON data, create a class instance."""
     instance = cls(client)
     instance.ref = resource["ref"]
     instance.ts = resource["ts"]
@@ -69,19 +73,30 @@ class ModelMetaClass(type):
     for field_name in cls.fields:
       # pylint: disable=protected-access
       instance._set_raw(field_name, raw_data.get(field_name))
+
     return instance
 
-  def list(cls, client, paging_params):
+
+  def list(cls, client, size, before=NoVal, after=NoVal):
     """
     Lists instances of this class.
     Should have created a class index first (see create_class_index).
-    :param paging_params: Hash of { "size", "before", "after" }.
-    :return: Hash of { "data", "before", "after", "count" }.
+    :return: Hash of {"data", "before", "after", "count"}.
     """
-    instances = Set(cls.class_ref, Ref("indexes", cls.__fauna_class_name__))
-    resource = client.query(query.paginate(instances, paging_params)).resource
-    resource["data"] = [cls.get(client, ref) for ref in resource["data"]]
-    return resource
+    class_index = Ref("indexes", cls.__fauna_class_name__)
+    instances = Set.match(cls.class_ref, class_index)
+
+    get = query.lambda_expr("x", query.get(query.var("x")))
+    page = query.paginate(instances, size=size, before=before, after=after)
+    v_page = query.var("page")
+    q = query.let({"page": page}, query.object(
+      before=query.select("before", v_page, default=None),
+      after=query.select("after", v_page, default=None),
+      data=query.map(get, query.select("data", v_page))
+    ))
+    page = client.query(q).resource
+    page["data"] = [cls._get_from_raw(client, raw) for raw in page["data"]]
+    return page
 
   def list_all_iter(cls, client):
     """Iterates over every instance of the class by calling cls.list until it runs out of pages."""

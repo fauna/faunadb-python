@@ -7,9 +7,9 @@ When constructing queries, you must use these functions or constructors from obj
 For passing raw data to a query, use query.object or query.quote.
 """
 
-from .errors import InvalidQuery
-
 # pylint: disable=invalid-name, redefined-builtin
+
+NoVal = object()
 
 #region Basic forms
 
@@ -66,33 +66,32 @@ def foreach(lambda_expr, coll):
 
 #region Read functions
 
-def get(ref, params=None):
+def get(ref, ts=NoVal):
   """See https://faunadb.com/documentation#queries-read_functions."""
-  return _append_params({"get": ref}, params, ["ts"])
+  return _params(get=ref, ts=ts)
 
-
-def paginate(set, params=None):
+def paginate(
+    set, size=NoVal, ts=NoVal, after=NoVal, before=NoVal, events=NoVal, sources=NoVal):
   """See https://faunadb.com/documentation#queries-read_functions."""
-  return _append_params(
-    {"paginate": set},
-    params,
-    ["ts", "after", "before", "size", "events", "sources"])
+  # pylint: disable=too-many-arguments
+  return _params(
+    paginate=set, size=size, ts=ts, after=after, before=before, events=events, sources=sources)
 
 
-def exists(ref, params=None):
+def exists(ref, ts=NoVal):
   """See https://faunadb.com/documentation#queries-read_functions."""
-  return _append_params({"exists": ref}, params, ["ts"])
+  return _params(exists=ref, ts=ts)
 
 
-def count(set, params=None):
+def count(set, events=NoVal):
   """See https://faunadb.com/documentation#queries-read_functions."""
-  _append_params({"count": set}, params, ["events"])
+  return _params(count=set, events=events)
 
 #endregion
 
 #region Write functions
 
-def create(class_ref, params=None):
+def create(class_ref, params=NoVal):
   """
   See https://faunadb.com/documentation#queries-write_functions.
   See also Model.create.
@@ -100,12 +99,12 @@ def create(class_ref, params=None):
   return {"create": class_ref, "params": params or {}}
 
 
-def update(ref, params=None):
+def update(ref, params=NoVal):
   """See https://faunadb.com/documentation#queries-write_functions."""
   return {"update": ref, "params": params or {}}
 
 
-def replace(ref, params=None):
+def replace(ref, params=NoVal):
   """See https://faunadb.com/documentation#queries-write_functions."""
   return {"replace": ref, "params": params or {}}
 
@@ -113,29 +112,6 @@ def replace(ref, params=None):
 def delete(ref):
   """See https://faunadb.com/documentation#queries-write_functions."""
   return {"delete": ref}
-
-#endregion
-
-#region Set functions
-
-def union(sets):
-  """See https://faunadb.com/documentation#queries-sets."""
-  return {"union": sets}
-
-
-def intersection(sets):
-  """See https://faunadb.com/documentation#queries-sets."""
-  return {"intersection": sets}
-
-
-def difference(source, sets):
-  """See https://faunadb.com/documentation#queries-sets."""
-  return {"difference": [source] + sets}
-
-
-def join(source, target):
-  """See https://faunadb.com/documentation#queries-sets."""
-  return {"join": source, "with": target}
 
 #endregion
 
@@ -156,12 +132,9 @@ def contains(path, value):
   return {"contains": path, "in": value}
 
 
-def select(path, data, params=None):
+def select(path, data, default=NoVal):
   """See https://faunadb.com/documentation#queries-misc_functions."""
-  return _append_params(
-    {"select": path, "from": data},
-    params,
-    ["ts", "after", "before", "size", "events", "sources"])
+  return _params(**{"select": path, "from": data, "default": default})
 
 
 def add(numbers):
@@ -185,11 +158,6 @@ def divide(numbers):
 
 #endregion
 
-def _append_params(source, params, allowed_params):
-  """Puts parameters into a query expression."""
-  if params is not None:
-    for param in params:
-      if param not in allowed_params:
-        raise InvalidQuery("%s is not a valid parameter." % param)
-    source.update(params)
-  return source
+def _params(**kwargs):
+  """Hash of query arguments with NoVal values removed."""
+  return {k: v for k, v in kwargs.iteritems() if v is not NoVal}

@@ -20,6 +20,13 @@ class ClientTest(FaunaTestCase):
     client = get_client("bad_key")
     self.assertRaises(Unauthorized, lambda: client.get("users/instances"))
 
+  def test_ping(self):
+    assert self.client.ping().resource == 'Scope Global is OK'
+    assert self.client.ping('global').resource == 'Scope Global is OK'
+    assert self.client.ping('local').resource == 'Scope Local is OK'
+    assert self.client.ping('node').resource == 'Scope Node is OK'
+    assert self.client.ping('all').resource == 'Scope All is OK'
+
   def test_get(self):
     self.client.get("users")
 

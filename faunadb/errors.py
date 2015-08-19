@@ -36,7 +36,6 @@ class FaunaHTTPError(FaunaError):
     self.parameters = params.get("parameters", {})
     super(FaunaHTTPError, self).__init__(self.reason or self.errors[0])
 
-
 class BadRequest(FaunaHTTPError):
   """HTTP 400 Error."""
   pass

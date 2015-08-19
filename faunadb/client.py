@@ -10,7 +10,6 @@ from .objects import Ref
 from ._json import parse_json, to_json, to_json_pretty
 from ._util import Spreader
 
-
 class Client(object):
   """
   Communicates directly with FaunaDB.
@@ -111,6 +110,9 @@ class Client(object):
     :return: Response.
     """
     return self._execute("POST", "", expression)
+
+  def ping(self, scope=None, timeout=None):
+    return self.get('ping', {"scope": scope, "timeout": timeout})
 
   def _log(self, indent, logged):
     """Indents `logged` before sending it to self.logger."""

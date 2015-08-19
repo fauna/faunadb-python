@@ -21,8 +21,7 @@ def _parse_json_hook(dct):
   if "@obj" in dct:
     return dct["@obj"]
   if "@set" in dct:
-    dct = dct["@set"]
-    return Set(dct["match"], dct["index"])
+    return Set(dct["@set"])
   else:
     return dct
 

@@ -69,19 +69,43 @@ class Set(object):
   For constructing sets out of other sets, see set functions in faunadb.query.
   """
 
-  def __init__(self, match, index):
-    self.match = match
-    self.index = index
+  @staticmethod
+  def match(match, index):
+    """See https://faunadb.com/documentation#queries-sets."""
+    return Set({"match": match, "index": index})
+
+  @staticmethod
+  def union(sets):
+    """See https://faunadb.com/documentation#queries-sets."""
+    return Set({"union": sets})
+
+  @staticmethod
+  def intersection(sets):
+    """See https://faunadb.com/documentation#queries-sets."""
+    return Set({"intersection": sets})
+
+  @staticmethod
+  def difference(source, sets):
+    """See https://faunadb.com/documentation#queries-sets."""
+    return Set({"difference": [source] + sets})
+
+  @staticmethod
+  def join(source, target):
+    """See https://faunadb.com/documentation#queries-sets."""
+    return Set({"join": source, "with": target})
+
+  def __init__(self, query_json):
+    self.query_json = query_json
 
   def to_fauna_json(self):
     # pylint: disable=missing-docstring
-    return {"@set": {"match": self.match, "index": self.index}}
+    return {"@set": self.query_json}
 
   def __repr__(self):
-    return "Set(%s, %s)" % (repr(self.match), repr(self.index))
+    return "Set(%s)" % repr(self.query_json)
 
   def __eq__(self, other):
-    return isinstance(other, Set) and self.match == other.match and self.index == other.index
+    return isinstance(other, Set) and self.query_json == other.query_json
 
   def __ne__(self, other):
     return not self == other
