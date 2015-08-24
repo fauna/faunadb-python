@@ -110,7 +110,7 @@ class QueryTest(FaunaTestCase):
     self._create(n)
     self._create(n)
     widgets = self._set_n(n)
-    # TODO: `count` is currently only approximate. Should be 2.
+    # `count` is currently only approximate. Should be 2.
     assert isinstance(self._q(query.count(widgets)), int)
 
   def test_create(self):
@@ -157,16 +157,26 @@ class QueryTest(FaunaTestCase):
     })
     index_ref = Ref("indexes", "foos_by_n")
 
+    self.client.post("indexes", {
+      "name": "foos_by_m",
+      "source": Ref("classes", "foos"),
+      "path": "data.m"
+    })
+    other_index_ref = Ref("indexes", "foos_by_m")
+
     self._q(query.create(Ref("classes", "foos"), query.object(data=query.object(n=1))))
     source = Set.match(1, index_ref)
-
     print "source set:", self._q(source)
     print "source set contents:", self._set_to_list(source)
     target = query.lambda_expr(
       "x",
-      Set.match(query.select("not selectable", query.var("x")), index_ref))
+      Set.match(query.divide([1, 0]), other_index_ref))
+      # Set.match(query.select("not selectable", query.var("x")), index_ref))
 
     print "join set:", self._q(Set.join(source, target))
+
+    from logging import getLogger
+    self.client.logger = getLogger(__name__)
     print "join set contents:", self._set_to_list(Set.join(source, target))
 
   '''
@@ -229,7 +239,8 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.subtract([2])) == 2
     self._assert_bad_query(query.subtract([]))
 
-  def divide(self):
+  def test_divide(self):
     assert self._q(query.divide([2, 3, 5])) == 2/15
-    assert self._q(query.divide([2])) == 1
+    assert self._q(query.divide([2])) == 2
+    self._assert_bad_query(query.divide([1, 0]))
     self._assert_bad_query(query.divide([]))

@@ -1,7 +1,7 @@
 """
 Constructors for creating queries to be passed into Client.query.
 See also use the constructors in faunadb.objects.
-For query documentation see <https://faunadb.com/documentation#guide-queries>.
+For query documentation see <https://faunadb.com/documentation#queries>.
 
 When constructing queries, you must use these functions or constructors from objects.py.
 For passing raw data to a query, use query.object or query.quote.

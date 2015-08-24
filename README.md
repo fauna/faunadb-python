@@ -1,6 +1,6 @@
 # faunadb-python
 
-Experimental Python client for FaunaDB. Owner: Andy
+Experimental Python client for FaunaDB.
 
 
 ## Setup
@@ -10,11 +10,41 @@ Experimental Python client for FaunaDB. Owner: Andy
 
 ## Testing
 
-Currently, you will have to go into tests/test_case.py and set `secret` to a key for a db.
+To run the tests you must have a FaunaDB database available.
+Then set the environment variable `FAUNA_ROOT_KEY` to your database's root key.
+If you use FaunaDB cloud, this is the password you log in with.
 
-Then: `nosetests`
+Then run `pynt test`.
 
 
-## Linting
+## Documentation
 
-`script/lint-all.sh`
+Run `pynt document`, then open `built-docs/index.html` in a web browser.
+
+
+## Further reading
+
+Please see the [FaunaDB Documentation](https://faunadb.com/documentation) for
+a complete API reference.
+
+
+## Contributing
+
+GitHub pull requests are very welcome.
+
+
+## LICENSE
+
+Copyright 2015 [Fauna, Inc.](https://faunadb.com/)
+
+Licensed under the Mozilla Public License, Version 2.0 (the
+"License"); you may not use this software except in compliance with
+the License. You may obtain a copy of the License at
+
+[http://mozilla.org/MPL/2.0/](http://mozilla.org/MPL/2.0/)
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.

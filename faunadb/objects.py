@@ -114,6 +114,14 @@ class Set(object):
 class Event(object):
   """FaunaDB Event. See https://faunadb.com/documentation#queries-values."""
 
+  @staticmethod
+  def from_json(json):
+    """
+    Events are not automatically converted.
+    Use Event.from_json on a dict that you know represents an Event.
+    """
+    return Event(json["ts"], json["action"], json["resource"])
+
   # pylint: disable=invalid-name
   def __init__(self, ts, action=None, resource=None):
     self.ts = ts

@@ -1,3 +1,7 @@
+from logging import getLogger
+import re
+from testfixtures import LogCapture
+
 from faunadb.errors import NotFound, Unauthorized
 from faunadb.objects import Ref
 from test_case import get_client, FaunaTestCase, random_email, random_password
@@ -67,3 +71,18 @@ class ClientTest(FaunaTestCase):
   def test_get_with_headers(self):
     headers = self.client.get("users").headers
     assert headers["content-type"] == "application/json;charset=utf-8"
+
+  def test_logging(self):
+    with LogCapture() as l:
+      self.client.logger = getLogger()
+      self.client.ping()
+      messages = [r.getMessage() for r in l.records]
+      assert messages[0] == "Fauna GET /ping"
+      assert re.search("^  Credentials:", messages[1])
+      assert messages[2].startswith("  Response headers: {")
+      assert messages[3] == """  Response JSON: {
+    "resource": "Scope Global is OK"
+  }"""
+      assert re.search(
+        "^  Response \\(200\\): API processing \\dms, network latency \\dms$",
+        messages[4])

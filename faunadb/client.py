@@ -52,7 +52,6 @@ class Client(object):
     self.domain = domain
     self.scheme = scheme
     self.api_version = api_version
-    # TODO: Why these defaults?
     self.port = (443 if scheme == "https" else 80) if port is None else port
 
     if environ.get("FAUNA_DEBUG"):
@@ -112,13 +111,14 @@ class Client(object):
     return self._execute("POST", "", expression)
 
   def ping(self, scope=None, timeout=None):
+    """Ping the server. See https://faunadb.com/documentation#rest-other."""
     return self.get('ping', {"scope": scope, "timeout": timeout})
 
   def _log(self, indent, logged):
     """Indents `logged` before sending it to self.logger."""
-    for line in logged.split('\n'):
-      print line
-      self.logger.debug(' ' * indent + line)
+    indent_str = ' ' * indent
+    logged = indent_str + ("\n" + indent_str).join(logged.split("\n"))
+    self.logger.debug(logged)
 
   def _execute(self, action, path, data=None, query=None):
     """Performs an HTTP action, logs it, and looks for errors."""
@@ -126,6 +126,8 @@ class Client(object):
 
     if isinstance(path, Ref):
       path = str(path)
+    if query is not None:
+      query = {k: v for k, v in query.iteritems() if v is not None}
 
     # pylint: disable=too-many-branches
     if self.logger is not None:
@@ -141,26 +143,25 @@ class Client(object):
       real_time_begin = time()
       response = self._execute_without_logging(action, path, data, query)
       real_time_end = time()
-
       real_time = real_time_end - real_time_begin
-      cpu_time = 0 # TODO: difference in process_time
-      # time.process_time() new in python 3.3, so can't use that yet.
-      # https://docs.python.org/3.3/library/time.html#time.process_time
-      latency_time = real_time - cpu_time
 
       # headers is initially a CaseInsensitiveDict, which can't be converted to JSON
       headers_json = to_json_pretty(dict(response.headers))
-      self._log(2, "Response headers, %s\nResponse JSON: %s" % (headers_json, response.text))
+      response_dict = parse_json(response.text)
+      response_json = to_json_pretty(response_dict)
+      self._log(2, "Response headers: %s" % headers_json)
+      self._log(2, "Response JSON: %s" % response_json)
       self._log(
         2,
-        "Response (%i): API processing %sms, network latency %ims, local processing %ims" % (
+        "Response (%i): API processing %sms, network latency %ims" % (
           response.status_code,
           response.headers["X-HTTP-Request-Processing-Time"],
-          int(latency_time * 1000),
-          int(cpu_time * 1000)))
-      return Client._handle_response(response)
+          int(real_time * 1000)))
+      return Client._handle_response(response, response_dict)
     else:
-      return Client._handle_response(self._execute_without_logging(action, path, data, query))
+      response = self._execute_without_logging(action, path, data, query)
+      response_dict = parse_json(response.text)
+      return Client._handle_response(response, response_dict)
 
   def _execute_without_logging(self, action, path, data, query):
     """Performs an HTTP action."""
@@ -170,12 +171,12 @@ class Client(object):
     return self.session.send(self.session.prepare_request(req))
 
   @staticmethod
-  def _handle_response(response):
+  def _handle_response(response, response_dict):
     """Looks for error codes in response. If not, parses it."""
     # pylint: disable=no-member
     code = response.status_code
     if 200 <= code <= 299:
-      return Response.from_requests_response(response)
+      return Response.from_requests_response(response.headers, response_dict)
     elif code == codes.bad_request:
       raise BadRequest(response)
     elif code == codes.unauthorized:
@@ -216,9 +217,9 @@ class Response(object):
   """
 
   @staticmethod
-  def from_requests_response(response):
+  def from_requests_response(response_headers, response_dict):
     """Creates a Response from the response returned by the `requests` module."""
-    return Response(parse_json(response.text)["resource"], response.headers)
+    return Response(response_dict["resource"], response_headers)
 
   def __init__(self, resource, headers):
     self.resource = resource

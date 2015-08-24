@@ -1,4 +1,8 @@
-def page_through_query(query, page_size=10):
+"""
+Optional functions that may be useful when using FaunaDB.
+"""
+
+def page_through_query(query, page_size=100):
   """
   Iterator that keeps getting new pages from a query.
 
