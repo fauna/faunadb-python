@@ -15,7 +15,6 @@ Compatibility
 -------------
 
 Tested in python 2.7.
-TODO: MORE
 
 
 Basic Usage
@@ -30,17 +29,16 @@ Optionally, :doc:`model` allows database instances
 to be represented as objects rather than as dicts.
 
 
-Major Modules
--------------
+Modules
+-------
 
 .. toctree::
-   :maxdepth: 1
 
    client
    query
    objects
+   page
    model
-   helpers
 
 
 Indices and tables

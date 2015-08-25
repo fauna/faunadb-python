@@ -2,8 +2,6 @@ from itertools import izip_longest
 
 from faunadb.errors import InvalidQuery
 from faunadb.model import Field, Model
-from faunadb.objects import Ref, Set
-from faunadb import query
 
 from test_case import FaunaTestCase
 
@@ -113,18 +111,10 @@ class ModelTest(FaunaTestCase):
     from logging import getLogger
     self.client.logger = getLogger(__name__)
     page = M.list(self.client, size=2)
-    assert page["data"] == [ms[0], ms[1]]
-    page2 = M.list(self.client, size=2, after=page["after"])
-    assert page2["data"] == [ms[2], ms[3]]
+    assert page.data == [ms[0], ms[1]]
+    page2 = M.list(self.client, size=2, after=page.after)
+    assert page2.data == [ms[2], ms[3]]
 
     # List of all Ms should be exactly 100 in length; use izip_longest to be sure.
     for i, m in izip_longest(range(100), M.list_all_iter(self.client)):
       assert m.number == i
-
-  def test_page_data(self):
-    self.MyModel.create_class_index(self.client)
-    instances = Set.match(self.MyModel.class_ref, Ref("indexes", "my_models"))
-    page = query.paginate(instances, size=1)
-    assert "data" in self.client.query(page).resource
-    q = query.contains("data", page)
-    assert self.client.query(q).resource
