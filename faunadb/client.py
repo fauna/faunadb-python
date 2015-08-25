@@ -1,4 +1,4 @@
-from logging import getLogger
+from logging import DEBUG, getLogger, StreamHandler
 from os import environ
 from time import time
 
@@ -8,7 +8,6 @@ from .errors import BadRequest, FaunaHTTPError, InternalError, MethodNotAllowed,
   PermissionDenied, Unauthorized, UnavailableError
 from .objects import Ref
 from ._json import parse_json, to_json, to_json_pretty
-from ._util import Spreader
 
 class Client(object):
   """
@@ -56,8 +55,12 @@ class Client(object):
     self.port = (443 if scheme == "https" else 80) if port is None else port
 
     if environ.get("FAUNA_DEBUG"):
-      logger = getLogger(__name__)
-      self.logger = logger if self.logger is None else Spreader([self.logger, logger])
+      self.debug_logger = getLogger(__name__)
+      # Make sure it outputs to stderr.
+      self.debug_logger.setLevel(DEBUG)
+      self.debug_logger.addHandler(StreamHandler())
+    else:
+      self.debug_logger = None
 
     self.session = Session()
     if secret is not None:
@@ -143,7 +146,10 @@ class Client(object):
     """Indents `logged` before sending it to self.logger."""
     indent_str = ' ' * indent
     logged = indent_str + ("\n" + indent_str).join(logged.split("\n"))
-    self.logger.debug(logged)
+    if self.debug_logger:
+      self.debug_logger.debug(logged)
+    if self.logger:
+      self.logger.debug(logged)
 
   def _execute(self, action, path, data=None, query=None):
     """Performs an HTTP action, logs it, and looks for errors."""
@@ -155,7 +161,7 @@ class Client(object):
       query = {k: v for k, v in query.iteritems() if v is not None}
 
     # pylint: disable=too-many-branches
-    if self.logger is not None:
+    if not (self.logger is None and self.debug_logger is None):
       self._log(0, "Fauna %s /%s%s" % (
         action.upper(),
         path,
