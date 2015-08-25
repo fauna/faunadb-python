@@ -43,6 +43,8 @@ class RefConverter(Converter):
       __fauna_class_name__ = 'my_models'
       plain_field = Field()
     MyModel.reference_field = Field(RefConverter(MyModel))
+
+  If the ref is invalid, :any:`errors.NotFound` will be thrown.
   """
 
   def __init__(self, referenced_model_class, nullable=False):

@@ -29,21 +29,12 @@ Optionally, :doc:`model` allows database instances
 to be represented as objects rather than as dicts.
 
 
-Modules
--------
-
 .. toctree::
+   :hidden:
 
    client
    query
    objects
    page
    model
-
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   errors

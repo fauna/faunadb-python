@@ -9,7 +9,7 @@ config = {
   "url": "github.com/faunadb/faunadb-python",
   "version": "0",
   "install_requires": ["requests"],
-  "tests_require": ["nose", "pynt", "StringGenerator"],
+  "tests_require": ["nose", "pynt", "sphinx", "sphinx_rtd_theme", "StringGenerator"],
   "packages": ["faunadb"],
   "scripts": [],
   "name": "faunadb"

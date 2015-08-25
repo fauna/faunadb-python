@@ -42,7 +42,7 @@ class Model(object):
 
   Models represent database instances.
   They link a FaunaDB class to a Python class.
-  See the `docs <http://localhost:3000/documentation#objects>`__.
+  See the `docs <https://faunadb.com/documentation#objects>`__.
 
   The basic format is::
 
@@ -52,7 +52,7 @@ class Model(object):
     # Fields can be added evem after the class has been defined.
     MyModel.other_field = Field()
 
-  Properties will be generated for each field.
+  Properties will be generated for each :any:`Field`.
 
   :samp:`__fauna_class_name__` is mandatory; otherwise this will be treated as an abstract class.
   """
@@ -97,8 +97,7 @@ class Model(object):
   #region Persistence
   def is_new_instance(self):
     """
-    Whether a :py:meth:`save` has happened yet.
-
+    :samp:`False` if this has ever been saved to the database.
     Iff :samp:`True`, :any:`ref` and :any:`ts` will be :samp:`None`.
     """
     return self.ref is None
@@ -202,7 +201,7 @@ class Model(object):
   def get_raw(self, field_name):
     """
     Gets the value of a field as directly returned from the database.
-    For fields with no converter, this is the same as the usual value.
+    For fields with no :any:`Converter`, this is the same as the usual value.
 
     If this class was initialized with converted values
     (rather than fetching raw values from the database),

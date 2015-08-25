@@ -1,5 +1,4 @@
-"""Error types that FaunaDB client throws."""
-
+"""Error types that methods in the FaunaDB client throw."""
 
 class FaunaError(Exception):
   """Base class for all FaunaDB errors."""
