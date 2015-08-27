@@ -1,7 +1,6 @@
-from itertools import izip_longest
-
 from faunadb.errors import InvalidQuery
 from faunadb.model import Field, Model
+from faunadb.model.builtin import Class
 
 from test_case import FaunaTestCase
 
@@ -13,7 +12,7 @@ class ModelTest(FaunaTestCase):
       __fauna_class_name__ = "my_models"
       number = Field()
       letter = Field()
-    MyModel.create_class(self.client)
+    Class.create_for_model(self.client, MyModel)
     self.MyModel = MyModel
 
   def test_persistence(self):
@@ -67,7 +66,7 @@ class ModelTest(FaunaTestCase):
     class GrowModel(Model):
       __fauna_class_name__ = "grow_models"
       number = Field()
-    GrowModel.create_class(self.client)
+    Class.create_for_model(self.client, GrowModel)
 
     g = GrowModel(self.client, number=1)
     g.save()
@@ -96,25 +95,3 @@ class ModelTest(FaunaTestCase):
     it.save()
     assert it.ref is ref1
     assert it.ts is not None and it.ts != ts1
-
-  def test_list(self):
-    class M(Model):
-      __fauna_class_name__ = "test_list_model"
-      number = Field()
-    M.create_class(self.client)
-    M.create_class_index(self.client)
-
-    ms = [M(self.client, number=i) for i in range(100)]
-    for m in ms:
-      m.save()
-
-    from logging import getLogger
-    self.client.logger = getLogger(__name__)
-    page = M.list(self.client, size=2)
-    assert page.data == [ms[0], ms[1]]
-    page2 = M.list(self.client, size=2, after=page.after)
-    assert page2.data == [ms[2], ms[3]]
-
-    # List of all Ms should be exactly 100 in length; use izip_longest to be sure.
-    for i, m in izip_longest(range(100), M.list_all_iter(self.client)):
-      assert m.number == i

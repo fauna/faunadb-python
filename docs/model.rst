@@ -1,10 +1,12 @@
 Model
 =====
 
+.. automodule:: faunadb.model.model
+   :members:
+
 .. toctree::
+   :hidden:
 
    converter
    field
-
-.. automodule:: faunadb.model.model
-   :members:
+   builtin

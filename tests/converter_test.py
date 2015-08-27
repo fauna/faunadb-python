@@ -1,5 +1,8 @@
 from faunadb.errors import InvalidValue
-from faunadb.model import Converter, Field, Model, RefConverter
+from faunadb.model.builtin import Class
+from faunadb.model.converter import Converter, RefConverter
+from faunadb.model.field import Field
+from faunadb.model.model import Model
 
 from test_case import FaunaTestCase
 
@@ -24,8 +27,8 @@ class ConverterTest(FaunaTestCase):
       converted_field = Field(converter=DoubleConverter())
     MyModel.ref_field = Field(RefConverter(MyModel, nullable=True))
     self.MyModel = MyModel
+    Class.create_for_model(self.client, MyModel)
 
-    MyModel.create_class(self.client)
     self.instance = MyModel(self.client, plain_field=1, converted_field="doubleme")
 
   def test_model_fields(self):

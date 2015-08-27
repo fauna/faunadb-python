@@ -46,6 +46,7 @@ class Client(object):
       Auth token for the FaunaDB server.
     :param api_version:
       If included, request headers will ask FaunaDB to use this version.
+      This will override the :samp:`api_version` on the :any:`Database`.
     """
 
     self.logger = logger

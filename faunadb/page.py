@@ -22,6 +22,9 @@ class Page(object):
   def map_data(self, fun):
     return Page([fun(x) for x in self.data], self.before, self.after)
 
+  def __repr__(self):
+    return "Page(data=%s, before=%s, after=%s)" % (self.data, self.before, self.after)
+
   @staticmethod
   def page_through_query(query, page_size=16):
     """

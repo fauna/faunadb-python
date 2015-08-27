@@ -1,12 +1,11 @@
 from functools import partial
 
 from ..errors import InvalidQuery, DatabaseError
-from ..objects import Ref, Set
+from ..objects import Ref
 from ..page import Page
 from .. import query
 from ..query import NoVal
 from .field import Field
-
 
 class _ModelMetaClass(type):
   """
@@ -14,22 +13,21 @@ class _ModelMetaClass(type):
   (On the class. **Not** on its instances.)
   """
 
-  def __init__(self, name, bases, dct):
+  def __init__(cls, name, bases, dct):
     # Need to call it `self` or sphynx won't document properties.
     # pylint: disable=bad-mcs-method-argument
 
     class_name = dct.get("__fauna_class_name__")
     if class_name is not None:
-      self.__fauna_class_name__ = class_name
-
-      self.class_ref = Ref("users") if class_name == "users" else Ref("classes", class_name)
-      self.fields = {}
+      cls.__fauna_class_name__ = class_name
+      cls.class_ref = Ref("classes", class_name)
+      cls.fields = {}
 
       for key, value in dct.items():
-        if self._maybe_add_field(key, value):
+        if cls._maybe_add_field(key, value):
           del dct[key]
 
-    super(_ModelMetaClass, self).__init__(name, bases, dct)
+    super(_ModelMetaClass, cls).__init__(name, bases, dct)
 
   def __setattr__(cls, key, value):
     if not cls._maybe_add_field(key, value):
@@ -55,6 +53,8 @@ class Model(object):
   Properties will be generated for each :any:`Field`.
 
   :samp:`__fauna_class_name__` is mandatory; otherwise this will be treated as an abstract class.
+
+  :any:`Class` :py:meth:`create_for_model` must be called before you can use the model.
   """
 
   __metaclass__ = _ModelMetaClass
@@ -71,6 +71,7 @@ class Model(object):
 
   #: Dict {field_name: :any:`Field`} of all fields assigned to this class.
   fields = None
+  builtin_fields = {}
 
   def __init__(self, client, **data):
     self.client = client
@@ -137,9 +138,13 @@ class Model(object):
     Sets :any:`ref` and :any:`ts`.
     Calling this will cause :py:meth:`is_new_instance` to be False.
     """
-    resource = self.client.post(self.__class__.class_ref, {"data": self}).resource
+    cls = self.__class__
+    resource = self.client.post(cls.class_ref, self._data_json()).resource
     self.ref = resource["ref"]
     self.ts = resource["ts"]
+    # Builtin fields may get set by faunadb upon instance creation.
+    for field_name in cls.builtin_fields:
+      self._set_raw(field_name, resource.get(field_name))
 
   def _replace(self):
     """
@@ -147,7 +152,7 @@ class Model(object):
     Fails if there is no instance to update. (Use `create()` first.)
     Updates self.ts.
     """
-    resource = self.client.put(self.ref, {"data": self}).resource
+    resource = self.client.put(self.ref, self._data_json()).resource
     if self.ref != resource["ref"]:
       raise DatabaseError("Response ref is different than this instance's.")
     self.ts = resource["ts"]
@@ -158,11 +163,37 @@ class Model(object):
     If a concurrent process
     """
     if self.changed_fields:
-      changed_values = {field_name: self.get_raw(field_name) for field_name in self.changed_fields}
-      resource = self.client.patch(self.ref, {"data": changed_values}).resource
+      changed_values = self._changed_values()
+      resource = self.client.patch(self.ref, changed_values).resource
       if self.ref != resource["ref"]:
         raise DatabaseError("Response ref is different than this instance's.")
       self.ts = resource["ts"]
+
+  def _changed_values(self):
+    values = {}
+    data = {}
+    cls = self.__class__
+    for field_name in self.changed_fields:
+      raw = self.get_raw(field_name)
+      (values if field_name in cls.builtin_fields else data)[field_name] = raw
+    if data:
+      values["data"] = data
+    return values
+
+  def _data_json(self):
+    dct = {}
+    data = {}
+
+    cls = self.__class__
+    for field_name in cls.fields:
+      raw = self.get_raw(field_name)
+      # KLUDGE (this will make 'replace' not work...)
+      if not (self.is_new_instance() and raw is None):
+        (dct if field_name in cls.builtin_fields else data)[field_name] = raw
+
+    if data:
+      dct["data"] = data
+    return dct
   #endregion
 
   #region Standard methods
@@ -187,15 +218,6 @@ class Model(object):
     fields = [field + "=" + str(getattr(self, field)) for field in self.__class__.fields]
     return "%s(ref=%s, ts=%s, %s)" % (self.__class__.__name__, self.ref, self.ts, ', '.join(fields))
   #endregion
-
-  def to_fauna_json(self):
-    # pylint: disable=missing-docstring
-    dct = {}
-    for field_name in self.__class__.fields:
-      dct[field_name] = self.get_raw(field_name)
-    if self.ref is not None:
-      dct["ref"] = self.ref
-    return dct
 
   #region Conversion
   def get_raw(self, field_name):
@@ -235,7 +257,6 @@ class Model(object):
   def _has_converted(self, field_name):
     """Whether the field has been converted yet."""
     return hasattr(self, Model._converted_field_name(field_name))
-  #endregion
 
   @staticmethod
   def _raw_field_name(field_name):
@@ -246,28 +267,13 @@ class Model(object):
   def _converted_field_name(field_name):
     """Property name for converted value."""
     return "__converted_" + field_name
+  #endregion
 
   #region Class methods
   @classmethod
-  def create_class(cls, client):
-    """
-    Adds this class to the database.
-    This should only be called once.
-    Must be called before any instances :py:meth:`save`.
-    """
-    return client.post("classes", {"name": cls.__fauna_class_name__}).resource
-
-  @classmethod
-  def create_class_index(cls, client):
-    """
-    Creates an index for use by :py:meth:`list`.
-    This should only be called once.
-    """
-    return client.post("indexes", {
-      "name": cls.__fauna_class_name__,
-      "source": cls.class_ref,
-      "path": "class"
-    })
+  def is_abstract(cls):
+    """A Model class is considered abstract if __fauna_class_name__ is not set."""
+    return cls.__fauna_class_name__ is None
 
   @classmethod
   def get(cls, client, ref):
@@ -275,19 +281,30 @@ class Model(object):
     return cls._get_from_raw(client, client.get(ref).resource)
 
   @classmethod
-  def list(cls, client, size, before=NoVal, after=NoVal):
-    """
-    Lists instances of this class.
-    Must call :py:meth:`create_class_index` first.
+  def create(cls, client, *args, **kwargs):
+    c = cls(client, *args, **kwargs)
+    c.save()
+    return c
 
-    :return:
-      :any:`Page`.
+  @classmethod
+  def page(cls, client, instance_set, size=NoVal, before=NoVal, after=NoVal):
     """
-    class_index = Ref("indexes", cls.__fauna_class_name__)
-    instances = Set.match(cls.class_ref, class_index)
+    Paginates a set query and converts results to instances of this class.
+
+    :param instance_set:
+      :any:`Set` of instances of this class.
+    :param size:
+      Number of instances per page.
+    :param before:
+      :any:`Ref` of the previous instance. Exclusive with :samp:`after`.
+    :param after:
+      :any:`Ref` of the next instance. Exclusive with :samp:`before`.
+    :return:
+      Page whose data is a list of instances of this class.
+    """
 
     get = query.lambda_expr("x", query.get(query.var("x")))
-    page = query.paginate(instances, size=size, before=before, after=after)
+    page = query.paginate(instance_set, size=size, before=before, after=after)
     v_page = query.var("page")
     q = query.let({"page": page}, query.object(
       before=query.select("before", v_page, default=None),
@@ -298,9 +315,36 @@ class Model(object):
     return page.map_data(partial(cls._get_from_raw, client))
 
   @classmethod
-  def list_all_iter(cls, client):
-    """Iterates over every instance of the class by calling :py:meth:`list` repeatedly."""
-    return Page.page_through_query(partial(cls.list, client))
+  def page_index(cls, index, matched_values, size=NoVal, before=NoVal, after=NoVal):
+    """
+    Calls :any:`Index` :py:meth:`match` and then works just like :py:meth:`page`.
+
+    :param matched_values:
+      Value or values to match the index's :samp:`terms`.
+    """
+    if not isinstance(matched_values, list):
+      matched_values = [matched_values]
+    match_set = index.match(*matched_values)
+    return cls.page(index.client, match_set, size=size, before=before, after=after)
+
+  @classmethod
+  def page_iter(cls, client, instance_set):
+    """
+    Returns an iterator of model instances.
+    :samp:`instance_set` should be a Set describing instances of this class.
+    Queries the set repeatedly, converting data to model instances.
+    """
+    return Page.page_through_query(partial(cls.page, client, instance_set))
+
+  @classmethod
+  def iter_index(cls, index, matched_values):
+    """
+    Calls :py:meth:`match` on the index and iterates through the results with :py:meth:`page_iter`.
+    """
+    if not isinstance(matched_values, list):
+      matched_values = [matched_values]
+    match_set = index.match(*matched_values)
+    return cls.page_iter(index.client, match_set)
   #endregion
 
   #region Private class methods
@@ -310,14 +354,17 @@ class Model(object):
     instance = cls(client)
     instance.ref = resource["ref"]
     instance.ts = resource["ts"]
+    cls._set_fields_from_resource(instance, resource)
+    return instance
 
-    raw_data = resource if cls.__fauna_class_name__ == "settings" else resource["data"]
+  @classmethod
+  def _set_fields_from_resource(cls, instance, resource):
+    raw_data = resource.get("data", {})
 
     for field_name in cls.fields:
       # pylint: disable=protected-access
-      instance._set_raw(field_name, raw_data.get(field_name))
-
-    return instance
+      raw = (resource if field_name in cls.builtin_fields else raw_data).get(field_name)
+      instance._set_raw(field_name, raw)
 
   @classmethod
   def _maybe_add_field(cls, field_name, field):
