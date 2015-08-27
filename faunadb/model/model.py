@@ -1,6 +1,6 @@
 from functools import partial
 
-from ..errors import InvalidQuery, DatabaseError
+from ..errors import InvalidQuery, InvalidValue, DatabaseError
 from ..objects import Ref
 from ..page import Page
 from .. import query
@@ -85,9 +85,13 @@ class Model(object):
     """
     self.changed_fields = set()
 
+    cls = self.__class__
     if data:
-      for field_name in self.__class__.fields:
+      for field_name in cls.fields:
         setattr(self, field_name, data.get(field_name))
+      for field_name in data:
+        if not field_name in cls.fields:
+          raise InvalidValue("Unrecognized field %s" % field_name)
 
   def id(self):
     """The id portion of this instance's :any:`Ref`."""

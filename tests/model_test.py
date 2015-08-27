@@ -1,4 +1,4 @@
-from faunadb.errors import InvalidQuery
+from faunadb.errors import InvalidQuery, InvalidValue
 from faunadb.model import Field, Model
 from faunadb.model.builtin import Class
 
@@ -36,6 +36,9 @@ class ModelTest(FaunaTestCase):
     it.delete()
 
     self.assertRaises(InvalidQuery, it.delete)
+
+  def test_bad_field(self):
+    self.assertRaises(InvalidValue, lambda: self.MyModel(self.client, nubber=1))
 
   def test_replace(self):
     it = self.MyModel(self.client, number=1, letter="a")
