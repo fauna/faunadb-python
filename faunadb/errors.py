@@ -11,11 +11,6 @@ class InvalidQuery(FaunaError):
   pass
 
 
-class DatabaseError(FaunaError):
-  """Thrown when the database behaves in an unexpected way."""
-  pass
-
-
 class InvalidValue(FaunaError):
   """Thrown when bad data is put into a Field of a Model."""
   def __init__(self, message="The field value is not valid."):

@@ -1,6 +1,6 @@
 from functools import partial
 
-from ..errors import InvalidQuery, InvalidValue, DatabaseError
+from ..errors import InvalidQuery, InvalidValue
 from ..objects import Ref
 from ..page import Page
 from .. import query
@@ -156,8 +156,6 @@ class Model(object):
     Updates self.ts.
     """
     resource = self.client.put(self.ref, self._data_json()).resource
-    if self.ref != resource["ref"]:
-      raise DatabaseError("Response ref is different than this instance's.")
     self.ts = resource["ts"]
 
   def _update(self):
@@ -168,8 +166,6 @@ class Model(object):
     if self._changed_fields:
       changed_values = self._changed_values()
       resource = self.client.patch(self.ref, changed_values).resource
-      if self.ref != resource["ref"]:
-        raise DatabaseError("Response ref is different than this instance's.")
       self.ts = resource["ts"]
 
   def _changed_values(self):
