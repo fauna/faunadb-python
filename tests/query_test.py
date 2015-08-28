@@ -226,6 +226,11 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.select("c", obj, default=None)) == None
     self.assertRaises(NotFound, lambda: self._q(query.select("c", obj)))
 
+  def test_select_array(self):
+    arr = [1, 2, 3]
+    assert self._q(query.select(2, arr)) == 3
+    self.assertRaises(NotFound, lambda: self._q(query.select(3, arr)))
+
   def test_add(self):
     assert self._q(query.add([2, 3, 5])) == 10
     self._assert_bad_query(query.add([]))

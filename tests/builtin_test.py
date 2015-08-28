@@ -82,7 +82,7 @@ class BuiltinTest(FaunaTestCase):
     assert list(C.iter_index(idx, 1)) == [c1, c2]
 
 
-  def test_multi_index(self):
+  def test_terms_and_values(self):
     class D(Model):
       __fauna_class_name__ = "ds"
       x = Field()
@@ -94,13 +94,38 @@ class BuiltinTest(FaunaTestCase):
       D,
       "ds_by_x_y",
       [{"path": "data.x"}, {"path": "data.y"}])
-    idx.save()
 
     d11 = D.create(self.client, x=1, y=1)
     D.create(self.client, x=1, y=2)
     D.create(self.client, x=2, y=1)
 
     assert D.page_index(idx, [1, 1]).data == [d11]
+
+  def test_values(self):
+    class E(Model):
+      __fauna_class_name__ = "es"
+      x = Field()
+      y = Field()
+      z = Field()
+    Class.create_for_model(self.client, E)
+
+    idx = Index.create_for_model(
+      self.client,
+      E,
+      "es_by_x_sorted",
+      "x",
+      values=[{"path": "data.y"}, {"path": "data.z", "reverse": True}])
+
+    es = {}
+    for x in range(2):
+      for y in range(2):
+        for z in range(2):
+          es[(x, y, z)] = E.create(self.client, x=x, y=y, z=z)
+
+    expected = [es[key] for key in [(0, 0, 1), (0, 0, 0), (0, 1, 1), (0, 1, 0)]]
+    assert E.page_index(idx, 0).data == expected
+    # Also test iter_index with values
+    assert list(E.iter_index(idx, 0)) == expected
 
   def test_class_index(self):
     class M(Model):

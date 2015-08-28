@@ -83,7 +83,7 @@ class Model(object):
     Microsecond UNIX Timestamp of latest :py:meth:`save`.
     :samp:`None` iff :py:meth:`is_new_instance`.
     """
-    self.changed_fields = set()
+    self._changed_fields = set()
 
     cls = self.__class__
     if data:
@@ -124,16 +124,15 @@ class Model(object):
       self._replace()
     else:
       self._update()
-    self.changed_fields.clear()
+    self._changed_fields.clear()
 
   def delete(self):
     """Removes this instance from the database."""
     if self.is_new_instance():
       raise InvalidQuery("Instance does not exist in the database.")
-    resource = self.client.delete(self.ref)
+    self.client.delete(self.ref)
     self.ref = None
     self.ts = None
-    return resource
 
   def _create(self):
     """
@@ -166,7 +165,7 @@ class Model(object):
     Updates only the fields that have changed.
     If a concurrent process
     """
-    if self.changed_fields:
+    if self._changed_fields:
       changed_values = self._changed_values()
       resource = self.client.patch(self.ref, changed_values).resource
       if self.ref != resource["ref"]:
@@ -177,7 +176,7 @@ class Model(object):
     values = {}
     data = {}
     cls = self.__class__
-    for field_name in self.changed_fields:
+    for field_name in self._changed_fields:
       raw = self.get_raw(field_name)
       (values if field_name in cls.builtin_fields else data)[field_name] = raw
     if data:
@@ -287,7 +286,7 @@ class Model(object):
   @classmethod
   def create(cls, client, *args, **kwargs):
     c = cls(client, *args, **kwargs)
-    c.save()
+    c._create()
     return c
 
   @classmethod
@@ -308,12 +307,20 @@ class Model(object):
     """
 
     get = query.lambda_expr("x", query.get(query.var("x")))
-    page = query.paginate(instance_set, size=size, before=before, after=after)
+    return cls._convert_page_data(client, instance_set, get, size, before, after)
+
+  @classmethod
+  def _convert_page_data(cls, client, query_set, instance_get_lambda, size, before, after):
+    """
+    Run a query, converting page data to model instances.
+    instance_get_lambda is a query lambda whose result is data for an instance.
+    """
+    page = query.paginate(query_set, size=size, before=before, after=after)
     v_page = query.var("page")
     q = query.let({"page": page}, query.object(
       before=query.select("before", v_page, default=None),
       after=query.select("after", v_page, default=None),
-      data=query.map(get, query.select("data", v_page))
+      data=query.map(instance_get_lambda, query.select("data", v_page))
     ))
     page = Page.from_json(client.query(q).resource)
     return page.map_data(partial(cls._get_from_raw, client))
@@ -329,7 +336,14 @@ class Model(object):
     if not isinstance(matched_values, list):
       matched_values = [matched_values]
     match_set = index.match(*matched_values)
-    return cls.page(index.client, match_set, size=size, before=before, after=after)
+
+    client = index.client
+    if index.values:
+      # Page data entries look like [value, value, ..., ref], so select the "ref" and get that.
+      get = query.lambda_expr("arr", query.get(query.select(len(index.values), query.var("arr"))))
+      return cls._convert_page_data(client, match_set, get, size, before, after)
+    else:
+      return cls.page(client, match_set, size=size, before=before, after=after)
 
   @classmethod
   def page_iter(cls, client, instance_set):
@@ -345,10 +359,7 @@ class Model(object):
     """
     Calls :py:meth:`match` on the index and iterates through the results with :py:meth:`page_iter`.
     """
-    if not isinstance(matched_values, list):
-      matched_values = [matched_values]
-    match_set = index.match(*matched_values)
-    return cls.page_iter(index.client, match_set)
+    return Page.page_through_query(partial(cls.page_index, index, matched_values))
   #endregion
 
   #region Private class methods
@@ -390,12 +401,13 @@ class Model(object):
     if field.converter is None:
       # There is no converter.
       # Raw value can be set directly.
-      # Getting the value just gets or sets the raw value (and updates `changed_fields`).
+      # Getting the value just gets or sets the raw value (and updates `_changed_fields`).
       def getter(self):
         return self.get_raw(field_name)
       def setter(self, value):
         self._set_raw(field_name, value)
-        self.changed_fields.add(field_name)
+        self._changed_fields.add(field_name)
+
       setattr(cls, field_name, property(getter, setter))
 
     else:
@@ -419,7 +431,7 @@ class Model(object):
         # Converting value->raw is done eagerly.
         self._set_raw(field_name, field.converter.value_to_raw(value, self))
         self._set_converted(field_name, value)
-        self.changed_fields.add(field_name)
+        self._changed_fields.add(field_name)
 
       setattr(cls, field_name, property(getter, setter))
   #endregion

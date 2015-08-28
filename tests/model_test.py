@@ -28,9 +28,9 @@ class ModelTest(FaunaTestCase):
     assert get() == it
 
     it.number = 2
-    assert it.changed_fields == {"number"}
+    assert it._changed_fields == {"number"}
     it.save()
-    assert it.changed_fields == set()
+    assert it._changed_fields == set()
     assert get() == it
 
     it.delete()
