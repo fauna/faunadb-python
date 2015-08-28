@@ -280,8 +280,13 @@ class Model(object):
 
   @classmethod
   def get(cls, client, ref):
-    """Gets the instance of this class specified by `ref`."""
+    """Gets the instance of this class specified by :samp:`ref`."""
     return cls._get_from_raw(client, client.get(ref).resource)
+
+  @classmethod
+  def get_by_id(cls, client, id):
+    """Gets the instance of this class specified by :samp:`id`."""
+    return cls.get(client, Ref(cls.class_ref, id))
 
   @classmethod
   def create(cls, client, *args, **kwargs):

@@ -23,23 +23,7 @@ class Builtin(Model):
   __metaclass__ = _BuiltinMetaClass
 
 
-class UsesNameAsRef(Builtin):
-  """
-  Builtins of this class have Refs based on their names.
-  """
-
-  @classmethod
-  def ref_for_name(cls, name):
-    """Ref for the instance with the given name."""
-    return Ref(cls.__fauna_class_name__, name)
-
-  @classmethod
-  def get_for_name(cls, client, name):
-    """Gets an instance with a given name."""
-    return cls.get(client, cls.ref_for_name(name))
-
-
-class Database(UsesNameAsRef):
+class Database(Builtin):
   """See the `docs <https://faunadb.com/documentation#objects-databases>`__."""
 
   __fauna_class_name__ = "databases"
@@ -57,7 +41,7 @@ class Key(Builtin):
   hashed_secret = Field()
 
 
-class Class(UsesNameAsRef):
+class Class(Builtin):
   """
   See the `docs <https://faunadb.com/documentation#objects-classes>`__.
   This is faunadb's representation of a :any:`Model` class.
@@ -80,7 +64,7 @@ class Class(UsesNameAsRef):
     return Class.get(client, model_class.class_ref)
 
 
-class Index(UsesNameAsRef):
+class Index(Builtin):
   """See the `docs <https://faunadb.com/documentation#objects-indexes>`__."""
 
   __fauna_class_name__ = "indexes"
@@ -142,7 +126,7 @@ class ClassIndex(Index):
     Fetches the class index.
     :py:meth:`create_for_model` should has been called for this database.
     """
-    return ClassIndex.get_for_name(client, model_class.__fauna_class_name__)
+    return ClassIndex.get_by_id(client, model_class.__fauna_class_name__)
 
   def match(self):
     """Set of all instances of the class."""

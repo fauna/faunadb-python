@@ -1,5 +1,6 @@
 from faunadb.client import Client
 from faunadb.errors import NotFound
+from faunadb.objects import Ref
 from faunadb.model.builtin import Database, Key
 
 from logging import getLogger, WARNING
@@ -25,7 +26,7 @@ class FaunaTestCase(TestCase):
     db_name = "faunadb-python-test"
     # TODO: See builtin_test test_database_existence
     try:
-      self.root_client.delete(Database.ref_for_name(db_name))
+      self.root_client.delete(Ref("databases", db_name))
     except NotFound:
       pass
 
