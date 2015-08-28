@@ -35,14 +35,16 @@ class BuiltinTest(FaunaTestCase):
     # assert self.root_client.query(q) == False
 
   def test_key(self):
-    key = Key(self.root_client, database=self.database, role="server")
+    database = Database.get(self.root_client, self.db_ref)
+    key = Key(self.root_client, database=database, role="server")
     key.save()
     assert key.is_new_instance() == False
     assert len(key.hashed_secret) > 0
 
   def test_custom_field(self):
+    database = Database.get(self.root_client, self.db_ref)
     Key.x = Field()
-    key = Key(self.root_client, database=self.database, role="server", x=3)
+    key = Key(self.root_client, database=database, role="server", x=3)
     key.save()
     assert Key.get(self.root_client, key.ref).x == 3
 

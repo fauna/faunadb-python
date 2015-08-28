@@ -1,7 +1,6 @@
 from faunadb.client import Client
 from faunadb.errors import NotFound
 from faunadb.objects import Ref
-from faunadb.model.builtin import Database, Key
 
 from logging import getLogger, WARNING
 from os import environ
@@ -24,23 +23,20 @@ class FaunaTestCase(TestCase):
     self.root_client = get_client(_FAUNA_ROOT_KEY)
 
     db_name = "faunadb-python-test"
+    self.db_ref = Ref("databases", db_name)
     # TODO: See builtin_test test_database_existence
     try:
-      self.root_client.delete(Ref("databases", db_name))
+      self.root_client.delete(self.db_ref)
     except NotFound:
       pass
 
-    self.database = Database.create(self.root_client, name=db_name)
+    self.root_client.post("databases", {"name": db_name})
 
-    def get_key(role):
-      key = Key(self.root_client, database=self.database, role=role)
-      key.save()
-      return key.secret
-
-    self.client = get_client(get_key("server"))
+    key = self.root_client.post("keys", {"database": self.db_ref, "role": "server"}).resource["secret"]
+    self.client = get_client(key)
 
   def tearDown(self):
-    self.database.delete()
+    self.root_client.delete(self.db_ref)
 
 def get_client(secret):
   args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}

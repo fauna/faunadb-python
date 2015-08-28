@@ -1,5 +1,3 @@
-"Functions for converting to and from JSON using types in faunadb.objects."
-
 from json import dumps, loads, JSONEncoder
 
 from .objects import Ref, Set
