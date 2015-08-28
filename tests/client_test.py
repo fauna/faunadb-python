@@ -77,6 +77,7 @@ class ClientTest(FaunaTestCase):
       self.client.logger = getLogger()
       self.client.ping()
       messages = [r.getMessage() for r in l.records]
+      print messages
       assert messages[0] == "Fauna GET /ping"
       assert re.search("^  Credentials:", messages[1])
       assert messages[2].startswith("  Response headers: {")
@@ -84,5 +85,5 @@ class ClientTest(FaunaTestCase):
     "resource": "Scope Global is OK"
   }"""
       assert re.search(
-        "^  Response \\(200\\): API processing \\dms, network latency \\dms$",
+        "^  Response \\(200\\): API processing \\d+ms, network latency \\d+ms$",
         messages[4])
