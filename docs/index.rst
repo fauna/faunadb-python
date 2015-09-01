@@ -32,5 +32,4 @@ FaunaDB can be used directly using the :doc:`query` API.
    client
    query
    objects
-   page
    errors

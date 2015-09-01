@@ -1,11 +1,10 @@
+from logging import getLogger, WARNING
+from os import environ
+from unittest import TestCase
+
 from faunadb.client import Client
 from faunadb.errors import NotFound
 from faunadb.objects import Ref
-
-from logging import getLogger, WARNING
-from os import environ
-from strgen import StringGenerator
-from unittest import TestCase
 
 _FAUNA_ROOT_KEY = environ["FAUNA_ROOT_KEY"]
 # If None, these have defaults in Client.
@@ -24,7 +23,7 @@ class FaunaTestCase(TestCase):
 
     db_name = "faunadb-python-test"
     self.db_ref = Ref("databases", db_name)
-    # TODO: See builtin_test test_database_existence
+    # TODO: See `core` issue #1975
     try:
       self.root_client.delete(self.db_ref)
     except NotFound:
@@ -43,9 +42,3 @@ def get_client(secret, logger=None):
   # If None, use default instead
   non_null_args = {k: v for k, v in args.iteritems() if v is not None}
   return Client(secret=secret, logger=logger, **non_null_args)
-
-def random_email():
-  return "%s@example.com" % StringGenerator("[\\w]{8}").render()
-
-def random_password():
-  return StringGenerator("[\\w]{8}").render()

@@ -4,8 +4,8 @@ from time import time
 
 from requests import codes, Request, Session
 
-from .errors import BadRequest, FaunaHTTPError, InternalError, MethodNotAllowed, NotFound,\
-  PermissionDenied, Unauthorized, UnavailableError
+from .errors import BadRequest, FaunaError, FaunaHTTPError, InternalError, MethodNotAllowed,\
+  NotFound, PermissionDenied, Unauthorized, UnavailableError
 from .objects import Ref
 from ._json import parse_json, to_json
 
@@ -13,8 +13,8 @@ class Client(object):
   """
   Directly communicates with FaunaDB via JSON.
 
-  For data sent to the server, the :samp:`to_fauna_json` method will be called on any objects.
-  All :doc:`objects` implement this.
+  For data sent to the server, the :samp:`to_fauna_json` method will be called on any values.
+  It is encouraged to pass e.g. :any:`Ref` objects instead of raw json data.
 
   Responses are all :any:`Response` objects.
   """
@@ -43,6 +43,7 @@ class Client(object):
       Read timeout in seconds.
     :param secret:
       Auth token for the FaunaDB server.
+      May be a (username, password) tuple, or "username:password", or just the username (no colon).
     """
 
     self.logger = logger
@@ -60,7 +61,7 @@ class Client(object):
 
     self.session = Session()
     if secret is not None:
-      self.session.auth = Client._credentials_from_string(secret)
+      self.session.auth = Client._parse_secret(secret)
 
     self.session.headers.update({
       "Accept-Encoding": "gzip",
@@ -92,7 +93,8 @@ class Client(object):
     :param path:
       Path relative to :samp:`self.domain`. May be a Ref.
     :param data:
-      Dict to be converted to request JSON. May contain types in faunadb.objects.
+      Dict to be converted to request JSON.
+      Values in this will have :samp:`to_fauna_json` called, recursively.
     :return:
       :any:`Response`.
     """
@@ -138,10 +140,12 @@ class Client(object):
     """
     return self.get("ping", {"scope": scope, "timeout": timeout})
 
-  def _log(self, indent, logged):
+  def _log(self, indented, logged):
     """Indents `logged` before sending it to self.logger."""
-    indent_str = " " * indent
-    logged = indent_str + ("\n" + indent_str).join(logged.split("\n"))
+    if indented:
+      indent_str = "  "
+      logged = indent_str + ("\n" + indent_str).join(logged.split("\n"))
+
     if self.debug_logger:
       self.debug_logger.debug(logged)
     if self.logger:
@@ -152,37 +156,37 @@ class Client(object):
     # pylint: disable=too-many-branches
 
     if isinstance(path, Ref):
-      path = str(path)
+      path = path.value
     if query is not None:
       query = {k: v for k, v in query.iteritems() if v is not None}
 
     if self.logger is not None or self.debug_logger is not None:
-      self._log(0, "Fauna %s /%s%s" % (action, path, Client._query_string_for_logging(query)))
+      self._log(False, "Fauna %s /%s%s" % (action, path, Client._query_string_for_logging(query)))
 
       if self.session.auth is None:
-        self._log(2, "Credentials: None")
+        self._log(True, "Credentials: None")
       else:
-        self._log(2, "Credentials: %s:%s" % self.session.auth)
+        self._log(True, "Credentials: %s:%s" % self.session.auth)
 
       if data:
-        self._log(2, "Request JSON: %s" % to_json(data, pretty=True))
+        self._log(True, "Request JSON: %s" % to_json(data, pretty=True))
 
       real_time_begin = time()
       response = self._execute_without_logging(action, path, data, query)
       real_time_end = time()
       real_time = real_time_end - real_time_begin
 
-      # headers is initially a CaseInsensitiveDict, which can't be converted to JSON
+      # response.headers a CaseInsensitiveDict, which can't be converted to JSON directly
       headers_json = to_json(dict(response.headers), pretty=True)
       response_dict = parse_json(response.text)
       response_json = to_json(response_dict, pretty=True)
-      self._log(2, "Response headers: %s" % headers_json)
-      self._log(2, "Response JSON: %s" % response_json)
+      self._log(True, "Response headers: %s" % headers_json)
+      self._log(True, "Response JSON: %s" % response_json)
       self._log(
-        2,
+        True,
         "Response (%i): API processing %sms, network latency %ims" % (
           response.status_code,
-          response.headers["X-HTTP-Request-Processing-Time"],
+          response.headers.get("X-HTTP-Request-Processing-Time", "N/A"),
           int(real_time * 1000)))
       return Client._handle_response(response, response_dict)
     else:
@@ -227,14 +231,17 @@ class Client(object):
       return ""
     return "?" + "&".join(("%s=%s" % (k, v) for k, v in query.iteritems()))
 
-  # user:pass -> (user, pass)
   @staticmethod
-  def _credentials_from_string(secret):
-    """Converts a username:password string to (username, password)."""
-    pair = secret.split(":", 1)
-    if len(pair) == 1:
-      pair.append("")
-    return tuple(pair)
+  def _parse_secret(secret):
+    if isinstance(secret, tuple):
+      if len(secret) != 2:
+        raise FaunaError("Secret tuple must have exactly two entries")
+      return secret
+    else:
+      pair = secret.split(":", 1)
+      if len(pair) == 1:
+        pair.append("")
+      return tuple(pair)
 
 
 class Response(object):
@@ -251,8 +258,10 @@ class Response(object):
     self.resource = resource
     """
     The converted JSON response.
-    This is a dict whose members may have been converted to :doc:`objects`.
-    (So instead of :samp:`{ "@ref": "users/123" }` you will get :samp:`Ref("users/123")`.)
+    This is a dictionary.
+    Any :any:`Ref` or :any:`Set` values in it will also be parsed.
+    (So instead of :samp:`{ "@ref": "classes/frogs/123" }`,
+      you will get :samp:`Ref("classes/frogs", "123")`.)
 
     There is no way to automatically convert to any other type, such as :any:`Event`,
     from the resource; you'll have to do that yourself manually.

@@ -2,27 +2,23 @@ from logging import getLogger
 import re
 from testfixtures import LogCapture
 
-from faunadb.errors import NotFound, Unauthorized
-from faunadb.objects import Ref
-from test_case import get_client, FaunaTestCase, random_email, random_password
-
-def _assert_is_headers(headers):
-  assert "content-type" in headers
+from faunadb.client import Client
+from faunadb.errors import FaunaError, NotFound, Unauthorized
+from test_case import get_client, FaunaTestCase
 
 class ClientTest(FaunaTestCase):
   def setUp(self):
     super(ClientTest, self).setUp()
 
-  def _create_user(self):
-    return self.client.post("users", {
-      "name": "Arawn",
-      "email": random_email(),
-      "password": random_password()
-    }).resource
+  def test_parse_secret(self):
+    assert Client._parse_secret(("user", "pass")) == ("user", "pass")
+    assert Client._parse_secret("user") == ("user", "")
+    assert Client._parse_secret("user:pass") == ("user", "pass")
+    self.assertRaises(FaunaError, lambda: Client._parse_secret(("user", "pass", "potato")))
 
-  def test_get_with_invalid_key(self):
+  def test_invalid_key(self):
     client = get_client("bad_key")
-    self.assertRaises(Unauthorized, lambda: client.get("users/instances"))
+    self.assertRaises(Unauthorized, lambda: client.get(self.db_ref))
 
   def test_ping(self):
     assert self.client.ping().resource == "Scope Global is OK"
@@ -32,45 +28,46 @@ class ClientTest(FaunaTestCase):
     assert self.client.ping("all").resource == "Scope All is OK"
 
   def test_get(self):
-    self.client.get("users")
+    assert isinstance(self.client.get("classes").resource["data"], list)
+
+  def _create_class(self):
+    return self.client.post("classes", {"name": "my_class"}).resource
+
+  def _create_instance(self):
+    return self.client.post("classes/my_class", {}).resource
 
   def test_post(self):
-    self._create_user()
+    cls = self._create_class()
+    assert self.client.get(cls["ref"]).resource == cls
 
   def test_put(self):
-    user = self._create_user()
-    user = self.client.put(user["ref"], {"data": {"pockets": 2}}).resource
+    self._create_class()
+    instance = self._create_instance()
+    instance = self.client.put(instance["ref"], {"data": {"a": 2}}).resource
 
-    assert user["data"]["pockets"] == 2
+    assert instance["data"]["a"] == 2
 
-    user = self.client.put(user["ref"], {"data": {"apples": 3}}).resource
+    instance = self.client.put(instance["ref"], {"data": {"b": 3}}).resource
 
-    assert "pockets" not in user["data"]
-    assert user["data"]["apples"] == 3
+    assert "a" not in instance["data"]
+    assert instance["data"]["b"] == 3
 
   def test_patch(self):
-    user = self._create_user()
-    user = self.client.patch(user["ref"], {"data": {"pockets": 2}}).resource
-    user = self.client.patch(user["ref"], {"data": {"apples": 3}}).resource
-
-    assert user["data"]["pockets"] == 2
-    assert user["data"]["apples"] == 3
+    self._create_class()
+    instance = self._create_instance()
+    instance = self.client.patch(instance["ref"], {"data": {"a": 1}}).resource
+    instance = self.client.patch(instance["ref"], {"data": {"b": 2}}).resource
+    assert instance["data"] == {"a": 1, "b": 2}
 
   def test_delete(self):
-    user = self._create_user()
-    headers = self.client.delete(user["ref"]).headers
-    _assert_is_headers(headers)
-    self.assertRaises(NotFound, lambda: self.client.get(user["ref"]))
+    cls_ref = self._create_class()["ref"]
+    self.client.delete(cls_ref)
+    self.assertRaises(NotFound, lambda: self.client.get(cls_ref))
 
-  def test_refs(self):
-    user1 = self.client.post("users", {"name": "One"}).resource
-    assert isinstance(user1["ref"], Ref)
-    user2 = self.client.post("users", {"data": {"best_friend": user1["ref"]}}).resource
-    assert user2["data"]["best_friend"] == user1["ref"]
-
-  def test_get_with_headers(self):
-    headers = self.client.get("users").headers
+  def test_headers(self):
+    headers = self.client.ping().headers
     assert headers["content-type"] == "application/json;charset=utf-8"
+    # Rest of headers is unspecified
 
   def test_logging(self):
     with LogCapture() as l:
@@ -84,7 +81,7 @@ class ClientTest(FaunaTestCase):
     "resource": "Scope Global is OK"
   }"""
       assert re.search(
-        "^  Response \\(200\\): API processing \\d+ms, network latency \\d+ms$",
+        r"^  Response \(200\): API processing \d+ms, network latency \d+ms$",
         messages[4])
 
   def test_logging_no_auth(self):

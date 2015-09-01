@@ -4,25 +4,25 @@ See https://faunadb.com/documentation#queries-values-special_types.
 """
 
 from .errors import InvalidQuery
-
+from . import query
 
 class Ref(object):
   """
   FaunaDB ref. See https://faunadb.com/documentation#queries-values.
 
-  A simple wrapper around a string which can be extracted using str(ref).
+  A simple wrapper around a string which can be extracted using :samp:`ref.value`.
   Queries that require a Ref will not work if you just pass in a string.
   """
 
   def __init__(self, class_name, instance_id=None):
     """
-    Create a Ref from a string, such as `Ref("databases/prydain")`.
-    Can also call `Ref("databases", "prydain")`.
+    Create a Ref from a string, such as :samp:`Ref("databases/prydain")`.
+    Can also call :samp:`Ref("databases", "prydain")` or :samp:`Ref(Ref("databases"), "prydain")`.
     """
     if instance_id is None:
-      self._ref = class_name
+      self.value = class_name
     else:
-      self._ref = "%s/%s" % (str(class_name), instance_id)
+      self.value = "%s/%s" % (str(class_name), instance_id)
 
   def to_class(self):
     """
@@ -30,34 +30,27 @@ class Ref(object):
     This is done by removing ref.id().
     So `Ref("a", "b/c").to_class()` will be `Ref("a/b")`.
     """
-    if self._ref.startswith("classes"):
-      # It looks like "classes/xxx/123", take "classes/xxx"
-      _ref = "/".join(self._ref.split("/", 3)[:2])
-    else:
-      # It looks like "users/123", take "users"
-      _ref = self._ref.split("/", 2)[0]
-    return Ref(_ref)
+    return Ref("/".join(self.value.split("/")[0:-1]))
 
   def id(self):
     """
     Removes the class part of the ref, leaving only the id.
     This is everything after the last `/`.
     """
-    return self._ref.split("/")[-1]
+    return self.value.split("/")[-1]
 
   def to_fauna_json(self):
     """Wraps it in a @ref hash to be sent as a query."""
-    return {"@ref": str(self)}
+    return {"@ref": self.value}
 
   def __str__(self):
-    return self._ref
+    return self.value
 
   def __repr__(self):
-    return "Ref(%s)" % repr(self._ref)
+    return "Ref(%s)" % repr(self.value)
 
   def __eq__(self, other):
-    # pylint: disable=protected-access
-    return isinstance(other, Ref) and self._ref == other._ref
+    return isinstance(other, Ref) and self.value == other.value
 
   def __ne__(self, other):
     return not self == other
@@ -75,19 +68,19 @@ class Set(object):
     return Set({"match": match, "index": index})
 
   @staticmethod
-  def union(sets):
+  def union(*sets):
     """See https://faunadb.com/documentation#queries-sets."""
     return Set({"union": sets})
 
   @staticmethod
-  def intersection(sets):
+  def intersection(*sets):
     """See https://faunadb.com/documentation#queries-sets."""
     return Set({"intersection": sets})
 
   @staticmethod
-  def difference(source, sets):
+  def difference(*sets):
     """See https://faunadb.com/documentation#queries-sets."""
-    return Set({"difference": [source] + sets})
+    return Set({"difference": sets})
 
   @staticmethod
   def join(source, target):
@@ -100,6 +93,29 @@ class Set(object):
   def to_fauna_json(self):
     # pylint: disable=missing-docstring
     return {"@set": self.query_json}
+
+  def iterator(self, client, page_size=None):
+    """
+    Iterator that keeps getting new pages of a set.
+    :param page_size:
+      Number of instances to be fetched at a time.
+    :return:
+      Iterator through all elements in the set.
+    """
+
+    def get_page(**kwargs):
+      return Page.from_json(client.query(query.paginate(self, **kwargs)).resource)
+
+    page = get_page(size=page_size)
+    for val in page.data:
+      yield val
+
+    next_cursor = "after" if page.after is not None else "before"
+
+    while getattr(page, next_cursor) is not None:
+      page = get_page(**{"size": page_size, next_cursor: getattr(page, next_cursor)})
+      for val in page.data:
+        yield val
 
   def __repr__(self):
     return "Set(%s)" % repr(self.query_json)
@@ -150,3 +166,37 @@ class Event(object):
 
   def __ne__(self, other):
     return not self == other
+
+
+class Page(object):
+  """
+  A single pagination result.
+  See :samp:`paginate` in the `docs <https://faunadb.com/documentation#queries-read_functions>`__.
+  """
+
+  @staticmethod
+  def from_json(json):
+    return Page(json["data"], json.get("before"), json.get("after"))
+
+  def __init__(self, data, before=None, after=None):
+    self.data = data
+    """
+    Always a list.
+    Elements could be raw data; some methods (such as :doc:`model` :py:meth:`list`) convert data.
+    """
+    self.before = before
+    """Optional :any:`Ref` for an instance that comes before this page."""
+    self.after = after
+    """Optional :any:`Ref` for an instance that comes after this page."""
+
+  def map_data(self, func):
+    return Page([func(x) for x in self.data], self.before, self.after)
+
+  def __repr__(self):
+    return "Page(data=%s, before=%s, after=%s)" % (self.data, self.before, self.after)
+
+  def __eq__(self, other):
+    return isinstance(other, Page) and\
+      self.data == other.data and\
+      self.before == other.before and\
+      self.after == other.after

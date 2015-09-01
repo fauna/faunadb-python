@@ -17,7 +17,7 @@ def lint_faunadb():
 
 @task()
 def lint_tests():
-  test_disable = "no-member,no-self-use,relative-import,too-many-public-methods"
+  test_disable = "no-member,no-self-use,protected-access,relative-import,too-many-public-methods"
   disable = "--disable=%s,%s" % (_common_lint_disable, test_disable)
   call(["pylint", "tests"] + _common_lint_opts + [disable])
 

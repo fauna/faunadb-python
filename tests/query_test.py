@@ -1,7 +1,8 @@
+from nose.tools import nottest
 from random import randint
 
 from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import Ref, Set
+from faunadb.objects import Set
 from faunadb import query
 from test_case import FaunaTestCase
 
@@ -12,37 +13,35 @@ class QueryTest(FaunaTestCase):
   def setUp(self):
     super(QueryTest, self).setUp()
 
-    # Set up sample model
-    self.client.post("classes", {"name": "widgets"})
-    # index by n
-    self.client.post("indexes", {
+    self.class_ref = self.client.post("classes", {"name": "widgets"}).resource["ref"]
+
+    self.n_index_ref = self.client.post("indexes", {
       "name": "widgets_by_n",
-      "source": Ref("classes", "widgets"),
-      "path": "data.n"
-    })
-    self.n_index_ref = Ref("indexes", "widgets_by_n")
+      "source": self.class_ref,
+      "path": "data.n",
+      "active": True
+    }).resource["ref"]
 
-    self.client.post("indexes", {
+    self.m_index_ref = self.client.post("indexes", {
       "name": "widgets_by_m",
-      "source": Ref("classes", "widgets"),
-      "path": "data.m"
-
-    })
-    self.m_index_ref = Ref("indexes", "widgets_by_m")
+      "source": self.class_ref,
+      "path": "data.m",
+      "active": True
+    }).resource["ref"]
 
     self.ref_n1 = self._create(n=1)["ref"]
     self.ref_m1 = self._create(m=1)["ref"]
     self.ref_n1m1 = self._create(n=1, m=1)["ref"]
 
-
   def _set_n(self, n):
     return Set.match(n, self.n_index_ref)
+
   def _set_m(self, m):
     return Set.match(m, self.m_index_ref)
 
   def _create(self, n=0, m=None):
     data = query.object(n=n) if m is None else query.object(n=n, m=m)
-    return self._q(query.create(Ref("classes", "widgets"), query.object(data=data)))
+    return self._q(query.create(self.class_ref, query.object(data=data)))
 
   def _q(self, query_json):
     return self.client.query(query_json).resource
@@ -66,14 +65,15 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.exists(widget["ref"])) == False
 
   def test_object(self):
-    assert self._q(query.object(x=1, y=2)) == {"x": 1, "y": 2}
+    # unlike quote, contents are evaluated
+    assert self._q(query.object(x=query.let({"x": 1}, query.var("x")))) == {"x": 1}
 
   def test_quote(self):
     quoted = query.let({"x": 1}, query.var("x"))
     assert self._q(query.quote(quoted)) == quoted
 
-  # Can't test lambda_expr alone, but test it with map.
   def test_map(self):
+    # This is also test_lambda_expr (can't test that alone)
     double = query.lambda_expr("x", query.multiply([2, query.var("x")]))
     assert self._q(query.map(double, [1, 2, 3])) == [2, 4, 6]
 
@@ -89,13 +89,14 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.get(widget["ref"])) == widget
 
   def test_paginate(self):
-    _set = self._set_n(1)
-    assert self._q(query.paginate(_set)) == {"data": [self.ref_n1, self.ref_n1m1]}
-    assert self._q(query.paginate(_set, size=1)) == {"data": [self.ref_n1], "after": self.ref_n1m1}
-    assert self._q(query.paginate(_set, sources=True)) == {
+    test_set = self._set_n(1)
+    assert self._q(query.paginate(test_set)) == {"data": [self.ref_n1, self.ref_n1m1]}
+    assert self._q(query.paginate(test_set, size=1)) ==\
+      {"data": [self.ref_n1], "after": self.ref_n1m1}
+    assert self._q(query.paginate(test_set, sources=True)) == {
       "data": [
-        {"sources": [_set], "value": self.ref_n1},
-        {"sources": [_set], "value": self.ref_n1m1}
+        {"sources": [test_set], "value": self.ref_n1},
+        {"sources": [test_set], "value": self.ref_n1m1}
       ]
     }
 
@@ -117,7 +118,7 @@ class QueryTest(FaunaTestCase):
     widget = self._create()
     assert "ref" in widget
     assert "ts" in widget
-    assert widget["class"] == Ref("classes", "widgets")
+    assert widget["class"] == self.class_ref
 
   def test_update(self):
     ref = self._create()["ref"]
@@ -135,52 +136,19 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.exists(ref)) == False
 
   def test_union(self):
-    q = Set.union([self._set_n(1), self._set_m(1)])
+    q = Set.union(self._set_n(1), self._set_m(1))
     assert self._set_to_list(q) == [self.ref_n1, self.ref_m1, self.ref_n1m1]
 
   def test_intersection(self):
-    q = Set.intersection([self._set_n(1), self._set_m(1)])
+    q = Set.intersection(self._set_n(1), self._set_m(1))
     assert self._set_to_list(q) == [self.ref_n1m1]
 
   def test_difference(self):
-    q = Set.difference(self._set_n(1), [self._set_m(1)])
+    q = Set.difference(self._set_n(1), self._set_m(1))
     assert self._set_to_list(q) == [self.ref_n1] # but not self.ref_n1m1
 
-  # TODO: `core` issue #1950
-  # The lambda has an error in it, but an error is not thrown. Instead we just get an empty list.
-  def test_error_in_join_lambda(self):
-    self.client.post("classes", {"name": "foos"})
-    self.client.post("indexes", {
-      "name": "foos_by_n",
-      "source": Ref("classes", "foos"),
-      "path": "data.n"
-    })
-    index_ref = Ref("indexes", "foos_by_n")
-
-    self.client.post("indexes", {
-      "name": "foos_by_m",
-      "source": Ref("classes", "foos"),
-      "path": "data.m"
-    })
-    other_index_ref = Ref("indexes", "foos_by_m")
-
-    self._q(query.create(Ref("classes", "foos"), query.object(data=query.object(n=1))))
-    source = Set.match(1, index_ref)
-    print "source set:", self._q(source)
-    print "source set contents:", self._set_to_list(source)
-    target = query.lambda_expr(
-      "x",
-      Set.match(query.divide([1, 0]), other_index_ref))
-      # Set.match(query.select("not selectable", query.var("x")), index_ref))
-
-    print "join set:", self._q(Set.join(source, target))
-
-    from logging import getLogger
-    self.client.logger = getLogger(__name__)
-    print "join set contents:", self._set_to_list(Set.join(source, target))
-
-  """
-  TODO: Must fix test_error_in_join_lambda first
+  # TODO: Fix `core` issue #1950 first
+  @nottest
   def test_join(self):
     # source_set is a normal set.
     # target takes an element in source_set and returns a set.
@@ -200,8 +168,7 @@ class QueryTest(FaunaTestCase):
     target = query.lambda_expr("x", Set.match(query.select(query.var("x"), "m"), self.m_index_ref))
     q = Set.join(source, target)
 
-    #assert self._q(q) == [r1, r2]
-  """
+    assert self._q(q) == [r1, r2]
 
   def test_equals(self):
     assert self._q(query.equals([1, 1, 1])) == True
@@ -223,7 +190,7 @@ class QueryTest(FaunaTestCase):
     obj = query.quote({"a": {"b": 1}})
     assert self._q(query.select("a", obj)) == {"b": 1}
     assert self._q(query.select(["a", "b"], obj)) == 1
-    assert self._q(query.select("c", obj, default=None)) == None
+    assert self._q(query.select_with_default("c", obj, None)) == None
     self.assertRaises(NotFound, lambda: self._q(query.select("c", obj)))
 
   def test_select_array(self):

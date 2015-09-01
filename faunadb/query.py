@@ -1,21 +1,13 @@
 """
 Constructors for creating queries to be passed into Client.query.
-See also use the constructors in faunadb.objects.
 For query documentation see the `docs <https://faunadb.com/documentation#queries>`_.
 
-When constructing queries, you must use these functions or constructors from :doc:`objects`.
+When constructing queries, you must use these functions or
+the :any:`Ref`, :any:`Set`, and :any:`Event` constructors.
 To pass raw data to a query, use :any:`object` or :any:`quote`.
 """
 
 # pylint: disable=invalid-name, redefined-builtin
-
-# Give NoVal a __repr__ method so that it shows up as "NoVal" in documentation.
-class _NoValClass(object):
-  # pylint: disable=no-init
-  def __repr__(self):
-    return "NoVal"
-NoVal = _NoValClass()
-
 
 #region Basic forms
 
@@ -72,47 +64,53 @@ def foreach(lambda_expr, coll):
 
 #region Read functions
 
-def get(ref, ts=NoVal):
+def get(ref, ts=None):
   """See the `docs <https://faunadb.com/documentation#queries-read_functions>`__."""
-  return _params(get=ref, ts=ts)
+  return _params({"get": ref}, {"ts": ts})
 
 def paginate(
-    set, size=NoVal, ts=NoVal, after=NoVal, before=NoVal, events=NoVal, sources=NoVal):
+    set, size=None, ts=None, after=None, before=None, events=None, sources=None):
   """
   See the `docs <https://faunadb.com/documentation#queries-read_functions>`__.
   You may want to convert the result of this to a :any:`Page`.
   """
   # pylint: disable=too-many-arguments
-  return _params(
-    paginate=set, size=size, ts=ts, after=after, before=before, events=events, sources=sources)
+  opts = {
+    "size": size,
+    "ts": ts,
+    "after": after,
+    "before": before,
+    "events": events,
+    "sources": sources
+  }
+  return _params({"paginate": set}, opts)
 
-
-def exists(ref, ts=NoVal):
+def exists(ref, ts=None):
   """See the `docs <https://faunadb.com/documentation#queries-read_functions>`__."""
-  return _params(exists=ref, ts=ts)
+  return _params({"exists": ref}, {"ts": ts})
 
 
-def count(set, events=NoVal):
+def count(set, events=None):
   """See the `docs <https://faunadb.com/documentation#queries-read_functions>`__."""
-  return _params(count=set, events=events)
+  return _params({"count": set}, {"events": events})
 
 #endregion
 
 #region Write functions
 
-def create(class_ref, params=NoVal):
+def create(class_ref, params):
   """See the `docs <https://faunadb.com/documentation#queries-write_functions>`__."""
-  return {"create": class_ref, "params": params or {}}
+  return {"create": class_ref, "params": params}
 
 
-def update(ref, params=NoVal):
+def update(ref, params):
   """See the `docs <https://faunadb.com/documentation#queries-write_functions>`__."""
-  return {"update": ref, "params": params or {}}
+  return {"update": ref, "params": params}
 
 
-def replace(ref, params=NoVal):
+def replace(ref, params):
   """See the `docs <https://faunadb.com/documentation#queries-write_functions>`__."""
-  return {"replace": ref, "params": params or {}}
+  return {"replace": ref, "params": params}
 
 
 def delete(ref):
@@ -138,9 +136,16 @@ def contains(path, value):
   return {"contains": path, "in": value}
 
 
-def select(path, data, default=NoVal):
+def select(path, data):
+  """
+  See the `docs <https://faunadb.com/documentation#queries-misc_functions>`__.
+  See also :py:fun:`select_with_default`."""
+  return {"select": path, "from": data}
+
+
+def select_with_default(path, data, default):
   """See the `docs <https://faunadb.com/documentation#queries-misc_functions>`__."""
-  return _params(**{"select": path, "from": data, "default": default})
+  return {"select": path, "from": data, "default": default}
 
 
 def add(numbers):
@@ -164,6 +169,9 @@ def divide(numbers):
 
 #endregion
 
-def _params(**kwargs):
-  """Hash of query arguments with NoVal values removed."""
-  return {k: v for k, v in kwargs.iteritems() if v is not NoVal}
+def _params(main_params, optional_params):
+  """Hash of query arguments with None values removed."""
+  for key, val in optional_params.iteritems():
+    if val is not None:
+      main_params[key] = val
+  return main_params
