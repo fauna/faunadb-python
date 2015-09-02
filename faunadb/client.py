@@ -9,6 +9,13 @@ from .errors import BadRequest, FaunaError, FaunaHTTPError, InternalError, Metho
 from .objects import Ref
 from ._json import parse_json, to_json
 
+if environ.get("FAUNA_DEBUG"):
+  _debug_logger = getLogger(__name__)
+  _debug_logger.setLevel(DEBUG)
+  _debug_logger.addHandler(StreamHandler())
+else:
+  _debug_logger = None
+
 class Client(object):
   """
   Directly communicates with FaunaDB via JSON.
@@ -50,14 +57,6 @@ class Client(object):
     self.domain = domain
     self.scheme = scheme
     self.port = (443 if scheme == "https" else 80) if port is None else port
-
-    if environ.get("FAUNA_DEBUG"):
-      self.debug_logger = getLogger(__name__)
-      # Make sure it outputs to stderr.
-      self.debug_logger.setLevel(DEBUG)
-      self.debug_logger.addHandler(StreamHandler())
-    else:
-      self.debug_logger = None
 
     self.session = Session()
     if secret is not None:
@@ -146,8 +145,8 @@ class Client(object):
       indent_str = "  "
       logged = indent_str + ("\n" + indent_str).join(logged.split("\n"))
 
-    if self.debug_logger:
-      self.debug_logger.debug(logged)
+    if _debug_logger:
+      _debug_logger.debug(logged)
     if self.logger:
       self.logger.debug(logged)
 
@@ -160,7 +159,7 @@ class Client(object):
     if query is not None:
       query = {k: v for k, v in query.iteritems() if v is not None}
 
-    if self.logger is not None or self.debug_logger is not None:
+    if self.logger is not None or _debug_logger is not None:
       self._log(False, "Fauna %s /%s%s" % (action, path, Client._query_string_for_logging(query)))
 
       if self.session.auth is None:
