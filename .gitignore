@@ -1,0 +1,8 @@
+*.egg
+*.pyc
+.idea
+build
+built-docs
+dist
+faunadb.egg-info
+venv
