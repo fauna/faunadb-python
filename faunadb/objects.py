@@ -58,64 +58,15 @@ class Ref(object):
 
 class Set(object):
   """
-  FaunaDB Set match. See https://faunadb.com/documentation#queries-sets.
-  For constructing sets out of other sets, see set functions in faunadb.query.
+  FaunaDB Set.
+  This represents a set returned as part of a response. This looks like :samp:`{"@set": set_query}`.
+  For query sets see :doc:`query`.
   """
-
-  @staticmethod
-  def match(match, index):
-    """See https://faunadb.com/documentation#queries-sets."""
-    return Set({"match": match, "index": index})
-
-  @staticmethod
-  def union(*sets):
-    """See https://faunadb.com/documentation#queries-sets."""
-    return Set({"union": sets})
-
-  @staticmethod
-  def intersection(*sets):
-    """See https://faunadb.com/documentation#queries-sets."""
-    return Set({"intersection": sets})
-
-  @staticmethod
-  def difference(*sets):
-    """See https://faunadb.com/documentation#queries-sets."""
-    return Set({"difference": sets})
-
-  @staticmethod
-  def join(source, target):
-    """See https://faunadb.com/documentation#queries-sets."""
-    return Set({"join": source, "with": target})
-
   def __init__(self, query_json):
     self.query_json = query_json
 
   def to_fauna_json(self):
-    # pylint: disable=missing-docstring
     return {"@set": self.query_json}
-
-  def iterator(self, client, page_size=None):
-    """
-    Iterator that keeps getting new pages of a set.
-    :param page_size:
-      Number of instances to be fetched at a time.
-    :return:
-      Iterator through all elements in the set.
-    """
-
-    def get_page(**kwargs):
-      return Page.from_json(client.query(query.paginate(self, **kwargs)).resource)
-
-    page = get_page(size=page_size)
-    for val in page.data:
-      yield val
-
-    next_cursor = "after" if page.after is not None else "before"
-
-    while getattr(page, next_cursor) is not None:
-      page = get_page(**{"size": page_size, next_cursor: getattr(page, next_cursor)})
-      for val in page.data:
-        yield val
 
   def __repr__(self):
     return "Set(%s)" % repr(self.query_json)
@@ -150,7 +101,6 @@ class Event(object):
     "The Ref of the affected instance."
 
   def to_fauna_json(self):
-    # pylint: disable=missing-docstring
     dct = {"ts": self.ts, "action": self.action, "resource": self.resource}
     return {k: v for k, v in dct.iteritems() if v is not None}
 
@@ -200,3 +150,27 @@ class Page(object):
       self.data == other.data and\
       self.before == other.before and\
       self.after == other.after
+
+  @staticmethod
+  def set_iterator(client, set_query, page_size=None):
+    """
+    Iterator that keeps getting new pages of a set.
+    :param page_size:
+      Number of instances to be fetched at a time.
+    :return:
+      Iterator through all elements in the set.
+    """
+
+    def get_page(**kwargs):
+      return Page.from_json(client.query(query.paginate(set_query, **kwargs)).resource)
+
+    page = get_page(size=page_size)
+    for val in page.data:
+      yield val
+
+    next_cursor = "after" if page.after is not None else "before"
+
+    while getattr(page, next_cursor) is not None:
+      page = get_page(**{"size": page_size, next_cursor: getattr(page, next_cursor)})
+      for val in page.data:
+        yield val

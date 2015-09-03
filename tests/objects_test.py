@@ -27,10 +27,19 @@ class ObjectsTest(FaunaTestCase):
     assert ref.id() == "123"
 
   def test_set(self):
-    match = Set.match(self.ref, self.index)
+    match = Set(query.match(self.ref, self.index))
     json_match = '{"@set": {"index": %s, "match": %s}}' % (self.json_index, self.json_ref)
     assert parse_json(json_match) == match
     assert to_json(match) == json_match
+
+  def test_event(self):
+    assert to_json(Event(123, None, None)) == '{"ts": 123}'
+    event_json = '{"action": "create", "resource": {"@ref": "classes/frogs/123"}, "ts": 123}'
+    assert to_json(Event(123, 'create', self.ref)) == event_json
+
+  def test_page(self):
+    assert Page.from_json({"data": 1, "before": 2, "after": 3}) == Page(1, 2, 3)
+    assert Page([1, 2, 3], 2, 3).map_data(lambda x: x + 1) == Page([2, 3, 4], 2, 3)
 
   def test_set_iterator(self):
     class_ref = self.client.post("classes", {"name": "gadgets"}).resource["ref"]
@@ -49,15 +58,6 @@ class ObjectsTest(FaunaTestCase):
     create(1)
     b = create(0)
 
-    gadgets_set = Set.match(0, index_ref)
+    gadgets_set = query.match(0, index_ref)
 
-    assert list(gadgets_set.iterator(self.client, page_size=1)) == [a, b]
-
-  def test_event(self):
-    assert to_json(Event(123, None, None)) == '{"ts": 123}'
-    event_json = '{"action": "create", "resource": {"@ref": "classes/frogs/123"}, "ts": 123}'
-    assert to_json(Event(123, 'create', self.ref)) == event_json
-
-  def test_page(self):
-    assert Page.from_json({"data": 1, "before": 2, "after": 3}) == Page(1, 2, 3)
-    assert Page([1, 2, 3], 2, 3).map_data(lambda x: x + 1) == Page([2, 3, 4], 2, 3)
+    assert list(Page.set_iterator(self.client, gadgets_set, page_size=1)) == [a, b]

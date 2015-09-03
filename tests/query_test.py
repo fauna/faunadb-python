@@ -34,10 +34,10 @@ class QueryTest(FaunaTestCase):
     self.ref_n1m1 = self._create(n=1, m=1)["ref"]
 
   def _set_n(self, n):
-    return Set.match(n, self.n_index_ref)
+    return query.match(n, self.n_index_ref)
 
   def _set_m(self, m):
-    return Set.match(m, self.m_index_ref)
+    return query.match(m, self.m_index_ref)
 
   def _create(self, n=0, m=None):
     data = query.object(n=n) if m is None else query.object(n=n, m=m)
@@ -95,8 +95,8 @@ class QueryTest(FaunaTestCase):
       {"data": [self.ref_n1], "after": self.ref_n1m1}
     assert self._q(query.paginate(test_set, sources=True)) == {
       "data": [
-        {"sources": [test_set], "value": self.ref_n1},
-        {"sources": [test_set], "value": self.ref_n1m1}
+        {"sources": [Set(test_set)], "value": self.ref_n1},
+        {"sources": [Set(test_set)], "value": self.ref_n1m1}
       ]
     }
 
@@ -135,16 +135,20 @@ class QueryTest(FaunaTestCase):
     self._q(query.delete(ref))
     assert self._q(query.exists(ref)) == False
 
+  def test_match(self):
+    q = self._set_n(1)
+    assert self._set_to_list(q) == [self.ref_n1, self.ref_n1m1]
+
   def test_union(self):
-    q = Set.union(self._set_n(1), self._set_m(1))
+    q = query.union(self._set_n(1), self._set_m(1))
     assert self._set_to_list(q) == [self.ref_n1, self.ref_m1, self.ref_n1m1]
 
   def test_intersection(self):
-    q = Set.intersection(self._set_n(1), self._set_m(1))
+    q = query.intersection(self._set_n(1), self._set_m(1))
     assert self._set_to_list(q) == [self.ref_n1m1]
 
   def test_difference(self):
-    q = Set.difference(self._set_n(1), self._set_m(1))
+    q = query.difference(self._set_n(1), self._set_m(1))
     assert self._set_to_list(q) == [self.ref_n1] # but not self.ref_n1m1
 
   # TODO: Fix `core` issue #1950 first
@@ -165,7 +169,9 @@ class QueryTest(FaunaTestCase):
     r2 = self._create(n=101, m=m2)
 
     source = self._set_n(n)
-    target = query.lambda_expr("x", Set.match(query.select(query.var("x"), "m"), self.m_index_ref))
+    target = query.lambda_expr(
+      "x",
+      query.match(query.select(query.var("x"), "m"), self.m_index_ref))
     q = Set.join(source, target)
 
     assert self._q(q) == [r1, r2]
