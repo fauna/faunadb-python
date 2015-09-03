@@ -53,7 +53,9 @@ class _FaunaJSONEncoder(JSONEncoder):
     This ensures that values implementing to_fauna don't need to call it recursively themselves.
     """
     dct = obj.to_fauna_json()
-    for key, value in dct.iteritems():
-      if hasattr(value, "to_fauna_json"):
-        dct[key] = _FaunaJSONEncoder._to_fauna_json_recursive(value)
-    return dct
+    def fauna(v):
+      if hasattr(v, "to_fauna_json"):
+        return _FaunaJSONEncoder._to_fauna_json_recursive(v)
+      else:
+        return v
+    return {k: fauna(v) for k, v in dct.iteritems()}

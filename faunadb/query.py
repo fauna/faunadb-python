@@ -119,6 +119,30 @@ def delete(ref):
 
 #endregion
 
+#region Sets
+
+def match(matched, index):
+  """See the `docs <https://faunadb.com/documentation#queries-sets>`__."""
+  return {"match": matched, "index": index}
+
+def union(*sets):
+  """See the `docs <https://faunadb.com/documentation#queries-sets>`__."""
+  return {"union": sets}
+
+def intersection(*sets):
+  """See the `docs <https://faunadb.com/documentation#queries-sets>`__."""
+  return {"intersection": sets}
+
+def difference(*sets):
+  """See the `docs <https://faunadb.com/documentation#queries-sets>`__."""
+  return {"difference": sets}
+
+def join(source, target):
+  """See the `docs <https://faunadb.com/documentation#queries-sets>`__."""
+  return {"join": source, "with": target}
+
+#endregion
+
 #region Miscellaneous Functions
 
 def equals(values):
