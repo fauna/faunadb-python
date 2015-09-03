@@ -8,6 +8,10 @@ class InvalidQuery(FaunaError):
   """Thrown when a query is malformed."""
   pass
 
+class InvalidValue(FaunaError):
+  """Thrown when bad data is put into a Field of a Model."""
+  def __init__(self, message="The field value is not valid."):
+    super(InvalidValue, self).__init__(message)
 
 class InvalidValue(FaunaError):
   """Thrown when a value cannot be accepted."""
