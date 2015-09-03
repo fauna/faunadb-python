@@ -155,9 +155,12 @@ class Page(object):
       self.after == other.after
 
   @staticmethod
-  def set_iterator(client, set_query, page_size=None):
+  def set_iterator(client, set_query, map_lambda=None, page_size=None):
     """
     Iterator that keeps getting new pages of a set.
+    :param map_lambda:
+      If present, a query lambda for mapping set elements.
+      (To map values on client size, just call :samp:`map(mapper, my_set.iterator(...))`.)
     :param page_size:
       Number of instances to be fetched at a time.
     :return:
@@ -165,7 +168,10 @@ class Page(object):
     """
 
     def get_page(**kwargs):
-      return Page.from_json(client.query(query.paginate(set_query, **kwargs)).resource)
+      q = query.paginate(set_query, **kwargs)
+      if map_lambda is not None:
+        q = query.map(map_lambda, q)
+      return Page.from_json(client.query(q).resource)
 
     page = get_page(size=page_size)
     for val in page.data:
@@ -177,3 +183,4 @@ class Page(object):
       page = get_page(**{"size": page_size, next_cursor: getattr(page, next_cursor)})
       for val in page.data:
         yield val
+

@@ -77,6 +77,12 @@ class QueryTest(FaunaTestCase):
     double = query.lambda_expr("x", query.multiply([2, query.var("x")]))
     assert self._q(query.map(double, [1, 2, 3])) == [2, 4, 6]
 
+    test_set = self._set_n(1)
+    get_n = query.lambda_expr("x", query.select(["data", "n"], query.get(query.var("x"))))
+    page = query.paginate(test_set)
+    ns = query.map(get_n, page)
+    assert self._q(ns)["data"] == [1, 1]
+
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
     q = query.foreach(query.lambda_expr("x", query.delete(query.var("x"))), refs)
