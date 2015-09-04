@@ -1,3 +1,4 @@
+from faunadb.errors import InvalidValue
 from faunadb.objects import Event, Page, Ref, Set
 from faunadb._json import parse_json, to_json
 from faunadb import query
@@ -22,6 +23,9 @@ class ObjectsTest(FaunaTestCase):
     assert ref.id() == "123"
 
     keys = Ref("keys")
+    assert keys.to_class() == keys
+    self.assertRaises(InvalidValue, keys.id)
+
     ref = Ref(keys, "123")
     assert ref.to_class() == keys
     assert ref.id() == "123"

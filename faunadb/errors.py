@@ -11,6 +11,12 @@ class InvalidQuery(FaunaError):
   pass
 
 
+class InvalidValue(FaunaError):
+  """Thrown when a value is not able to be used."""
+  def __init__(self, message="The field value is not valid."):
+    super(InvalidValue, self).__init__(message)
+
+
 #region HTTPError
 class FaunaHTTPError(FaunaError):
   """Error in FaunaDB server connection."""
