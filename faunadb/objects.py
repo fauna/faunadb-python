@@ -3,7 +3,7 @@ Types used in queries and responses.
 See https://faunadb.com/documentation#queries-values-special_types.
 """
 
-from .errors import InvalidQuery
+from .errors import InvalidQuery, InvalidValue
 from . import query
 
 class Ref(object):
@@ -14,33 +14,36 @@ class Ref(object):
   Queries that require a Ref will not work if you just pass in a string.
   """
 
-  def __init__(self, class_name, instance_id=None):
+  def __init__(self, *parts):
     """
     Create a Ref from a string, such as :samp:`Ref("databases/prydain")`.
     Can also call :samp:`Ref("databases", "prydain")` or :samp:`Ref(Ref("databases"), "prydain")`.
     """
-    if instance_id is None:
-      self.value = class_name
-    else:
-      self.value = "%s/%s" % (str(class_name), instance_id)
+    self.value = "/".join(str(part) for part in parts)
 
   def to_class(self):
     """
     Gets the class part out of the Ref.
     This is done by removing ref.id().
-    So `Ref("a", "b/c").to_class()` will be `Ref("a/b")`.
+    So :samp:`Ref("a", "b/c").to_class()` will be :samp:`Ref("a/b")`.
     """
-    return Ref("/".join(self.value.split("/")[0:-1]))
+    parts = self.value.split("/")
+    if len(parts) == 1:
+      return self
+    else:
+      return Ref(*parts[:-1])
 
   def id(self):
     """
     Removes the class part of the ref, leaving only the id.
-    This is everything after the last `/`.
+    This is everything after the last :samp:`/`.
     """
+    parts = self.value.split("/")
+    if len(parts) == 1:
+      raise InvalidValue("The Ref does not have an id.")
     return self.value.split("/")[-1]
 
   def to_fauna_json(self):
-    """Wraps it in a @ref hash to be sent as a query."""
     return {"@ref": self.value}
 
   def __str__(self):
