@@ -1,6 +1,6 @@
-from ..objects import Ref, Set
+from ..objects import Ref
 from .. import query
-from .converter import RefConverter
+from .codec import RefCodec
 from .field import Field
 from .model import Model, _ModelMetaClass
 
@@ -10,7 +10,10 @@ class _BuiltinMetaClass(_ModelMetaClass):
     super(_BuiltinMetaClass, cls).__init__(name, bases, dct)
     if not cls.is_abstract():
       cls.class_ref = Ref(cls.__fauna_class_name__)
-      cls.builtin_fields = cls.fields.copy()
+      for field_name in cls.fields:
+        field = cls.fields[field_name]
+        # Builtin fields do not have "data" in front of path
+        field.path = [field_name]
 
 
 class Builtin(Model):
@@ -36,7 +39,7 @@ class Key(Builtin):
   """See the `docs <https://faunadb.com/documentation#objects-keys>`__."""
 
   __fauna_class_name__ = "keys"
-  database = Field(RefConverter(Database))
+  database = Field(RefCodec(Database))
   role = Field()
   secret = Field()
   hashed_secret = Field()
@@ -70,7 +73,7 @@ class Index(Builtin):
 
   __fauna_class_name__ = "indexes"
   name = Field()
-  source = Field(RefConverter(Class))
+  source = Field(RefCodec(Class))
   terms = Field()
   values = Field()
   unique = Field()
@@ -134,4 +137,4 @@ class ClassIndex(Index):
   def match(self):
     """Set of all instances of the class."""
     # pylint: disable=arguments-differ
-    return query.match(self.get_raw("source"), self.ref)
+    return query.match(self.get_encoded("source"), self.ref)

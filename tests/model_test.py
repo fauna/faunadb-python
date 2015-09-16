@@ -1,6 +1,7 @@
-from faunadb.errors import InvalidQuery, InvalidValue
+from faunadb.errors import InvalidValue, NotFound
 from faunadb.model import Field, Model
 from faunadb.model.builtin import Class
+from faunadb.objects import Ref
 
 from test_case import FaunaTestCase
 
@@ -12,8 +13,15 @@ class ModelTest(FaunaTestCase):
       __fauna_class_name__ = "my_models"
       number = Field()
       letter = Field()
+
     Class.create_for_model(self.client, MyModel)
     self.MyModel = MyModel
+
+  def test_common_fields(self):
+    it = self.MyModel.create(self.client)
+    assert isinstance(it.ref, Ref)
+    assert isinstance(it.ts, int)
+    assert it.id == it.ref.id()
 
   def test_persistence(self):
     it = self.MyModel(self.client, number=1, letter="a")
@@ -28,14 +36,14 @@ class ModelTest(FaunaTestCase):
     assert get() == it
 
     it.number = 2
-    assert it._changed_fields == {"number"}
+    assert it._diff() == {"data": {"number": 2}}
     it.save()
-    assert it._changed_fields == set()
+    assert it._diff() == {}
     assert get() == it
 
     it.delete()
 
-    self.assertRaises(InvalidQuery, it.delete)
+    self.assertRaises(NotFound, it.delete)
 
   def test_bad_field(self):
     self.assertRaises(InvalidValue, lambda: self.MyModel(self.client, nubber=1))
@@ -96,5 +104,17 @@ class ModelTest(FaunaTestCase):
 
     it.number = 2
     it.save()
-    assert it.ref is ref1
+    assert it.ref == ref1
     assert it.ts is not None and it.ts != ts1
+
+  def test_update(self):
+    it = self.MyModel(self.client, number={"a": {"b": 1, "c": 2}})
+    it.save()
+
+    it.number["a"]["b"] = -1
+    it.number["a"]["d"] = {"e": 3}
+    print it._diff()
+    assert it._diff() == {"data": {"number": {"a": {"b": -1, "d": {"e": 3}}}}}
+
+    it.save()
+    assert self.MyModel.get(self.client, it.ref) == it

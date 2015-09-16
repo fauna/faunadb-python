@@ -7,6 +7,6 @@ Model
 .. toctree::
    :hidden:
 
-   converter
+   codec
    field
    builtin
