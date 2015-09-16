@@ -31,7 +31,7 @@ class FaunaTestCase(TestCase):
 
     self.root_client.post("databases", {"name": db_name})
 
-    key = self.root_client.post("keys", {"database": self.db_ref, "role": "server"}).resource
+    key = self.root_client.post("keys", {"database": self.db_ref, "role": "server"})
     self.client = get_client(key["secret"])
 
   def tearDown(self):

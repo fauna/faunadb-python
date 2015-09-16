@@ -135,7 +135,7 @@ class Model(object):
 
   def save(self, replace=False):
     """Executes :py:meth:`save_query`."""
-    self._init_from_resource(self.client.query(self.save_query(replace)).resource)
+    self._init_from_resource(self.client.query(self.save_query(replace)))
 
   def save_query(self, replace=False):
     """
@@ -206,7 +206,7 @@ class Model(object):
   @classmethod
   def get(cls, client, ref):
     """Gets the instance of this class specified by :samp:`ref`."""
-    return cls.get_from_resource(client, client.get(ref).resource)
+    return cls.get_from_resource(client, client.get(ref))
 
   @classmethod
   def get_by_id(cls, client, instance_id):
@@ -217,7 +217,7 @@ class Model(object):
   def create(cls, client, *args, **kwargs):
     # pylint: disable=protected-access
     instance = cls(client, *args, **kwargs)
-    instance._init_from_resource(client.query(instance.create_query()).resource)
+    instance._init_from_resource(client.query(instance.create_query()))
     return instance
 
   @classmethod
@@ -323,7 +323,7 @@ class Model(object):
     """
     page_query = query.paginate(instance_set, size=page_size, before=before, after=after)
     map_query = query.map(page_lambda, page_query)
-    page = Page.from_json(client.query(map_query).resource)
+    page = Page.from_json(client.query(map_query))
     return page.map_data(partial(cls.get_from_resource, client))
 
   @classmethod

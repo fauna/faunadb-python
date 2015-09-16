@@ -171,7 +171,7 @@ class Page(object):
       q = query.paginate(set_query, **kwargs)
       if map_lambda is not None:
         q = query.map(map_lambda, q)
-      return Page.from_json(client.query(q).resource)
+      return Page.from_json(client.query(q))
 
     page = get_page(size=page_size)
     for val in page.data:
