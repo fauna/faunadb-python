@@ -260,7 +260,7 @@ class Response(object):
     This is a dictionary.
     Any :any:`Ref` or :any:`Set` values in it will also be parsed.
     (So instead of :samp:`{ "@ref": "classes/frogs/123" }`,
-      you will get :samp:`Ref("classes/frogs", "123")`.)
+    you will get :samp:`Ref("classes/frogs", "123")`.)
 
     There is no way to automatically convert to any other type, such as :any:`Event`,
     from the resource; you'll have to do that yourself manually.

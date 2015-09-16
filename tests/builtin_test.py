@@ -74,6 +74,8 @@ class BuiltinTest(FaunaTestCase):
     Class.create_for_model(self.client, C)
 
     idx = Index.create_for_model(self.client, C, "cs_by_x", "x")
+    print Index.get_by_id(self.client, "cs_by_x")
+    print idx
     assert Index.get_by_id(self.client, "cs_by_x") == idx
 
     c1 = C.create(self.client, x=1)
