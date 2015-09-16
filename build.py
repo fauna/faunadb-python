@@ -8,7 +8,7 @@ def document():
 
 _common_lint_opts = ["--reports=n", "--indent-string='  '", "--indent-after-paren=2"]
 _common_lint_disable =\
-  "invalid-name,locally-disabled,missing-docstring,too-few-public-methods,too-many-arguments"
+  "invalid-name,locally-disabled,missing-docstring,too-few-public-methods,too-many-public-methods,too-many-arguments"
 
 
 @task()
