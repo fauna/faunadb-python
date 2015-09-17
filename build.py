@@ -3,12 +3,13 @@ from subprocess import call, check_call
 
 @task()
 def document():
-  check_call(["sphinx-build", "-b", "html", "docs", "built-docs"])
+  check_call(["sphinx-build", "-b", "html", "docs", "docs/_build/html"])
 
 
 _common_lint_opts = ["--reports=n", "--indent-string='  '", "--indent-after-paren=2"]
 _common_lint_disable =\
   "invalid-name,locally-disabled,missing-docstring,too-few-public-methods,too-many-arguments"
+
 
 @task()
 def lint_faunadb():

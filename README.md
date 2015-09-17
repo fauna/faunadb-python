@@ -1,31 +1,36 @@
 # faunadb-python
 
-Experimental Python client for FaunaDB.
+Python client for [FaunaDB](https://faunadb.com).
+
+Documentation is [here](https://faunadb.readthedocs.org/en/latest/).
+
+See the [FaunaDB Documentation](https://faunadb.com/documentation) for
+a complete API reference, or look in
+[`/tests`](https://github.com/faunadb/faunadb-python/tree/master/tests) for more
+examples.
 
 
-## Setup
+## Building it yourself
 
-`pip install .`
+### Setup
 
+  virtualenv venv
+  source venv/bin/activate
+  pip install .
+  pynt
 
-## Testing
+### Testing
 
 To run the tests you must have a FaunaDB database available.
 Then set the environment variable `FAUNA_ROOT_KEY` to your database's root key.
 If you use FaunaDB cloud, this is the password you log in with.
 
 Then run `pynt test`.
+To test a single test, use e.g. `nosetests tests/client_test.py:ClientTest.test_ping`.
 
+### Documenting
 
-## Documentation
-
-Run `pynt document`, then open `built-docs/index.html` in a web browser.
-
-
-## Further reading
-
-Please see the [FaunaDB Documentation](https://faunadb.com/documentation) for
-a complete API reference.
+Run `pynt document`, then open `docs/_build/html/index.html` in a web browser.
 
 
 ## Contributing

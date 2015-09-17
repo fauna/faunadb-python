@@ -1,11 +1,13 @@
-Index
-=====
+FaunaDB
+=======
 
 Python client for `FaunaDB <https://faunadb.com>`_.
 
 
 Installation / Getting Started
 ------------------------------
+
+To install, run :samp:`pip install faunadb`.
 
 Please see the `FaunaDB Documentation <https://faunadb.com/documentation>`_
 for information on FaunaDB itself.
@@ -14,7 +16,7 @@ for information on FaunaDB itself.
 Compatibility
 -------------
 
-Tested in python 2.7.
+Should work in python 2.6+ and 3.1+.
 
 
 Basic Usage

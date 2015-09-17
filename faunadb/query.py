@@ -163,7 +163,7 @@ def contains(path, value):
 def select(path, data):
   """
   See the `docs <https://faunadb.com/documentation#queries-misc_functions>`__.
-  See also :py:fun:`select_with_default`."""
+  See also :py:func:`select_with_default`."""
   return {"select": path, "from": data}
 
 

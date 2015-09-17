@@ -1,8 +1,12 @@
 *.egg
 *.pyc
 .idea
+.Python
+bin
 build
-built-docs
 dist
+docs/_build
 faunadb.egg-info
+include
+lib
 venv
