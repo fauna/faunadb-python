@@ -8,10 +8,10 @@ class ObjectsTest(FaunaTestCase):
   def setUp(self):
     super(ObjectsTest, self).setUp()
     self.ref = Ref("classes/frogs", "123")
-    self.json_ref = '{"@ref": "classes/frogs/123"}'
+    self.json_ref = '{"@ref":"classes/frogs/123"}'
 
     self.index = Ref("indexes", "frogs_by_size")
-    self.json_index = '{"@ref": "indexes/frogs_by_size"}'
+    self.json_index = '{"@ref":"indexes/frogs_by_size"}'
 
   def test_ref(self):
     assert parse_json(self.json_ref) == self.ref
@@ -32,13 +32,13 @@ class ObjectsTest(FaunaTestCase):
 
   def test_set(self):
     match = Set(query.match(self.ref, self.index))
-    json_match = '{"@set": {"index": %s, "match": %s}}' % (self.json_index, self.json_ref)
+    json_match = '{"@set":{"index":%s,"match":%s}}' % (self.json_index, self.json_ref)
     assert parse_json(json_match) == match
     assert to_json(match) == json_match
 
   def test_event(self):
-    assert to_json(Event(123, None, None)) == '{"ts": 123}'
-    event_json = '{"action": "create", "resource": {"@ref": "classes/frogs/123"}, "ts": 123}'
+    assert to_json(Event(123, None, None)) == '{"ts":123}'
+    event_json = '{"action":"create","resource":{"@ref":"classes/frogs/123"},"ts":123}'
     assert to_json(Event(123, 'create', self.ref)) == event_json
 
   def test_page(self):
