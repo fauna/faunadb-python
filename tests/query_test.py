@@ -61,7 +61,7 @@ class QueryTest(FaunaTestCase):
 
   def test_do(self):
     widget = self._create()
-    assert self._q(query.do([query.delete(widget["ref"]), 1])) == 1
+    assert self._q(query.do(query.delete(widget["ref"]), 1)) == 1
     assert self._q(query.exists(widget["ref"])) == False
 
   def test_object(self):
@@ -177,14 +177,14 @@ class QueryTest(FaunaTestCase):
     assert self._q(q) == [r1, r2]
 
   def test_equals(self):
-    assert self._q(query.equals([1, 1, 1])) == True
-    assert self._q(query.equals([1, 1, 2])) == False
-    assert self._q(query.equals([1])) == True
-    self._assert_bad_query(query.equals([]))
+    assert self._q(query.equals(1, 1, 1)) == True
+    assert self._q(query.equals(1, 1, 2)) == False
+    assert self._q(query.equals(1)) == True
+    self._assert_bad_query(query.equals())
 
   def test_concat(self):
-    assert self._q(query.concat(["a", "b", "c"])) == "abc"
-    assert self._q(query.concat([])) == ""
+    assert self._q(query.concat("a", "b", "c")) == "abc"
+    assert self._q(query.concat()) == ""
 
   def test_contains(self):
     obj = query.quote({"a": {"b": 1}})
@@ -205,20 +205,26 @@ class QueryTest(FaunaTestCase):
     self.assertRaises(NotFound, lambda: self._q(query.select(3, arr)))
 
   def test_add(self):
-    assert self._q(query.add([2, 3, 5])) == 10
-    self._assert_bad_query(query.add([]))
+    assert self._q(query.add(2, 3, 5)) == 10
+    self._assert_bad_query(query.add())
 
   def test_multiply(self):
-    assert self._q(query.multiply([2, 3, 5])) == 30
-    self._assert_bad_query(query.multiply([]))
+    assert self._q(query.multiply(2, 3, 5)) == 30
+    self._assert_bad_query(query.multiply())
 
   def test_subtract(self):
-    assert self._q(query.subtract([2, 3, 5])) == -6
-    assert self._q(query.subtract([2])) == 2
-    self._assert_bad_query(query.subtract([]))
+    assert self._q(query.subtract(2, 3, 5)) == -6
+    assert self._q(query.subtract(2)) == 2
+    self._assert_bad_query(query.subtract())
 
   def test_divide(self):
-    assert self._q(query.divide([2, 3, 5])) == 2/15
-    assert self._q(query.divide([2])) == 2
+    assert self._q(query.divide(2, 3, 5)) == 2/15
+    assert self._q(query.divide(2)) == 2
     self._assert_bad_query(query.divide([1, 0]))
     self._assert_bad_query(query.divide([]))
+
+  def test_varargs(self):
+    # Works for lists too
+    assert self._q(query.add([2, 3, 5])) == 10
+    # Works for a variable equal to a list
+    assert self._q(query.let({"x": [2, 3, 5]}, query.add(query.var("x")))) == 10

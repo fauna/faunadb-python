@@ -134,7 +134,7 @@ class Client(object):
 
   def ping(self, scope=None, timeout=None):
     """
-    Ping the server.
+    Ping FaunaDB.
     See the `docs <https://faunadb.com/documentation#rest-other>`__.
     """
     return self.get("ping", {"scope": scope, "timeout": timeout})
