@@ -41,7 +41,7 @@ class Ref(object):
     parts = self.value.split("/")
     if len(parts) == 1:
       raise InvalidValue("The Ref does not have an id.")
-    return self.value.split("/")[-1]
+    return parts[-1]
 
   def to_fauna_json(self):
     return {"@ref": self.value}
