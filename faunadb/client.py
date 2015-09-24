@@ -73,7 +73,7 @@ class Client(object):
   def get(self, path, query=None):
     """
     HTTP GET.
-    See the `docs <https://faunadb.com/documentation#rest>`__.
+    See the `docs <https://faunadb.com/documentation/rest>`__.
 
     :param path:
       Path relative to :samp:`self.domain`. May be a Ref.
@@ -87,7 +87,7 @@ class Client(object):
   def post(self, path, data=None):
     """
     HTTP :samp:`POST`.
-    See the `docs <https://faunadb.com/documentation#rest>`__.
+    See the `docs <https://faunadb.com/documentation/rest>`__.
 
     :param path:
       Path relative to :samp:`self.domain`. May be a Ref.
@@ -102,21 +102,21 @@ class Client(object):
   def put(self, path, data=None):
     """
     Like :py:meth:`post`, but a :samp:`PUT` request.
-    See the `docs <https://faunadb.com/documentation#rest>`__.
+    See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("PUT", path, data)
 
   def patch(self, path, data=None):
     """
     Like :py:meth:`post`, but a :samp:`PATCH` request.
-    See the `docs <https://faunadb.com/documentation#rest>`__.
+    See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("PATCH", path, data)
 
   def delete(self, path, data=None):
     """
     Like :py:meth:`post`, but a :samp:`DELETE` request.
-    See the `docs <https://faunadb.com/documentation#rest>`__.
+    See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("DELETE", path, data)
 
@@ -135,7 +135,7 @@ class Client(object):
   def ping(self, scope=None, timeout=None):
     """
     Ping FaunaDB.
-    See the `docs <https://faunadb.com/documentation#rest-other>`__.
+    See the `docs <https://faunadb.com/documentation/rest#other>`__.
     """
     return self.get("ping", {"scope": scope, "timeout": timeout})
 
