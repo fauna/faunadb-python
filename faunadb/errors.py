@@ -12,7 +12,7 @@ class InvalidQuery(FaunaError):
 
 
 class InvalidValue(FaunaError):
-  """Thrown when a value is not able to be used."""
+  """Thrown when bad data is put into a Field of a Model."""
   def __init__(self, message="The field value is not valid."):
     super(InvalidValue, self).__init__(message)
 

@@ -21,33 +21,33 @@ class ClientTest(FaunaTestCase):
     self.assertRaises(Unauthorized, lambda: client.get(self.db_ref))
 
   def test_ping(self):
-    assert self.client.ping().resource == "Scope Global is OK"
-    assert self.client.ping("global").resource == "Scope Global is OK"
-    assert self.client.ping("local").resource == "Scope Local is OK"
-    assert self.client.ping("node").resource == "Scope Node is OK"
-    assert self.client.ping("all").resource == "Scope All is OK"
+    assert self.client.ping() == "Scope Global is OK"
+    assert self.client.ping("global") == "Scope Global is OK"
+    assert self.client.ping("local") == "Scope Local is OK"
+    assert self.client.ping("node") == "Scope Node is OK"
+    assert self.client.ping("all") == "Scope All is OK"
 
   def test_get(self):
-    assert isinstance(self.client.get("classes").resource["data"], list)
+    assert isinstance(self.client.get("classes")["data"], list)
 
   def _create_class(self):
-    return self.client.post("classes", {"name": "my_class"}).resource
+    return self.client.post("classes", {"name": "my_class"})
 
   def _create_instance(self):
-    return self.client.post("classes/my_class", {}).resource
+    return self.client.post("classes/my_class", {})
 
   def test_post(self):
     cls = self._create_class()
-    assert self.client.get(cls["ref"]).resource == cls
+    assert self.client.get(cls["ref"]) == cls
 
   def test_put(self):
     self._create_class()
     instance = self._create_instance()
-    instance = self.client.put(instance["ref"], {"data": {"a": 2}}).resource
+    instance = self.client.put(instance["ref"], {"data": {"a": 2}})
 
     assert instance["data"]["a"] == 2
 
-    instance = self.client.put(instance["ref"], {"data": {"b": 3}}).resource
+    instance = self.client.put(instance["ref"], {"data": {"b": 3}})
 
     assert "a" not in instance["data"]
     assert instance["data"]["b"] == 3
@@ -55,19 +55,14 @@ class ClientTest(FaunaTestCase):
   def test_patch(self):
     self._create_class()
     instance = self._create_instance()
-    instance = self.client.patch(instance["ref"], {"data": {"a": 1}}).resource
-    instance = self.client.patch(instance["ref"], {"data": {"b": 2}}).resource
+    instance = self.client.patch(instance["ref"], {"data": {"a": 1}})
+    instance = self.client.patch(instance["ref"], {"data": {"b": 2}})
     assert instance["data"] == {"a": 1, "b": 2}
 
   def test_delete(self):
     cls_ref = self._create_class()["ref"]
     self.client.delete(cls_ref)
     self.assertRaises(NotFound, lambda: self.client.get(cls_ref))
-
-  def test_headers(self):
-    headers = self.client.ping().headers
-    assert headers["content-type"] == "application/json;charset=utf-8"
-    # Rest of headers is unspecified
 
   def test_logging(self):
     with LogCapture() as l:

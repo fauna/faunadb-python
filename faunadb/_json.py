@@ -33,7 +33,7 @@ def to_json(dct, pretty=False):
   if pretty:
     return dumps(dct, cls=_FaunaJSONEncoder, sort_keys=True, indent=2, separators=(", ", ": "))
   else:
-    return dumps(dct, cls=_FaunaJSONEncoder)
+    return dumps(dct, cls=_FaunaJSONEncoder, separators=(",", ":"))
 
 
 class _FaunaJSONEncoder(JSONEncoder):

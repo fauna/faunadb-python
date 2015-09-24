@@ -8,10 +8,10 @@ class ObjectsTest(FaunaTestCase):
   def setUp(self):
     super(ObjectsTest, self).setUp()
     self.ref = Ref("classes/frogs", "123")
-    self.json_ref = '{"@ref": "classes/frogs/123"}'
+    self.json_ref = '{"@ref":"classes/frogs/123"}'
 
     self.index = Ref("indexes", "frogs_by_size")
-    self.json_index = '{"@ref": "indexes/frogs_by_size"}'
+    self.json_index = '{"@ref":"indexes/frogs_by_size"}'
 
   def test_ref(self):
     assert parse_json(self.json_ref) == self.ref
@@ -32,13 +32,13 @@ class ObjectsTest(FaunaTestCase):
 
   def test_set(self):
     match = Set(query.match(self.ref, self.index))
-    json_match = '{"@set": {"index": %s, "match": %s}}' % (self.json_index, self.json_ref)
+    json_match = '{"@set":{"index":%s,"match":%s}}' % (self.json_index, self.json_ref)
     assert parse_json(json_match) == match
     assert to_json(match) == json_match
 
   def test_event(self):
-    assert to_json(Event(123, None, None)) == '{"ts": 123}'
-    event_json = '{"action": "create", "resource": {"@ref": "classes/frogs/123"}, "ts": 123}'
+    assert to_json(Event(123, None, None)) == '{"ts":123}'
+    event_json = '{"action":"create","resource":{"@ref":"classes/frogs/123"},"ts":123}'
     assert to_json(Event(123, 'create', self.ref)) == event_json
 
   def test_page(self):
@@ -46,17 +46,17 @@ class ObjectsTest(FaunaTestCase):
     assert Page([1, 2, 3], 2, 3).map_data(lambda x: x + 1) == Page([2, 3, 4], 2, 3)
 
   def test_set_iterator(self):
-    class_ref = self.client.post("classes", {"name": "gadgets"}).resource["ref"]
+    class_ref = self.client.post("classes", {"name": "gadgets"})["ref"]
     index_ref = self.client.post("indexes", {
       "name": "gadgets_by_n",
       "source": class_ref,
       "path": "data.n",
       "active": True
-    }).resource["ref"]
+    })["ref"]
 
     def create(n):
       q = query.create(class_ref, query.object(data=query.object(n=n)))
-      return self.client.query(q).resource["ref"]
+      return self.client.query(q)["ref"]
 
     a = create(0)
     create(1)
