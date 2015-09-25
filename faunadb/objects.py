@@ -1,6 +1,6 @@
 """
 Types used in queries and responses.
-See https://faunadb.com/documentation#queries-values-special_types.
+See the `docs <https://faunadb.com/documentation/queries#values>`__.
 """
 
 from .errors import InvalidQuery, InvalidValue
@@ -8,7 +8,7 @@ from . import query
 
 class Ref(object):
   """
-  FaunaDB ref. See https://faunadb.com/documentation#queries-values.
+  FaunaDB ref. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.
 
   A simple wrapper around a string which can be extracted using :samp:`ref.value`.
   Queries that require a Ref will not work if you just pass in a string.
@@ -82,7 +82,7 @@ class Set(object):
 
 
 class Event(object):
-  """FaunaDB Event. See https://faunadb.com/documentation#queries-values."""
+  """FaunaDB Event. See the `docs <https://faunadb.com/documentation/queries#values>`__."""
 
   @staticmethod
   def from_json(json):
@@ -124,7 +124,7 @@ class Event(object):
 class Page(object):
   """
   A single pagination result.
-  See :samp:`paginate` in the `docs <https://faunadb.com/documentation#queries-read_functions>`__.
+  See :samp:`paginate` in the `docs <https://faunadb.com/documentation/queries#read_functions>`__.
   """
 
   @staticmethod
