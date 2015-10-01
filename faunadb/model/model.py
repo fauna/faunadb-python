@@ -323,7 +323,7 @@ class Model(object):
     """
     page_query = query.paginate(instance_set, size=page_size, before=before, after=after)
     map_query = query.map(page_lambda, page_query)
-    page = Page.from_json(client.query(map_query))
+    page = Page.from_raw(client.query(map_query))
     return page.map_data(partial(cls.get_from_resource, client))
 
   @classmethod
