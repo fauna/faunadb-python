@@ -26,7 +26,7 @@ class Client(object):
   All methods return a converted JSON response.
   This is a dict containing lists, ints, floats, strings, and other dicts.
   Any :any:`Ref` or :any:`Set` values in it will also be parsed.
-  (So instead of ``{ "@ref": "classes/frogs/123" }``, you will get ``Ref("classes/frogs", "123")``.)
+  (So instead of ``{ "@ref": "classes/frogs/123" }``, you will get ``Ref("classes/frogs/123")``.)
 
   There is no way to automatically convert to any other type, such as :any:`Event`,
   from the response; you'll have to do that yourself manually.
@@ -35,28 +35,28 @@ class Client(object):
   # pylint: disable=too-many-arguments, too-many-instance-attributes
   def __init__(
       self,
-      logger=None,
       domain="rest.faunadb.com",
       scheme="https",
       port=None,
       timeout=60,
-      secret=None):
+      secret=None,
+      logger=None):
     """
-    :param logger:
-      A `Logger <https://docs.python.org/2/library/logging.html#logger-objects>`_.
-      Will be called to log every request and response.
-      Setting the ``FAUNA_DEBUG`` environment variable will also log to ``STDERR``.
     :param domain:
       Base URL for the FaunaDB server.
     :param scheme:
       ``"http"`` or ``"https"``.
     :param port:
       Port of the FaunaDB server.
-    :param timeout:
-      Read timeout in seconds.
     :param secret:
       Auth token for the FaunaDB server.
       May be a (username, password) tuple, or "username:password", or just the username (no colon).
+    :param timeout:
+      Read timeout in seconds.
+    :param logger:
+      A `Logger <https://docs.python.org/2/library/logging.html#logger-objects>`_.
+      Will be called to log every request and response.
+      Setting the ``FAUNA_DEBUG`` environment variable will also log to ``STDERR``.
     """
 
     self.logger = logger
