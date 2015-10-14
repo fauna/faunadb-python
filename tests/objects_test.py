@@ -42,7 +42,7 @@ class ObjectsTest(FaunaTestCase):
     assert to_json(Event(123, 'create', self.ref)) == event_json
 
   def test_page(self):
-    assert Page.from_json({"data": 1, "before": 2, "after": 3}) == Page(1, 2, 3)
+    assert Page.from_raw({"data": 1, "before": 2, "after": 3}) == Page(1, 2, 3)
     assert Page([1, 2, 3], 2, 3).map_data(lambda x: x + 1) == Page([2, 3, 4], 2, 3)
 
   def test_set_iterator(self):
@@ -65,3 +65,10 @@ class ObjectsTest(FaunaTestCase):
     gadgets_set = query.match(0, index_ref)
 
     assert list(Page.set_iterator(self.client, gadgets_set, page_size=1)) == [a, b]
+
+    query_mapper = query.lambda_expr('x', query.select(['data', 'n'], query.get(query.var('x'))))
+    query_mapped_iter = Page.set_iterator(self.client, gadgets_set, map_lambda=query_mapper)
+    assert list(query_mapped_iter) == [0, 0]
+
+    mapped_iter = Page.set_iterator(self.client, gadgets_set, mapper=lambda x: [x])
+    assert list(mapped_iter) == [[a], [b]]
