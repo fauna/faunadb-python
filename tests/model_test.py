@@ -1,4 +1,4 @@
-from faunadb.errors import InvalidValue, NotFound
+from faunadb.errors import InvalidValue, InvalidQuery, NotFound
 from faunadb.model import Field, Model
 from faunadb.model.builtin import Class
 from faunadb.objects import Ref
@@ -86,7 +86,7 @@ class ModelTest(FaunaTestCase):
 
     g = GrowModel.get(self.client, g.ref)
     g.letter = "a"
-    g.save()
+    g.save(True)
 
     assert g.number == 1
     assert g.letter == "a"
@@ -95,10 +95,13 @@ class ModelTest(FaunaTestCase):
   def test_ref_ts(self):
     it = self.MyModel(self.client, number=1, letter="a")
 
-    assert it.ref is None and it.ts is None
+    self.assertRaises(InvalidQuery, lambda: it.ref)
+    self.assertRaises(InvalidQuery, lambda: it.id)
+    self.assertRaises(InvalidQuery, lambda: it.ts)
 
     it.save()
     assert it.ref is not None and it.ts is not None
+    assert it.id == it.ref.id()
     ref1 = it.ref
     ts1 = it.ts
 
@@ -113,7 +116,6 @@ class ModelTest(FaunaTestCase):
 
     it.number["a"]["b"] = -1
     it.number["a"]["d"] = {"e": 3}
-    print it._diff()
     assert it._diff() == {"data": {"number": {"a": {"b": -1, "d": {"e": 3}}}}}
 
     it.save()

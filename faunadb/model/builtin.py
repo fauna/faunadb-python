@@ -9,17 +9,16 @@ class _BuiltinMetaClass(_ModelMetaClass):
   def __init__(cls, name, bases, dct):
     super(_BuiltinMetaClass, cls).__init__(name, bases, dct)
     if not cls.is_abstract():
+      # class_ref does not have 'classes' in front
       cls.class_ref = Ref(cls.__fauna_class_name__)
       for field_name in cls.fields:
-        field = cls.fields[field_name]
         # Builtin fields do not have "data" in front of path
-        field.path = [field_name]
+        cls.fields[field_name].path = [field_name]
 
 
 class Builtin(Model):
   """
-  Builtins are special classes directly by FaunaDB itself.
-  Since these exist by default, you do not need to create the Class for them.
+  Builtins are special classes that exist by default.
 
   If you want to store custom data, you can add new fields to these builtins.
   """
@@ -28,7 +27,7 @@ class Builtin(Model):
 
 
 class Database(Builtin):
-  """See the `docs <https://faunadb.com/documentation#objects-databases>`__."""
+  """See the `docs <https://faunadb.com/documentation/objects#databases>`__."""
 
   __fauna_class_name__ = "databases"
   name = Field()
@@ -36,10 +35,10 @@ class Database(Builtin):
 
 
 class Key(Builtin):
-  """See the `docs <https://faunadb.com/documentation#objects-keys>`__."""
+  """See the `docs <https://faunadb.com/documentation/objects#keys>`__."""
 
   __fauna_class_name__ = "keys"
-  database = Field(RefCodec(Database))
+  database = Field(RefCodec)
   role = Field()
   secret = Field()
   hashed_secret = Field()
@@ -47,7 +46,7 @@ class Key(Builtin):
 
 class Class(Builtin):
   """
-  See the `docs <https://faunadb.com/documentation#objects-classes>`__.
+  See the `docs <https://faunadb.com/documentation/objects#classes>`__.
   This is faunadb's representation of a :any:`Model` class.
   """
 
@@ -59,21 +58,21 @@ class Class(Builtin):
 
   @staticmethod
   def create_for_model(client, model_class, **kwargs):
-    """Creates a class for the model."""
+    """Creates a class for the :any:`Model`."""
     return Class.create(client, name=model_class.__fauna_class_name__, **kwargs)
 
   @staticmethod
   def get_for_model(client, model_class):
-    """Gets the class associated."""
+    """Gets the class associated with a :any:`Model`."""
     return Class.get(client, model_class.class_ref)
 
 
 class Index(Builtin):
-  """See the `docs <https://faunadb.com/documentation#objects-indexes>`__."""
+  """See the `docs <https://faunadb.com/documentation/objects#indexes>`__."""
 
   __fauna_class_name__ = "indexes"
   name = Field()
-  source = Field(RefCodec(Class))
+  source = Field(RefCodec)
   terms = Field()
   values = Field()
   unique = Field()
@@ -91,11 +90,11 @@ class Index(Builtin):
       terms = [{"path": "data.%s" % terms}]
 
     source = Class.get_for_model(client, model_class)
-    return Index.create(client, source=source, name=name, terms=terms, **kwargs)
+    return Index.create(client, source=source.ref, name=name, terms=terms, **kwargs)
 
   def match(self, *matched_values):
     """
-    :any:`Set` representing all instances whose value matches the index's term.
+    Set query representing all instances whose value matches the index's term.
     See also :any:`Model` :py:meth:`page_index` and :py:meth:`iter_index`.
 
     :param matched_values:
@@ -114,7 +113,7 @@ class ClassIndex(Index):
   """
 
   @staticmethod
-  def create_for_model(client, model_class, permissions=None):
+  def create_for_model(client, model_class, **kwargs):
     """
     Creates a class index for the given model.
     If the model is :samp:`classes/xyz`, the class index will be :samp:`indexes/xyz`.
@@ -124,17 +123,17 @@ class ClassIndex(Index):
     name = model_class.__fauna_class_name__
     source = Class.get_for_model(client, model_class)
     terms = [{"path": "class"}]
-    return ClassIndex.create(client, source=source, name=name, terms=terms, permissions=permissions)
+    return ClassIndex.create(client, source=source.ref, name=name, terms=terms, **kwargs)
 
   @staticmethod
   def get_for_model(client, model_class):
     """
     Fetches the class index.
-    :py:meth:`create_for_model` should has been called for this database.
+    :py:meth:`create_for_model` should have been called for this database.
     """
     return ClassIndex.get_by_id(client, model_class.__fauna_class_name__)
 
   def match(self):
-    """Set of all instances of the class."""
+    """Query set of all instances of the class."""
     # pylint: disable=arguments-differ
     return query.match(self.get_encoded("source"), self.ref)
