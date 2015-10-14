@@ -207,21 +207,21 @@ class Client(object):
     if 200 <= code <= 299:
       return response_dict["resource"]
     elif code == codes.bad_request:
-      raise BadRequest(response)
+      raise BadRequest(response_dict)
     elif code == codes.unauthorized:
-      raise Unauthorized(response)
+      raise Unauthorized(response_dict)
     elif code == codes.forbidden:
-      raise PermissionDenied(response)
+      raise PermissionDenied(response_dict)
     elif code == codes.not_found:
-      raise NotFound(response)
+      raise NotFound(response_dict)
     elif code == codes.method_not_allowed:
-      raise MethodNotAllowed(response)
+      raise MethodNotAllowed(response_dict)
     elif code == codes.internal_server_error:
-      raise InternalError(response)
+      raise InternalError(response_dict)
     elif code == codes.unavailable:
-      raise UnavailableError(response)
+      raise UnavailableError(response_dict)
     else:
-      raise FaunaHTTPError(response)
+      raise FaunaHTTPError(response_dict)
 
   @staticmethod
   def _query_string_for_logging(query):
