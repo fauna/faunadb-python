@@ -165,7 +165,7 @@ class Page(object):
     """
 
     def get_page(**kwargs):
-      return Page.from_json(client.query(query.paginate(set_query, **kwargs)).resource)
+      return Page.from_json(client.query(query.paginate(set_query, **kwargs)))
 
     page = get_page(size=page_size)
     for val in page.data:
