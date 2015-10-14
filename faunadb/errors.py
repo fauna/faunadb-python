@@ -2,9 +2,7 @@
 
 class FaunaError(Exception):
   """Base class for all FaunaDB errors."""
-  def __init__(self, message):
-    super(FaunaError, self).__init__(message)
-
+  pass
 
 class InvalidQuery(FaunaError):
   """Thrown when a query is malformed."""
@@ -12,7 +10,7 @@ class InvalidQuery(FaunaError):
 
 
 class InvalidValue(FaunaError):
-  """Thrown when a value is not able to be used."""
+  """Thrown when a value cannot be accepted."""
   def __init__(self, message="The field value is not valid."):
     super(InvalidValue, self).__init__(message)
 
@@ -20,47 +18,46 @@ class InvalidValue(FaunaError):
 #region HTTPError
 class FaunaHTTPError(FaunaError):
   """Error in FaunaDB server connection."""
-  def __init__(self, response):
-    params = response.json()
-    if "error" in params:
-      self.errors = [params["error"]]
+  def __init__(self, response_dict):
+    if "error" in response_dict:
+      self.errors = [response_dict["error"]]
     else:
-      self.errors = params["errors"]
-    self.reason = params.get("reason", "")
-    self.parameters = params.get("parameters", {})
+      self.errors = response_dict["errors"]
+    self.reason = response_dict.get("reason", "")
+    self.parameters = response_dict.get("parameters", {})
     super(FaunaHTTPError, self).__init__(self.reason or self.errors[0])
 
 class BadRequest(FaunaHTTPError):
-  """HTTP 400 Error."""
+  """HTTP 400 error."""
   pass
 
 
 class Unauthorized(FaunaHTTPError):
-  """HTTP 401 Error."""
+  """HTTP 401 error."""
   pass
 
 
 class PermissionDenied(FaunaHTTPError):
-  """HTTP 403 Error."""
+  """HTTP 403 error."""
   pass
 
 
 class NotFound(FaunaHTTPError):
-  """HTTP 404 Error."""
+  """HTTP 404 error."""
   pass
 
 
 class MethodNotAllowed(FaunaHTTPError):
-  """HTTP 405 Error."""
+  """HTTP 405 error."""
   pass
 
 
 class InternalError(FaunaHTTPError):
-  """HTTP 500 Error."""
+  """HTTP 500 error."""
   pass
 
 
 class UnavailableError(FaunaHTTPError):
-  """HTTP 503 Error."""
+  """HTTP 503 error."""
   pass
 #endregion
