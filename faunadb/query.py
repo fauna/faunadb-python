@@ -28,7 +28,7 @@ def if_expr(condition, true_expr, false_expr):
 
 def do(*expressions):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"do": expressions}
+  return _varargs_query("do", expressions)
 
 
 def object(**keys_vals):
@@ -213,4 +213,4 @@ def _varargs_query(name, values):
   This ensures that a single value passed is not put in array, so
   :samp:`query.add(query.var(x))` will work where :samp:`x` is a list whose values are to be added.
   """
-  return {name: values[0]} if len(values) == 1 else {name: values}
+  return {name: values[0] if len(values) == 1 else values}
