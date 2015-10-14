@@ -46,17 +46,17 @@ class ObjectsTest(FaunaTestCase):
     assert Page([1, 2, 3], 2, 3).map_data(lambda x: x + 1) == Page([2, 3, 4], 2, 3)
 
   def test_set_iterator(self):
-    class_ref = self.client.post("classes", {"name": "gadgets"}).resource["ref"]
+    class_ref = self.client.post("classes", {"name": "gadgets"})["ref"]
     index_ref = self.client.post("indexes", {
       "name": "gadgets_by_n",
       "source": class_ref,
       "path": "data.n",
       "active": True
-    }).resource["ref"]
+    })["ref"]
 
     def create(n):
       q = query.create(class_ref, query.object(data=query.object(n=n)))
-      return self.client.query(q).resource["ref"]
+      return self.client.query(q)["ref"]
 
     a = create(0)
     create(1)

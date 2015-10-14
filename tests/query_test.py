@@ -7,21 +7,21 @@ class QueryTest(FaunaTestCase):
   def setUp(self):
     super(QueryTest, self).setUp()
 
-    self.class_ref = self.client.post("classes", {"name": "widgets"}).resource["ref"]
+    self.class_ref = self.client.post("classes", {"name": "widgets"})["ref"]
 
     self.n_index_ref = self.client.post("indexes", {
       "name": "widgets_by_n",
       "source": self.class_ref,
       "path": "data.n",
       "active": True
-    }).resource["ref"]
+    })["ref"]
 
     self.m_index_ref = self.client.post("indexes", {
       "name": "widgets_by_m",
       "source": self.class_ref,
       "path": "data.m",
       "active": True
-    }).resource["ref"]
+    })["ref"]
 
     self.ref_n1 = self._create(n=1)["ref"]
     self.ref_m1 = self._create(m=1)["ref"]
@@ -38,7 +38,7 @@ class QueryTest(FaunaTestCase):
     return self._q(query.create(self.class_ref, query.object(data=data)))
 
   def _q(self, query_json):
-    return self.client.query(query_json).resource
+    return self.client.query(query_json)
 
   def _set_to_list(self, _set):
     return self._q(query.paginate(_set, size=1000))["data"]
