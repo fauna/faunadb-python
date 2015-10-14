@@ -158,6 +158,7 @@ class Page(object):
   def set_iterator(client, set_query, page_size=None):
     """
     Iterator that keeps getting new pages of a set.
+
     :param page_size:
       Number of instances to be fetched at a time.
     :return:
