@@ -1,5 +1,3 @@
-from functools import partial
-
 from ..errors import InvalidQuery, InvalidValue
 from ..objects import Page, Ref
 from .. import query
@@ -54,7 +52,7 @@ class Model(object):
 
   :samp:`__fauna_class_name__` is mandatory; otherwise this will be treated as an abstract class.
 
-  :any:`Class` :py:meth:`create_for_model` must be called before you can use the model.
+  :any:`Class` :py:meth:`create_for_model` must be called before you can save model instances.
   """
 
   __metaclass__ = _ModelMetaClass
@@ -69,7 +67,7 @@ class Model(object):
   #: :any:`Ref` for the class itself.
   #:
   #: :samp:`instance.ref` should be the same as
-  #: :samp:`Ref(instance.__class__.class_ref, instance.id())`.
+  #: :samp:`Ref(instance.__class__.class_ref, instance.id)`.
   class_ref = None
 
   #: Dict {field_name: :any:`Field`} of all fields assigned to this class.
@@ -91,27 +89,26 @@ class Model(object):
   #region Common properties
   @property
   def ref(self):
-    """:any:`Ref` of this instance in the database. :samp:`None` iff :py:meth:`is_new_instance`."""
-    return self._current.get("ref")
-
-  @property
-  def ts(self):
-    """
-    Microsecond UNIX Timestamp of latest :py:meth:`save`.
-    :samp:`None` iff :py:meth:`is_new_instance`.
-    """
-    return self._current.get("ts")
+    """:any:`Ref` of this instance in the database. Fails if :py:meth:`is_new_instance`."""
+    if self.is_new_instance():
+      raise InvalidQuery("Instance has not been saved to the database, so no ref exists.")
+    return self._current["ref"]
 
   @property
   def id(self):
-    """The id portion of this instance's :any:`Ref`."""
-    if self.is_new_instance():
-      raise InvalidQuery("Instance has not been saved to the database, so no id exists.")
+    """The id portion of this instance's :any:`Ref`. Fails if :py:meth:`is_new_instance`."""
     return self.ref.id()
+
+  @property
+  def ts(self):
+    """Microsecond UNIX timestamp of latest :py:meth:`save`. Fails if :py:meth:`is_new_instance`."""
+    if self.is_new_instance():
+      raise InvalidQuery("Instance has not been saved to the database, so no ts exists.")
+    return self._current["ts"]
   #endregion
 
   def get_encoded(self, field_name):
-    """Gets the encoded value for a field."""
+    """For a field with a :any:`Codec`, gets the encoded value."""
     field = self.__class__.fields[field_name]
     return get_path(field.path, self._current)
 
@@ -119,9 +116,9 @@ class Model(object):
   def is_new_instance(self):
     """
     :samp:`False` if this has ever been saved to the database.
-    Iff :samp:`True`, :any:`ref` and :any:`ts` will be :samp:`None`.
+    Iff :samp:`True`, :any:`ref` and :any:`ts` will fail.
     """
-    return self.ref is None
+    return "ref" not in self._current
 
   def delete(self):
     """Removes this instance from the database."""
@@ -146,7 +143,7 @@ class Model(object):
     :param replace:
       If true, updates will update *all* fields
       using :py:meth:`replace_query` instead of :py:meth:`update_query`.
-      See the `docs <https://faunadb.com/documentation#queries-write_functions>`_.
+      See the `docs <https://faunadb.com/documentation/queries#write_functions>`_.
     """
     if self.is_new_instance():
       return self.create_query()
@@ -156,29 +153,19 @@ class Model(object):
       return self.update_query()
 
   def create_query(self):
-    """
-    Query to create a new instance.
-    It is recommended to use :py:meth:`save_query` instead.
-    """
+    """Query to create a new instance."""
     if not self.is_new_instance():
       raise InvalidQuery("Trying to create instance that has already been created.")
-    cls = self.__class__
-    return query.create(cls.class_ref, query.quote(self._current))
+    return query.create(self.__class__.class_ref, query.quote(self._current))
 
   def replace_query(self):
-    """
-    Query to replace this instance's data.
-    It is recommended to use :samp:`instance.save_query(replace=True)` instead.
-    """
+    """Query to replace this instance's data."""
     if self.is_new_instance():
       raise InvalidQuery("Instance has not yet been created.")
     return query.replace(self.ref, query.quote(self._current))
 
   def update_query(self):
-    """
-    Query to update this instance's data.
-    It is recommended to use :py:meth:`save_query` instead.
-    """
+    """Query to update this instance's data."""
     if self.is_new_instance():
       raise InvalidQuery("Instance has not yet been created.")
     return query.update(self.ref, query.quote(self._diff()))
@@ -187,7 +174,7 @@ class Model(object):
   #region Standard methods
   def __eq__(self, other):
     # pylint: disable=protected-access
-    return self is other or self._current == other._current
+    return self is other or (isinstance(other, Model) and self._current == other._current)
 
   def __ne__(self, other):
     return not self == other
@@ -214,9 +201,10 @@ class Model(object):
     return cls.get(client, Ref(cls.class_ref, instance_id))
 
   @classmethod
-  def create(cls, client, *args, **kwargs):
+  def create(cls, client, **data):
+    """Initializes and saves a new instance."""
     # pylint: disable=protected-access
-    instance = cls(client, *args, **kwargs)
+    instance = cls(client, **data)
     instance._init_from_resource(client.query(instance.create_query()))
     return instance
 
@@ -234,7 +222,7 @@ class Model(object):
     Paginates a set query and converts results to instances of this class.
 
     :param instance_set:
-      :any:`Set` of instances of this class.
+      Query set of instances of this class.
     :param size:
       Number of instances per page.
     :param before:
@@ -254,9 +242,9 @@ class Model(object):
     :param instance_set: :any:`Set` of refs to instances of this class.
     """
     m = query.lambda_expr("x", query.get(query.var("x")))
-    iterator = Page.set_iterator(client, instance_set, page_size=page_size, map_lambda=m)
-    for instance in iterator:
-      yield cls.get_from_resource(client, instance)
+    def mapper(instance):
+      return cls.get_from_resource(client, instance)
+    return Page.set_iterator(client, instance_set, page_size=page_size, map_lambda=m, mapper=mapper)
 
   @classmethod
   def page_index(cls, index, matched_values, page_size=None, before=None, after=None):
@@ -264,7 +252,7 @@ class Model(object):
     Calls :any:`Index` :py:meth:`match` and then works just like :py:meth:`page`.
 
     :param matched_values:
-      Value
+      Matched value or list of matched values, passed into :any:`Index` :py:meth:`match`.
     """
     if not isinstance(matched_values, list):
       matched_values = [matched_values]
@@ -275,15 +263,23 @@ class Model(object):
 
   @classmethod
   def iter_index(cls, index, matched_values, page_size=None):
-    client = index.client
+    """
+    Calls :any:`Index` :py:meth:`match` and then works just like :py:meth:`iterator`.
+
+    :param matched_values:
+      Matched value or list of matched values, passed into :any:`Index` :py:meth:`match`.
+    :param page_size:
+      Size of each page.
+    """
     if not isinstance(matched_values, list):
       matched_values = [matched_values]
+    client = index.client
     match_set = index.match(*matched_values)
 
-    getter = Model._index_ref_getter(index)
-    iterator = Page.set_iterator(client, match_set, page_size=page_size, map_lambda=getter)
-    for instance in iterator:
-      yield cls.get_from_resource(client, instance)
+    get = Model._index_ref_getter(index)
+    def mapper(instance):
+      return cls.get_from_resource(client, instance)
+    return Page.set_iterator(client, match_set, page_size=page_size, map_lambda=get, mapper=mapper)
   #endregion
 
   #region Private methods
@@ -307,9 +303,7 @@ class Model(object):
   #region Private class methods
   @staticmethod
   def _index_ref_getter(index):
-    """
-    Lambda expression for getting an instance Ref out of a match result.
-    """
+    """Lambda expression for getting an instance Ref out of a match result."""
     if index.values:
       return query.lambda_expr("arr", query.get(query.select(len(index.values), query.var("arr"))))
     else:
@@ -324,7 +318,7 @@ class Model(object):
     page_query = query.paginate(instance_set, size=page_size, before=before, after=after)
     map_query = query.map(page_lambda, page_query)
     page = Page.from_raw(client.query(map_query))
-    return page.map_data(partial(cls.get_from_resource, client))
+    return page.map_data(lambda resource: cls.get_from_resource(client, resource))
 
   @classmethod
   def _maybe_add_field(cls, field_name, field):
@@ -357,13 +351,17 @@ class Model(object):
           return self._cache[field_name]
         else:
           encoded = get_path(field.path, self._current)
-          decoded = field.codec.decode(encoded, self)
+          decoded = field.codec.decode(encoded)
           self._cache[field_name] = decoded
           return decoded
 
       def setter(self, value):
-        self._cache[field_name] = value
-        encoded = field.codec.encode(value, self)
+        # Clear any previous cached decoded value.
+        if field_name in self._cache:
+          del self._cache[field_name]
+        # Codecs are not guaranteed to have decode(encode(value)) === value.
+        # So can't set _cache until getter is called.
+        encoded = field.codec.encode(value)
         set_path(field.path, encoded, self._current)
 
     setattr(cls, field_name, property(getter, setter))

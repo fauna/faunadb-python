@@ -14,6 +14,12 @@ class BuiltinTest(FaunaTestCase):
   def setUp(self):
     super(BuiltinTest, self).setUp()
 
+    class MyModel(Model):
+      __fauna_class_name__ = "mooses"
+      x = Field()
+    Class.create_for_model(self.client, MyModel)
+    self.MyModel = MyModel
+
   def test_database(self):
     name = "builtin_test_database"
     db = Database(self.root_client, name=name, api_version="2.0")
@@ -38,7 +44,7 @@ class BuiltinTest(FaunaTestCase):
 
   def test_key(self):
     database = Database.get(self.root_client, self.db_ref)
-    key = Key(self.root_client, database=database, role="server")
+    key = Key(self.root_client, database=database.ref, role="server")
     key.save()
     assert key.is_new_instance() == False
     assert len(key.hashed_secret) > 0
@@ -46,46 +52,33 @@ class BuiltinTest(FaunaTestCase):
   def test_custom_field(self):
     database = Database.get(self.root_client, self.db_ref)
     Key.x = Field()
-    key = Key(self.root_client, database=database, role="server", x=3)
+    key = Key(self.root_client, database=database.ref, role="server", x=3)
     key.save()
     assert Key.get(self.root_client, key.ref).x == 3
 
   def test_class(self):
-    class C(Model):
-      __fauna_class_name__ = "c"
-      x = Field()
-    Class.create_for_model(self.client, C)
-
-    cls = Class.get_for_model(self.client, C)
+    cls = Class.get_for_model(self.client, self.MyModel)
     assert not cls.is_new_instance()
     assert cls.history_days > 0
-    assert cls.name == "c"
+    assert cls.name == self.MyModel.__fauna_class_name__
 
     cls.permissions = "public"
     cls.save()
 
     assert cls.permissions == "public"
-    assert Class.get_for_model(self.client, C).permissions == "public"
+    assert Class.get_for_model(self.client, self.MyModel).permissions == "public"
 
   def test_index(self):
-    class C(Model):
-      __fauna_class_name__ = "cs"
-      x = Field()
-    Class.create_for_model(self.client, C)
+    idx = Index.create_for_model(self.client, self.MyModel, "mooses_by_x", "x")
+    assert Index.get_by_id(self.client, "mooses_by_x") == idx
 
-    idx = Index.create_for_model(self.client, C, "cs_by_x", "x")
-    print Index.get_by_id(self.client, "cs_by_x")
-    print idx
-    assert Index.get_by_id(self.client, "cs_by_x") == idx
+    instance1 = self.MyModel.create(self.client, x=1)
+    self.MyModel.create(self.client, x=2)
+    instance2 = self.MyModel.create(self.client, x=1)
 
-    c1 = C.create(self.client, x=1)
-    C.create(self.client, x=2)
-    c2 = C.create(self.client, x=1)
+    assert self.MyModel.page_index(idx, 1).data == [instance1, instance2]
 
-    p = C.page_index(idx, 1)
-    assert p.data == [c1, c2]
-
-    assert list(C.iter_index(idx, 1)) == [c1, c2]
+    assert list(self.MyModel.iter_index(idx, 1)) == [instance1, instance2]
 
 
   def test_terms_and_values(self):
@@ -142,9 +135,7 @@ class BuiltinTest(FaunaTestCase):
     idx = ClassIndex.create_for_model(self.client, M)
     assert ClassIndex.get_for_model(self.client, M) == idx
 
-    ms = [M(self.client, number=i) for i in range(100)]
-    for m in ms:
-      m.save()
+    ms = [M.create(self.client, number=i) for i in range(10)]
 
     ms_set = idx.match()
     page = M.page(self.client, ms_set, page_size=2)
@@ -153,5 +144,5 @@ class BuiltinTest(FaunaTestCase):
     assert page2.data == [ms[2], ms[3]]
 
     # List of all Ms should be exactly 100 in length; use izip_longest to be sure.
-    for i, m in izip_longest(range(100), M.iterator(self.client, ms_set)):
+    for i, m in izip_longest(range(10), M.iterator(self.client, ms_set, page_size=2)):
       assert m.number == i
