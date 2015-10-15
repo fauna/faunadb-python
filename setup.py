@@ -12,6 +12,6 @@ setup(
   version=0,
   install_requires=["requests"],
   tests_require=["nose", "pynt", "sphinx", "sphinx_rtd_theme", "testfixtures"],
-  packages=["faunadb"],
+  packages=["faunadb", "faunadb.model"],
   scripts=[],
   license="MPL 2.0")
