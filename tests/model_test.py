@@ -1,5 +1,6 @@
 from faunadb.errors import InvalidValue, InvalidQuery, NotFound
-from faunadb.model import Field, Model
+from faunadb.model.field import Field
+from faunadb.model.model import Model
 from faunadb.model.builtin import Class
 from faunadb.objects import Ref
 
