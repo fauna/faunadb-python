@@ -52,7 +52,7 @@ class Model(object):
 
   :samp:`__fauna_class_name__` is mandatory; otherwise this will be treated as an abstract class.
 
-  :any:`Class` :py:meth:`create_for_model` must be called before you can save model instances.
+  :any:`Class.create_for_model` must be called before you can save model instances.
   """
 
   __metaclass__ = _ModelMetaClass
@@ -89,19 +89,19 @@ class Model(object):
   #region Common properties
   @property
   def ref(self):
-    """:any:`Ref` of this instance in the database. Fails if :py:meth:`is_new_instance`."""
+    """:any:`Ref` of this instance in the database. Fails if :any:`is_new_instance`."""
     if self.is_new_instance():
       raise InvalidQuery("Instance has not been saved to the database, so no ref exists.")
     return self._current["ref"]
 
   @property
   def id(self):
-    """The id portion of this instance's :any:`Ref`. Fails if :py:meth:`is_new_instance`."""
+    """The id portion of this instance's :any:`Ref`. Fails if any:`is_new_instance`."""
     return self.ref.id()
 
   @property
   def ts(self):
-    """Microsecond UNIX timestamp of latest :py:meth:`save`. Fails if :py:meth:`is_new_instance`."""
+    """Microsecond UNIX timestamp of latest :any:`save`. Fails if :any:`is_new_instance`."""
     if self.is_new_instance():
       raise InvalidQuery("Instance has not been saved to the database, so no ts exists.")
     return self._current["ts"]
@@ -131,18 +131,18 @@ class Model(object):
     return query.delete(self.ref)
 
   def save(self, replace=False):
-    """Executes :py:meth:`save_query`."""
+    """Executes :any:`save_query`."""
     self._init_from_resource(self.client.query(self.save_query(replace)))
 
   def save_query(self, replace=False):
     """
     Query to save this instance to the database.
-    If :py:meth:`is_new_instance`, creates it and sets :any:`ref` and :any:`ts`.
+    If :any:`is_new_instance`, creates it and sets :any:`ref` and :any:`ts`.
     Otherwise, updates any changed fields.
 
     :param replace:
       If true, updates will update *all* fields
-      using :py:meth:`replace_query` instead of :py:meth:`update_query`.
+      using :any:`replace_query` instead of :any:`update_query`.
       See the `docs <https://faunadb.com/documentation/queries#write_functions>`_.
     """
     if self.is_new_instance():
@@ -249,10 +249,10 @@ class Model(object):
   @classmethod
   def page_index(cls, index, matched_values, page_size=None, before=None, after=None):
     """
-    Calls :any:`Index` :py:meth:`match` and then works just like :py:meth:`page`.
+    Calls :any:`Index.match` and then works just like :any:`page`.
 
     :param matched_values:
-      Matched value or list of matched values, passed into :any:`Index` :py:meth:`match`.
+      Matched value or list of matched values, passed into :any:`Index.match`.
     """
     if not isinstance(matched_values, list):
       matched_values = [matched_values]
@@ -264,10 +264,10 @@ class Model(object):
   @classmethod
   def iter_index(cls, index, matched_values, page_size=None):
     """
-    Calls :any:`Index` :py:meth:`match` and then works just like :py:meth:`iterator`.
+    Calls :any:`Index.match` and then works just like :any:`iterator`.
 
     :param matched_values:
-      Matched value or list of matched values, passed into :any:`Index` :py:meth:`match`.
+      Matched value or list of matched values, passed into :any:`Index.match`.
     :param page_size:
       Size of each page.
     """
@@ -280,6 +280,17 @@ class Model(object):
     def mapper(instance):
       return cls.get_from_resource(client, instance)
     return Page.set_iterator(client, match_set, page_size=page_size, map_lambda=get, mapper=mapper)
+
+  @classmethod
+  def get_from_index(cls, index, *matched_values):
+    """
+    Returns the first instance matched by the index.
+
+    :param index: :any:`Index`
+    :param matched_values: Same as for :any:`Index.match`.
+    :return: Instance of this class.
+    """
+    return cls.get_from_resource(index.client, index.get_single(*matched_values))
   #endregion
 
   #region Private methods
