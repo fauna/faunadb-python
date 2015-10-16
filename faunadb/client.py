@@ -103,21 +103,21 @@ class Client(object):
 
   def put(self, path, data=None):
     """
-    Like :py:meth:`post`, but a :samp:`PUT` request.
+    Like :any:`post`, but a :samp:`PUT` request.
     See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("PUT", path, data)
 
   def patch(self, path, data=None):
     """
-    Like :py:meth:`post`, but a :samp:`PATCH` request.
+    Like :any:`post`, but a :samp:`PATCH` request.
     See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("PATCH", path, data)
 
   def delete(self, path, data=None):
     """
-    Like :py:meth:`post`, but a :samp:`DELETE` request.
+    Like :any:`post`, but a :samp:`DELETE` request.
     See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("DELETE", path, data)
