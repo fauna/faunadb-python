@@ -4,7 +4,7 @@ from testfixtures import LogCapture
 
 from faunadb.client import Client
 from faunadb.errors import FaunaError, NotFound, Unauthorized
-from test_case import get_client, FaunaTestCase
+from .test_case import get_client, FaunaTestCase
 
 class ClientTest(FaunaTestCase):
   def setUp(self):

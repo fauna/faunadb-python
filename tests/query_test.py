@@ -1,7 +1,7 @@
 from faunadb.errors import BadRequest, NotFound
 from faunadb.objects import Set
 from faunadb import query
-from test_case import FaunaTestCase
+from .test_case import FaunaTestCase
 
 class QueryTest(FaunaTestCase):
   def setUp(self):
@@ -206,7 +206,7 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.subtract())
 
   def test_divide(self):
-    assert self._q(query.divide(2, 3, 5)) == 2/15
+    assert self._q(query.divide(2.0, 3, 5)) == 2.0/15
     assert self._q(query.divide(2)) == 2
     self._assert_bad_query(query.divide([1, 0]))
     self._assert_bad_query(query.divide([]))

@@ -58,4 +58,8 @@ class _FaunaJSONEncoder(JSONEncoder):
         return _FaunaJSONEncoder._to_fauna_json_recursive(v)
       else:
         return v
-    return {k: fauna(v) for k, v in dct.iteritems()}
+
+    res = {}
+    for key in dct:
+      res[key] = fauna(dct[key])
+    return res

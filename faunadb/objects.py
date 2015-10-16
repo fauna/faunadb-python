@@ -5,6 +5,7 @@ See the `docs <https://faunadb.com/documentation/queries#values>`__.
 
 from .errors import InvalidQuery, InvalidValue
 from . import query
+from ._util import no_null_values
 
 class Ref(object):
   """
@@ -104,8 +105,7 @@ class Event(object):
     "The Ref of the affected instance."
 
   def to_fauna_json(self):
-    dct = {"ts": self.ts, "action": self.action, "resource": self.resource}
-    return {k: v for k, v in dct.iteritems() if v is not None}
+    return no_null_values({"ts": self.ts, "action": self.action, "resource": self.resource})
 
   def __repr__(self):
     return "Event(ts=%s, action=%s, resource=%s)" % (

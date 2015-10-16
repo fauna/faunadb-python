@@ -201,7 +201,8 @@ def divide(*numbers):
 
 def _params(main_params, optional_params):
   """Hash of query arguments with None values removed."""
-  for key, val in optional_params.iteritems():
+  for key in optional_params:
+    val = optional_params[key]
     if val is not None:
       main_params[key] = val
   return main_params

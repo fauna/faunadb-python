@@ -5,6 +5,7 @@ from unittest import TestCase
 from faunadb.client import Client
 from faunadb.errors import NotFound
 from faunadb.objects import Ref
+from faunadb._util import no_null_values
 
 _FAUNA_ROOT_KEY = environ["FAUNA_ROOT_KEY"]
 # If None, these have defaults in Client.
@@ -38,7 +39,6 @@ class FaunaTestCase(TestCase):
     self.root_client.delete(self.db_ref)
 
 def get_client(secret, logger=None):
-  args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
   # If None, use default instead
-  non_null_args = {k: v for k, v in args.iteritems() if v is not None}
-  return Client(secret=secret, logger=logger, **non_null_args)
+  args = no_null_values({"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT})
+  return Client(secret=secret, logger=logger, **args)
