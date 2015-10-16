@@ -95,7 +95,7 @@ class Index(Builtin):
   def match(self, *matched_values):
     """
     Set query representing all instances whose value matches the index's term.
-    See also :any:`Model` :py:meth:`page_index` and :py:meth:`iter_index`.
+    See also :any:`Model.page_index` and :any:`Model.iter_index`.
 
     :param matched_values:
       For each term in :samp:`self.terms`, a value that must be matched.
@@ -105,6 +105,16 @@ class Index(Builtin):
       matched_values = matched_values[0]
     return query.match(matched_values, self.ref)
 
+  def get_single(self, *matched_values):
+    """
+    Returns raw data of the first instance matched by this index.
+    Typically this will be used for an index with :samp:`unique = True`.
+    See also :any:`Model.get_from_index`.
+
+    :param matched_values: Same as for :any:`match`.
+    :return: Raw data for an instance.
+    """
+    return self.client.query(query.get(self.match(*matched_values)))
 
 class ClassIndex(Index):
   """
@@ -129,7 +139,7 @@ class ClassIndex(Index):
   def get_for_model(client, model_class):
     """
     Fetches the class index.
-    :py:meth:`create_for_model` should have been called for this database.
+    :any:`create_for_model` should have been called for this database.
     """
     return ClassIndex.get_by_id(client, model_class.__fauna_class_name__)
 

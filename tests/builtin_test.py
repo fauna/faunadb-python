@@ -1,7 +1,7 @@
 from itertools import izip_longest
 from nose.tools import nottest
 
-from faunadb.errors import NotFound
+from faunadb.errors import BadRequest, NotFound
 from faunadb.model.model import Model
 from faunadb.model.field import Field
 from faunadb.model.builtin import Class, Database, Index, Key, ClassIndex
@@ -80,7 +80,6 @@ class BuiltinTest(FaunaTestCase):
 
     assert list(self.MyModel.iter_index(idx, 1)) == [instance1, instance2]
 
-
   def test_terms_and_values(self):
     class D(Model):
       __fauna_class_name__ = "ds"
@@ -126,6 +125,20 @@ class BuiltinTest(FaunaTestCase):
     assert E.page_index(idx, 0).data == expected
     assert list(E.iter_index(idx, 0)) == expected
 
+  def test_unique_index(self):
+    class F(Model):
+      __fauna_class_name__ = "fs"
+      x = Field()
+    Class.create_for_model(self.client, F)
+    index = Index.create_for_model(self.client, F, "fs_by_x", "x", unique=True)
+    instance = F.create(self.client, x=1)
+    # Unique index, so can't create another one.
+    self.assertRaises(BadRequest, lambda: F.create(self.client, x=1))
+
+    assert index.get_single(1) == instance._current
+    assert F.get_from_index(index, 1) == instance
+    self.assertRaises(NotFound, lambda: index.get_single(2))
+
   def test_class_index(self):
     class M(Model):
       __fauna_class_name__ = "test_list_model"
@@ -134,7 +147,6 @@ class BuiltinTest(FaunaTestCase):
 
     idx = ClassIndex.create_for_model(self.client, M)
     assert ClassIndex.get_for_model(self.client, M) == idx
-
     ms = [M.create(self.client, number=i) for i in range(10)]
 
     ms_set = idx.match()
