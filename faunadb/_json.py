@@ -28,7 +28,7 @@ def _parse_json_hook(dct):
 def to_json(dct, pretty=False):
   """
   Opposite of parse_json.
-  Converts a dict into a request body, calling :py:meth`to_fauna_json`.
+  Converts a dict into a request body, calling :any:`to_fauna_json`.
   """
   if pretty:
     return dumps(dct, cls=_FaunaJSONEncoder, sort_keys=True, indent=2, separators=(", ", ": "))
@@ -37,7 +37,7 @@ def to_json(dct, pretty=False):
 
 
 class _FaunaJSONEncoder(JSONEncoder):
-  """Converts values with :py:meth:`to_fauna_json` to JSON."""
+  """Converts values with :any:`to_fauna_json` to JSON."""
   # pylint: disable=method-hidden
   def default(self, obj):
     if hasattr(obj, "to_fauna_json"):

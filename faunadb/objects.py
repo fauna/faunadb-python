@@ -135,7 +135,7 @@ class Page(object):
     self.data = data
     """
     Always a list.
-    Elements could be raw data; some methods (such as :doc:`model` :py:meth:`list`) convert data.
+    Elements could be raw data; some methods (such as :any:`Model.page`) convert data.
     """
     self.before = before
     """Optional :any:`Ref` for an instance that comes before this page."""
