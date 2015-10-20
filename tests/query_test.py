@@ -34,8 +34,8 @@ class QueryTest(FaunaTestCase):
     return query.match(m, self.m_index_ref)
 
   def _create(self, n=0, m=None):
-    data = query.object(n=n) if m is None else query.object(n=n, m=m)
-    return self._q(query.create(self.class_ref, query.object(data=data)))
+    data = {"n": n} if m is None else {"n": n, "m": m}
+    return self._q(query.create(self.class_ref, query.quote({"data": data})))
 
   def _q(self, query_json):
     return self.client.query(query_json)
@@ -120,12 +120,12 @@ class QueryTest(FaunaTestCase):
 
   def test_update(self):
     ref = self._create()["ref"]
-    got = self._q(query.update(ref, query.object(data=query.object(m=1))))
+    got = self._q(query.update(ref, query.quote({"data": {"m": 1}})))
     assert got["data"] == {"n": 0, "m": 1}
 
   def test_replace(self):
     ref = self._create()["ref"]
-    got = self._q(query.replace(ref, query.object(data=query.object(m=1))))
+    got = self._q(query.replace(ref, query.quote({"data": {"m": 1}})))
     assert got["data"] == {"m": 1}
 
   def test_delete(self):
