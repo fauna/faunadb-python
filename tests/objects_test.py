@@ -66,7 +66,7 @@ class ObjectsTest(FaunaTestCase):
 
     assert list(Page.set_iterator(self.client, gadgets_set, page_size=1)) == [a, b]
 
-    query_mapper = query.lambda_expr('x', query.select(['data', 'n'], query.get(query.var('x'))))
+    query_mapper = lambda a: query.select(['data', 'n'], query.get(a))
     query_mapped_iter = Page.set_iterator(self.client, gadgets_set, map_lambda=query_mapper)
     assert list(query_mapped_iter) == [0, 0]
 

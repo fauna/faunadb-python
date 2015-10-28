@@ -2,6 +2,8 @@ from faunadb.errors import BadRequest, NotFound
 from faunadb.objects import Set
 from faunadb import query
 from test_case import FaunaTestCase
+from threading import Thread
+from time import sleep
 
 class QueryTest(FaunaTestCase):
   def setUp(self):
@@ -66,19 +68,72 @@ class QueryTest(FaunaTestCase):
     quoted = query.let({"x": 1}, query.var("x"))
     assert self._q(query.quote(quoted)) == quoted
 
+  def test_lambda_query(self):
+    assert query.lambda_query(lambda a: query.add(a, a)) == {
+      "lambda": "auto0", "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
+    }
+
+    expected = query.lambda_query(
+      lambda a: query.lambda_query(
+        lambda b: query.lambda_query(
+          lambda c: [a, b, c])))
+    assert expected == {
+      "lambda": "auto0",
+      "expr": {
+        "lambda": "auto1",
+        "expr": {
+          "lambda": "auto2",
+          "expr": [{"var": "auto0"}, {"var": "auto1"}, {"var": "auto2"}]
+        }
+      }
+    }
+
+    # Error in lambda should not affect future queries.
+    with self.assertRaises(Exception):
+      def fail():
+        raise Exception("foo")
+      query.lambda_query(lambda a: fail())
+    assert query.lambda_query(lambda a: a) == {"lambda": "auto0", "expr": {"var": "auto0"}}
+
+  def test_lambda_query_multithreaded(self):
+    """Test that lambda_query works in simultaneous threads."""
+    events = []
+
+    def do_a():
+      def do_lambda(a):
+        events.append(0)
+        sleep(1)
+        events.append(2)
+        return a
+      assert query.lambda_query(do_lambda) == {"lambda": "auto0", "expr": {"var": "auto0"}}
+
+    def do_b():
+      # This happens while thread 'a' has incremented its auto name to auto1,
+      # but that doesn't affect thread 'b'.
+      assert query.lambda_query(lambda a: a) == {"lambda": "auto0", "expr": {"var": "auto0"}}
+      events.append(1)
+
+    t = Thread(name="a", target=do_a)
+    t2 = Thread(name="b", target=do_b)
+    t.start()
+    t2.start()
+    t.join()
+    t2.join()
+
+    # Assert that events happened in the order expected.
+    assert events == [0, 1, 2]
+
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
-    double = query.lambda_expr("x", query.multiply([2, query.var("x")]))
-    assert self._q(query.map(double, [1, 2, 3])) == [2, 4, 6]
+    assert self._q(query.map(lambda a: query.multiply([2, a]), [1, 2, 3])) == [2, 4, 6]
 
-    get_n = query.lambda_expr("x", query.select(["data", "n"], query.get(query.var("x"))))
     page = query.paginate(self._set_n(1))
-    ns = query.map(get_n, page)
+    ns = query.map(lambda a: query.select(["data", "n"], query.get(a)), page)
     assert self._q(ns)["data"] == [1, 1]
 
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
-    q = query.foreach(query.lambda_expr("x", query.delete(query.var("x"))), refs)
+    q = query.foreach(query.delete, refs)
     self._q(q)
     for ref in refs:
       assert self._q(query.exists(ref)) == False
@@ -157,11 +212,7 @@ class QueryTest(FaunaTestCase):
     assert self._set_to_list(source) == referenced
 
     # For each obj with n=12, get the set of elements whose data.m refers to it.
-    joined = query.join(
-      source,
-      query.lambda_expr(
-        "x",
-        query.match(query.var("x"), self.m_index_ref)))
+    joined = query.join(source, lambda a: query.match(a, self.m_index_ref))
     assert self._set_to_list(joined) == referencers
 
   def test_equals(self):

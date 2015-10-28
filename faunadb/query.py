@@ -9,6 +9,10 @@ To pass raw data to a query, use :any:`object` or :any:`quote`.
 
 # pylint: disable=invalid-name, redefined-builtin
 
+from threading import local
+from types import FunctionType
+_thread_local = local()
+
 #region Basic forms
 
 def let(vars, in_expr):
@@ -40,6 +44,43 @@ def quote(expr):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
   return {"quote": expr}
 
+def lambda_query(lambda_body):
+  """
+  See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__.
+  This form generates the names of lambda parameters for you, and is called like::
+
+      query.lambda_query(lambda a: query.add(a, a))
+      # Produces: {
+      #  "lambda": "auto0",
+      #  "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
+      # }
+
+  Query functions requiring lambdas can be passed raw lambdas
+  without explicitly calling :any:`lambda_query`.
+  For example: ``query.map(lambda a: query.add(a, 1), collection)``.
+
+  You can also use :any:`lambda_expr` directly.
+
+  :param lambda_body: Takes a :any:`var` and uses it to construct an expression.
+  """
+  if not hasattr(_thread_local, "fauna_lambda_var_number"):
+    _thread_local.fauna_lambda_var_number = 0
+
+  var_name = "auto%i" % _thread_local.fauna_lambda_var_number
+  _thread_local.fauna_lambda_var_number += 1
+
+  # Make sure lambda_auto_var_number returns to its former value even if there are errors.
+  try:
+    return lambda_expr(var_name, lambda_body(var(var_name)))
+  finally:
+    _thread_local.fauna_lambda_var_number -= 1
+
+def _to_lambda(value):
+  """ If ``value`` is a lambda, converts it to a query using :any:`lambda_query`."""
+  if isinstance(value, FunctionType):
+    return lambda_query(value)
+  else:
+    return value
 
 def lambda_expr(var_name, expr):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
@@ -52,13 +93,13 @@ def lambda_expr(var_name, expr):
 def map(lambda_expr, coll):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
-  return {"map": lambda_expr, "collection": coll}
+  return {"map": _to_lambda(lambda_expr), "collection": coll}
 
 
 def foreach(lambda_expr, coll):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
-  return {"foreach": lambda_expr, "collection": coll}
+  return {"foreach": _to_lambda(lambda_expr), "collection": coll}
 
 #endregion
 
@@ -145,7 +186,7 @@ def difference(*sets):
 
 def join(source, target):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"join": source, "with": target}
+  return {"join": source, "with": _to_lambda(target)}
 
 #endregion
 
