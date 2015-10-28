@@ -211,6 +211,6 @@ def _varargs_query(name, values):
   """
   Call name with varargs.
   This ensures that a single value passed is not put in array, so
-  :samp:`query.add(query.var(x))` will work where :samp:`x` is a list whose values are to be added.
+  ``query.add(query.var(x))`` will work where ``x`` is a list whose values are to be added.
   """
   return {name: values[0] if len(values) == 1 else values}

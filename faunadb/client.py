@@ -20,14 +20,13 @@ class Client(object):
   """
   Directly communicates with FaunaDB via JSON.
 
-  For data sent to the server, the :samp:`to_fauna_json` method will be called on any values.
+  For data sent to the server, the ``to_fauna_json`` method will be called on any values.
   It is encouraged to pass e.g. :any:`Ref` objects instead of raw json data.
 
   All methods return a converted JSON response.
   This is a dict containing lists, ints, strings, and other dicts.
   Any :any:`Ref` or :any:`Set` values in it will also be parsed.
-  (So instead of :samp:`{ "@ref": "classes/frogs/123" }`,
-  you will get :samp:`Ref("classes/frogs", "123")`.)
+  (So instead of ``{ "@ref": "classes/frogs/123" }``, you will get ``Ref("classes/frogs", "123")``.)
 
   There is no way to automatically convert to any other type, such as :any:`Event`,
   from the response; you'll have to do that yourself manually.
@@ -46,11 +45,11 @@ class Client(object):
     :param logger:
       A `Logger <https://docs.python.org/2/library/logging.html#logger-objects>`_.
       Will be called to log every request and response.
-      Setting the :samp:`FAUNA_DEBUG` environment variable will also log to :samp:`STDERR`.
+      Setting the ``FAUNA_DEBUG`` environment variable will also log to ``STDERR``.
     :param domain:
       Base URL for the FaunaDB server.
     :param scheme:
-      :samp:`"http"` or :samp:`"https"`.
+      ``"http"`` or ``"https"``.
     :param port:
       Port of the FaunaDB server.
     :param timeout:
@@ -79,10 +78,10 @@ class Client(object):
 
   def get(self, path, query=None):
     """
-    HTTP :samp:`GET`.
+    HTTP ``GET``.
     See the `docs <https://faunadb.com/documentation/rest>`__.
 
-    :param path: Path relative to :samp:`self.domain`. May be a Ref.
+    :param path: Path relative to ``self.domain``. May be a Ref.
     :param query: Dict to be converted to URL parameters.
     :return: Converted JSON response.
     """
@@ -90,34 +89,34 @@ class Client(object):
 
   def post(self, path, data=None):
     """
-    HTTP :samp:`POST`.
+    HTTP ``POST``.
     See the `docs <https://faunadb.com/documentation/rest>`__.
 
-    :param path: Path relative to :samp:`self.domain`. May be a Ref.
+    :param path: Path relative to ``self.domain``. May be a Ref.
     :param data:
       Dict to be converted to request JSON.
-      Values in this will have :samp:`to_fauna_json` called, recursively.
+      Values in this will have ``to_fauna_json`` called, recursively.
     :return: Converted JSON response.
     """
     return self._execute("POST", path, data)
 
   def put(self, path, data=None):
     """
-    Like :any:`post`, but a :samp:`PUT` request.
+    Like :any:`post`, but a ``PUT`` request.
     See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("PUT", path, data)
 
   def patch(self, path, data=None):
     """
-    Like :any:`post`, but a :samp:`PATCH` request.
+    Like :any:`post`, but a ``PATCH`` request.
     See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("PATCH", path, data)
 
   def delete(self, path, data=None):
     """
-    Like :any:`post`, but a :samp:`DELETE` request.
+    Like :any:`post`, but a ``DELETE`` request.
     See the `docs <https://faunadb.com/documentation/rest>`__.
     """
     return self._execute("DELETE", path, data)
