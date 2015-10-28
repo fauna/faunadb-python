@@ -84,6 +84,10 @@ class Index(Builtin):
     """
     Creates an Index for a :any:`Model` class.
     The index may not be usable immediately. See the docs.
+
+    :param terms:
+      If a str, transformed to ``[{"path": "data.xxx"}]`` where :samp:`xxx` is the provided str.
+      Otherwise, an array looking like ``[{"path": ...}, {"path": ...}, ...]``.
     """
 
     if isinstance(terms, str):
