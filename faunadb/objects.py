@@ -10,14 +10,14 @@ class Ref(object):
   """
   FaunaDB ref. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.
 
-  A simple wrapper around a string which can be extracted using :samp:`ref.value`.
+  A simple wrapper around a string which can be extracted using ``ref.value``.
   Queries that require a Ref will not work if you just pass in a string.
   """
 
   def __init__(self, *parts):
     """
-    Create a Ref from a string, such as :samp:`Ref("databases/prydain")`.
-    Can also call :samp:`Ref("databases", "prydain")` or :samp:`Ref(Ref("databases"), "prydain")`.
+    Create a Ref from a string, such as ``Ref("databases/prydain")``.
+    Can also call ``Ref("databases", "prydain")`` or ``Ref(Ref("databases"), "prydain")``.
     """
     self.value = "/".join(str(part) for part in parts)
 
@@ -25,7 +25,7 @@ class Ref(object):
     """
     Gets the class part out of the Ref.
     This is done by removing the id.
-    So :samp:`Ref("a", "b/c").to_class()` will be :samp:`Ref("a/b")`.
+    So ``Ref("a", "b/c").to_class()`` will be ``Ref("a/b")``.
     """
     parts = self.value.split("/")
     if len(parts) == 1:
@@ -36,7 +36,7 @@ class Ref(object):
   def id(self):
     """
     Removes the class part of the Ref, leaving only the id.
-    This is everything after the last :samp:`/`.
+    This is everything after the last ``/``.
     """
     parts = self.value.split("/")
     if len(parts) == 1:
@@ -62,7 +62,7 @@ class Ref(object):
 class Set(object):
   """
   FaunaDB Set.
-  This represents a set returned as part of a response. This looks like :samp:`{"@set": set_query}`.
+  This represents a set returned as part of a response. This looks like ``{"@set": set_query}``.
   For query sets see :doc:`query`.
   """
   def __init__(self, set_query):
@@ -124,7 +124,7 @@ class Event(object):
 class Page(object):
   """
   A single pagination result.
-  See :samp:`paginate` in the `docs <https://faunadb.com/documentation/queries#read_functions>`__.
+  See ``paginate`` in the `docs <https://faunadb.com/documentation/queries#read_functions>`__.
   """
 
   @staticmethod
@@ -143,7 +143,7 @@ class Page(object):
     """Optional :any:`Ref` for an instance that comes after this page."""
 
   def map_data(self, func):
-    """Return a new Page whose data has had :samp:`func` applied to each element."""
+    """Return a new Page whose data has had ``func`` applied to each element."""
     return Page([func(x) for x in self.data], self.before, self.after)
 
   def __repr__(self):
