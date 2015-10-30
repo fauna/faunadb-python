@@ -37,6 +37,7 @@ class FaunaTestCase(TestCase):
   def tearDown(self):
     self.root_client.delete(self.db_ref)
 
+
 def get_client(secret, logger=None):
   args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
   # If None, use default instead

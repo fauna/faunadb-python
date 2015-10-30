@@ -21,10 +21,10 @@ class Client(object):
   Directly communicates with FaunaDB via JSON.
 
   For data sent to the server, the ``to_fauna_json`` method will be called on any values.
-  It is encouraged to pass e.g. :any:`Ref` objects instead of raw json data.
+  It is encouraged to pass e.g. :any:`Ref` objects instead of raw JSON data.
 
   All methods return a converted JSON response.
-  This is a dict containing lists, ints, strings, and other dicts.
+  This is a dict containing lists, ints, floats, strings, and other dicts.
   Any :any:`Ref` or :any:`Set` values in it will also be parsed.
   (So instead of ``{ "@ref": "classes/frogs/123" }``, you will get ``Ref("classes/frogs", "123")``.)
 

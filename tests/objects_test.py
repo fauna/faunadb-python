@@ -7,17 +7,14 @@ from test_case import FaunaTestCase
 class ObjectsTest(FaunaTestCase):
   def setUp(self):
     super(ObjectsTest, self).setUp()
-    self.ref = Ref("classes/frogs", "123")
+    self.ref = Ref("classes", "frogs", "123")
     self.json_ref = '{"@ref":"classes/frogs/123"}'
-
-    self.index = Ref("indexes", "frogs_by_size")
-    self.json_index = '{"@ref":"indexes/frogs_by_size"}'
 
   def test_ref(self):
     assert parse_json(self.json_ref) == self.ref
     assert to_json(self.ref) == self.json_ref
 
-    blobs = Ref("classes/blobs")
+    blobs = Ref("classes", "blobs")
     ref = Ref(blobs, "123")
     assert ref.to_class() == blobs
     assert ref.id() == "123"
@@ -31,15 +28,19 @@ class ObjectsTest(FaunaTestCase):
     assert ref.id() == "123"
 
   def test_set(self):
-    match = Set(query.match(self.ref, self.index))
-    json_match = '{"@set":{"index":%s,"match":%s}}' % (self.json_index, self.json_ref)
+    index = Ref("indexes", "frogs_by_size")
+    match = Set(query.match(self.ref, index))
+    json_match = '{"@set":{"index":%s,"match":%s}}' % (to_json(index), self.json_ref)
     assert parse_json(json_match) == match
     assert to_json(match) == json_match
 
   def test_event(self):
-    assert to_json(Event(123, None, None)) == '{"ts":123}'
+    event = Event(123, "create", self.ref)
     event_json = '{"action":"create","resource":{"@ref":"classes/frogs/123"},"ts":123}'
-    assert to_json(Event(123, 'create', self.ref)) == event_json
+    assert Event.from_raw(parse_json(event_json)) == event
+    assert to_json(event) == event_json
+
+    assert to_json(Event(123, None, None)) == '{"ts":123}'
 
   def test_page(self):
     assert Page.from_raw({"data": 1, "before": 2, "after": 3}) == Page(1, 2, 3)
