@@ -56,9 +56,9 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.if_expr(False, "t", "f")) == "f"
 
   def test_do(self):
-    widget = self._create()
-    assert self._q(query.do(query.delete(widget["ref"]), 1)) == 1
-    assert self._q(query.exists(widget["ref"])) == False
+    ref = self._create()["ref"]
+    assert self._q(query.do(query.delete(ref), 1)) == 1
+    assert self._q(query.exists(ref)) == False
 
   def test_object(self):
     # unlike quote, contents are evaluated
@@ -139,8 +139,8 @@ class QueryTest(FaunaTestCase):
       assert self._q(query.exists(ref)) == False
 
   def test_get(self):
-    widget = self._create()
-    assert self._q(query.get(widget["ref"])) == widget
+    instance = self._create()
+    assert self._q(query.get(instance["ref"])) == instance
 
   def test_paginate(self):
     test_set = self._set_n(1)
@@ -163,15 +163,15 @@ class QueryTest(FaunaTestCase):
   def test_count(self):
     self._create(123)
     self._create(123)
-    widgets = self._set_n(123)
+    instances = self._set_n(123)
     # `count` is currently only approximate. Should be 2.
-    assert isinstance(self._q(query.count(widgets)), int)
+    assert isinstance(self._q(query.count(instances)), int)
 
   def test_create(self):
-    widget = self._create()
-    assert "ref" in widget
-    assert "ts" in widget
-    assert widget["class"] == self.class_ref
+    instance = self._create()
+    assert "ref" in instance
+    assert "ts" in instance
+    assert instance["class"] == self.class_ref
 
   def test_update(self):
     ref = self._create()["ref"]
@@ -257,10 +257,10 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.subtract())
 
   def test_divide(self):
-    assert self._q(query.divide(2, 3, 5)) == 2/15
+    assert self._q(query.divide(2.0, 3, 5)) == 2.0/15
     assert self._q(query.divide(2)) == 2
-    self._assert_bad_query(query.divide([1, 0]))
-    self._assert_bad_query(query.divide([]))
+    self._assert_bad_query(query.divide(1, 0))
+    self._assert_bad_query(query.divide())
 
   def test_varargs(self):
     # Works for lists too
