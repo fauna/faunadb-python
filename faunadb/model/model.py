@@ -232,8 +232,9 @@ class Model(object):
     :return:
       Page whose data is a list of instances of this class.
     """
-    get = query.lambda_expr("x", query.get(query.var("x")))
-    return cls._map_page(client, instance_set, get, page_size=page_size, before=before, after=after)
+    return cls._map_page(
+      client, instance_set, query.get,
+      page_size=page_size, before=before, after=after)
 
   @classmethod
   def iterator(cls, client, instance_set, page_size=None):
@@ -241,10 +242,11 @@ class Model(object):
     Returns an iterator of model instances.
     :param instance_set: :any:`Set` of refs to instances of this class.
     """
-    m = query.lambda_expr("x", query.get(query.var("x")))
     def mapper(instance):
       return cls.get_from_resource(client, instance)
-    return Page.set_iterator(client, instance_set, page_size=page_size, map_lambda=m, mapper=mapper)
+    return Page.set_iterator(
+      client, instance_set,
+      page_size=page_size, map_lambda=query.get, mapper=mapper)
 
   @classmethod
   def page_index(cls, index, matched_values, page_size=None, before=None, after=None):
@@ -316,9 +318,9 @@ class Model(object):
   def _index_ref_getter(index):
     """Lambda expression for getting an instance Ref out of a match result."""
     if index.values:
-      return query.lambda_expr("arr", query.get(query.select(len(index.values), query.var("arr"))))
+      return lambda arr: query.get(query.select(len(index.values), arr))
     else:
-      return query.lambda_expr("x", query.get(query.var("x")))
+      return query.get
 
   @classmethod
   def _map_page(cls, client, instance_set, page_lambda, page_size=None, before=None, after=None):
