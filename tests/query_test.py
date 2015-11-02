@@ -125,15 +125,15 @@ class QueryTest(FaunaTestCase):
 
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
-    assert self._q(query.map(lambda a: query.multiply([2, a]), [1, 2, 3])) == [2, 4, 6]
+    assert self._q(query.map([1, 2, 3], lambda a: query.multiply([2, a]))) == [2, 4, 6]
 
     page = query.paginate(self._set_n(1))
-    ns = query.map(lambda a: query.select(["data", "n"], query.get(a)), page)
+    ns = query.map(page, lambda a: query.select(["data", "n"], query.get(a)))
     assert self._q(ns)["data"] == [1, 1]
 
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
-    q = query.foreach(query.delete, refs)
+    q = query.foreach(refs, query.delete)
     self._q(q)
     for ref in refs:
       assert self._q(query.exists(ref)) == False

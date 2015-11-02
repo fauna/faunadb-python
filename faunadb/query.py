@@ -57,7 +57,7 @@ def lambda_query(lambda_body):
 
   Query functions requiring lambdas can be passed raw lambdas
   without explicitly calling :any:`lambda_query`.
-  For example: ``query.map(lambda a: query.add(a, 1), collection)``.
+  For example: ``query.map(collection, lambda a: query.add(a, 1))``.
 
   You can also use :any:`lambda_expr` directly.
 
@@ -90,13 +90,13 @@ def lambda_expr(var_name, expr):
 
 #region Collection functions
 
-def map(lambda_expr, coll):
+def map(coll, lambda_expr):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
   return {"map": _to_lambda(lambda_expr), "collection": coll}
 
 
-def foreach(lambda_expr, coll):
+def foreach(coll, lambda_expr):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
   return {"foreach": _to_lambda(lambda_expr), "collection": coll}
