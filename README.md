@@ -1,6 +1,6 @@
 # faunadb-python
 
-Python client for [FaunaDB](https://faunadb.com).
+Python driver for [FaunaDB](https://faunadb.com).
 
 Documentation is [here](https://faunadb.readthedocs.org/en/latest/).
 
