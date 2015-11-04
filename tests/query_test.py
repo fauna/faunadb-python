@@ -138,6 +138,16 @@ class QueryTest(FaunaTestCase):
     for ref in refs:
       assert self._q(query.exists(ref)) == False
 
+  def test_prepend(self):
+    assert self._q(query.prepend([1, 2, 3], [4, 5, 6])) == [1, 2, 3, 4, 5, 6]
+    # Fails for non-array.
+    self._assert_bad_query(query.prepend([1, 2], "foo"))
+
+  def test_append(self):
+    assert self._q(query.append([4, 5, 6], [1, 2, 3])) == [1, 2, 3, 4, 5, 6]
+    # Fails for non-array.
+    self._assert_bad_query(query.append([1, 2], "foo"))
+
   def test_get(self):
     instance = self._create()
     assert self._q(query.get(instance["ref"])) == instance
@@ -261,6 +271,32 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.divide(2)) == 2
     self._assert_bad_query(query.divide(1, 0))
     self._assert_bad_query(query.divide())
+
+  def test_modulo(self):
+    assert self._q(query.modulo(5, 2)) == 1
+    # This is (15 % 10) % 2
+    assert self._q(query.modulo(15, 10, 2)) == 1
+    assert self._q(query.modulo(2)) == 2
+    self._assert_bad_query(query.modulo(1, 0))
+    self._assert_bad_query(query.modulo())
+
+  def test_and(self):
+    assert self._q(query.and_expr(True, True, False)) == False
+    assert self._q(query.and_expr(True, True, True)) == True
+    assert self._q(query.and_expr(True)) == True
+    assert self._q(query.and_expr(False)) == False
+    self._assert_bad_query(query.and_expr())
+
+  def test_or(self):
+    assert self._q(query.or_expr(False, False, True)) == True
+    assert self._q(query.or_expr(False, False, False)) == False
+    assert self._q(query.or_expr(True)) == True
+    assert self._q(query.or_expr(False)) == False
+    self._assert_bad_query(query.or_expr())
+
+  def test_not(self):
+    assert self._q(query.not_expr(True)) == False
+    assert self._q(query.not_expr(False)) == True
 
   def test_varargs(self):
     # Works for lists too
