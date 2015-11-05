@@ -32,7 +32,7 @@ def if_expr(condition, true_expr, false_expr):
 
 def do(*expressions):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return _varargs_query("do", expressions)
+  return {"do": _varargs(expressions)}
 
 
 def object(**keys_vals):
@@ -171,17 +171,17 @@ def match(matched, index):
 
 def union(*sets):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return _varargs_query("union", sets)
+  return {"union": _varargs(sets)}
 
 
 def intersection(*sets):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return _varargs_query("intersection", sets)
+  return {"intersection": _varargs(sets)}
 
 
 def difference(*sets):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return _varargs_query("difference", sets)
+  return {"difference": _varargs(sets)}
 
 
 def join(source, target):
@@ -194,12 +194,12 @@ def join(source, target):
 
 def equals(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return _varargs_query("equals", values)
+  return {"equals": _varargs(values)}
 
 
 def concat(*strings):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return _varargs_query("concat", strings)
+  return {"concat": _varargs(strings)}
 
 
 def contains(path, value):
@@ -221,22 +221,22 @@ def select_with_default(path, data, default):
 
 def add(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return _varargs_query("add", numbers)
+  return {"add": _varargs(numbers)}
 
 
 def multiply(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return _varargs_query("multiply", numbers)
+  return {"multiply": _varargs(numbers)}
 
 
 def subtract(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return _varargs_query("subtract", numbers)
+  return {"subtract": _varargs(numbers)}
 
 
 def divide(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return _varargs_query("divide", numbers)
+  return {"divide": _varargs(numbers)}
 
 #endregion
 
@@ -248,10 +248,10 @@ def _params(main_params, optional_params):
   return main_params
 
 
-def _varargs_query(name, values):
+def _varargs(values):
   """
-  Call name with varargs.
-  This ensures that a single value passed is not put in array, so
-  ``query.add(query.var(x))`` will work where ``x`` is a list whose values are to be added.
+  Called on rest arguments.
+  This ensures that a single value passed is not put in an array, so
+  ``query.add([1, 2])`` will work as well as ``query.add(1, 2)``.
   """
-  return {name: values[0] if len(values) == 1 else values}
+  return values[0] if len(values) == 1 else values

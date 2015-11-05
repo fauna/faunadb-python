@@ -27,6 +27,8 @@ This object must be explicitly threaded through any code that needs to access Fa
 
 FaunaDB can be used directly using the :doc:`query` API.
 
+Optionally, :doc:`model` allows database instances
+to be represented as objects rather than as dicts.
 
 .. toctree::
    :hidden:
@@ -35,3 +37,4 @@ FaunaDB can be used directly using the :doc:`query` API.
    query
    objects
    errors
+   model
