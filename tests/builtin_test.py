@@ -62,11 +62,12 @@ class BuiltinTest(FaunaTestCase):
     assert cls.history_days > 0
     assert cls.name == self.MyModel.__fauna_class_name__
 
-    cls.permissions = "public"
+    permissions = {"read": cls.ref}
+    cls.permissions = permissions
     cls.save()
 
-    assert cls.permissions == "public"
-    assert Class.get_for_model(self.client, self.MyModel).permissions == "public"
+    assert cls.permissions == permissions
+    assert Class.get_for_model(self.client, self.MyModel).permissions == permissions
 
   def test_index(self):
     idx = Index.create_for_model(self.client, self.MyModel, "mooses_by_x", "x")
