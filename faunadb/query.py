@@ -44,6 +44,7 @@ def quote(expr):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
   return {"quote": expr}
 
+
 def lambda_query(lambda_body):
   """
   See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__.
@@ -75,12 +76,14 @@ def lambda_query(lambda_body):
   finally:
     _thread_local.fauna_lambda_var_number -= 1
 
+
 def _to_lambda(value):
   """ If ``value`` is a lambda, converts it to a query using :any:`lambda_query`."""
   if isinstance(value, FunctionType):
     return lambda_query(value)
   else:
     return value
+
 
 def lambda_expr(var_name, expr):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
@@ -100,6 +103,16 @@ def foreach(lambda_expr, coll):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
   return {"foreach": _to_lambda(lambda_expr), "collection": coll}
+
+
+def prepend(elems, collection):
+  """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
+  return {"prepend": elems, "collection": collection}
+
+
+def append(elems, collection):
+  """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
+  return {"append": elems, "collection": collection}
 
 #endregion
 
@@ -202,6 +215,11 @@ def concat(*strings):
   return {"concat": _varargs(strings)}
 
 
+def concat_with_separator(separator, *strings):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"concat": _varargs(strings), "separator": separator}
+
+
 def contains(path, value):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
   return {"contains": path, "in": value}
@@ -237,6 +255,26 @@ def subtract(*numbers):
 def divide(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
   return {"divide": _varargs(numbers)}
+
+
+def modulo(*numbers):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"modulo": _varargs(numbers)}
+
+
+def and_expr(*booleans):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"and": _varargs(booleans)}
+
+
+def or_expr(*booleans):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"or": _varargs(booleans)}
+
+
+def not_expr(boolean):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"not": boolean}
 
 #endregion
 
