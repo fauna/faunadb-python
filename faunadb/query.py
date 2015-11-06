@@ -90,7 +90,7 @@ def lambda_expr(var_name, expr):
 
 #region Collection functions
 
-def map(lambda_expr, coll):
+def map_expr(lambda_expr, coll):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
   return {"map": _to_lambda(lambda_expr), "collection": coll}

@@ -173,7 +173,7 @@ class Page(object):
     def get_page(**kwargs):
       queried = query.paginate(set_query, **kwargs)
       if map_lambda is not None:
-        queried = query.map(map_lambda, queried)
+        queried = query.map_expr(map_lambda, queried)
       return Page.from_raw(client.query(queried))
 
     page = get_page(size=page_size)
