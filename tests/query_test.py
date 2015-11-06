@@ -125,10 +125,10 @@ class QueryTest(FaunaTestCase):
 
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
-    assert self._q(query.map(lambda a: query.multiply([2, a]), [1, 2, 3])) == [2, 4, 6]
+    assert self._q(query.map_expr(lambda a: query.multiply([2, a]), [1, 2, 3])) == [2, 4, 6]
 
     page = query.paginate(self._set_n(1))
-    ns = query.map(lambda a: query.select(["data", "n"], query.get(a)), page)
+    ns = query.map_expr(lambda a: query.select(["data", "n"], query.get(a)), page)
     assert self._q(ns)["data"] == [1, 1]
 
   def test_foreach(self):
