@@ -9,9 +9,12 @@ To pass raw data to a query, use :any:`object` or :any:`quote`.
 
 # pylint: disable=invalid-name, redefined-builtin
 
+from collections import Mapping, Sequence, namedtuple
 from threading import local
 from types import FunctionType
 _thread_local = local()
+
+from .errors import InvalidQuery
 
 #region Basic forms
 
@@ -83,6 +86,50 @@ def _to_lambda(value):
     return lambda_query(value)
   else:
     return value
+
+
+def lambda_pattern(pattern, lambda_body):
+  """
+  See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__.
+  This form gathers variables from the pattern you provide and puts them in an object.
+  It is called like::
+
+      q = query.map_expr(
+        query.lambda_pattern(["foo", "", "bar"], lambda args: [args.bar, args.foo]),
+        [[1, 2, 3], [4, 5, 6]]))
+      # Result of client.query(q) is: [[3, 1], [6, 4]].
+
+  You can also destructure the namedtuple; in this case, variables are sorted alphabetically::
+
+      query.lambda_pattern(["foo", "", "bar"], lambda (bar, foo): [bar, foo])
+
+  :param Sequence|Mapping pattern:
+    Tree of lists and dicts. Leaves are the names of variables.
+    If a leaf is the empty string ``""``, it is ignored.
+  :param function lambda_body:
+    Takes a ``namedtuple`` of variables taken from the leaves of ``pattern``, and returns a query.
+  """
+  arg_names = sorted(_pattern_args(pattern))
+  PatternArgs = namedtuple("PatternArgs", arg_names)
+  args = PatternArgs(*[var(name) for name in arg_names])
+  return lambda_expr(pattern, lambda_body(args))
+
+
+def _pattern_args(pattern):
+  """Collects all args from the leaves of a pattern."""
+  args = []
+  if isinstance(pattern, str):
+    if pattern != "":
+      args.append(pattern)
+  elif isinstance(pattern, Sequence):
+    for entry in pattern:
+      args.extend(_pattern_args(entry))
+  elif isinstance(pattern, Mapping):
+    for entry in pattern.values():
+      args.extend(_pattern_args(entry))
+  else:
+    raise InvalidQuery, "Pattern must be a str, Sequence, or Mapping; got %s" % repr(pattern)
+  return args
 
 
 def lambda_expr(var_name, expr):
