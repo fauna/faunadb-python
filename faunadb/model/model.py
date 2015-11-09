@@ -329,7 +329,7 @@ class Model(object):
     Then maps the result page to create Model instances out of that instance data.
     """
     page_query = query.paginate(instance_set, size=page_size, before=before, after=after)
-    map_query = query.map(page_lambda, page_query)
+    map_query = query.map_expr(page_lambda, page_query)
     page = Page.from_raw(client.query(map_query))
     return page.map_data(lambda resource: cls.get_from_resource(client, resource))
 
