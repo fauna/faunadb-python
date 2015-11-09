@@ -48,7 +48,7 @@ def quote(expr):
   return {"quote": expr}
 
 
-def lambda_query(lambda_body):
+def lambda_query(func):
   """
   See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__.
   This form generates the names of lambda parameters for you, and is called like::
@@ -65,7 +65,7 @@ def lambda_query(lambda_body):
 
   You can also use :any:`lambda_expr` directly.
 
-  :param lambda_body: Takes a :any:`var` and uses it to construct an expression.
+  :param func: Takes a :any:`var` and uses it to construct an expression.
   """
   if not hasattr(_thread_local, "fauna_lambda_var_number"):
     _thread_local.fauna_lambda_var_number = 0
@@ -75,7 +75,7 @@ def lambda_query(lambda_body):
 
   # Make sure lambda_auto_var_number returns to its former value even if there are errors.
   try:
-    return lambda_expr(var_name, lambda_body(var(var_name)))
+    return lambda_expr(var_name, func(var(var_name)))
   finally:
     _thread_local.fauna_lambda_var_number -= 1
 
@@ -88,7 +88,7 @@ def _to_lambda(value):
     return value
 
 
-def lambda_pattern(pattern, lambda_body):
+def lambda_pattern(pattern, func):
   """
   See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__.
   This form gathers variables from the pattern you provide and puts them in an object.
@@ -106,13 +106,13 @@ def lambda_pattern(pattern, lambda_body):
   :param Sequence|Mapping pattern:
     Tree of lists and dicts. Leaves are the names of variables.
     If a leaf is the empty string ``""``, it is ignored.
-  :param function lambda_body:
+  :param function func:
     Takes a ``namedtuple`` of variables taken from the leaves of ``pattern``, and returns a query.
   """
   arg_names = sorted(_pattern_args(pattern))
   PatternArgs = namedtuple("PatternArgs", arg_names)
   args = PatternArgs(*[var(name) for name in arg_names])
-  return lambda_expr(pattern, lambda_body(args))
+  return lambda_expr(pattern, func(args))
 
 
 def _pattern_args(pattern):
