@@ -10,7 +10,7 @@ setup(
   author_email="priority@faunadb.com",
   url="github.com/faunadb/faunadb-python",
   version=0,
-  install_requires=["requests"],
+  install_requires=["iso8601", "requests"],
   tests_require=["nose", "pylint", "pynt", "sphinx", "sphinx_rtd_theme", "testfixtures"],
   packages=["faunadb"],
   scripts=[],
