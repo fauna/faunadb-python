@@ -185,7 +185,7 @@ class QueryTest(FaunaTestCase):
 
     page = query.paginate(self._set_n(1))
     ns = query.map_expr(lambda a: query.select(["data", "n"], query.get(a)), page)
-    assert self._q(ns)["data"] == [1, 1]
+    assert self._q(ns) == {"data": [1, 1]}
 
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
@@ -193,6 +193,25 @@ class QueryTest(FaunaTestCase):
     self._q(q)
     for ref in refs:
       assert self._q(query.exists(ref)) == False
+
+  def test_filter(self):
+    evens = query.filter_expr(lambda a: query.equals(query.modulo(a, 2), 0), [1, 2, 3, 4])
+    assert self._q(evens) == [2, 4]
+
+    # Works on page too
+    page = query.paginate(self._set_n(1))
+    refs_with_m = query.filter_expr(lambda a: query.contains(["data", "m"], query.get(a)), page)
+    assert self._q(refs_with_m) == {"data": [self.ref_n1m1]}
+
+  def test_take(self):
+    assert self._q(query.take(1, [1, 2])) == [1]
+    assert self._q(query.take(3, [1, 2])) == [1, 2]
+    assert self._q(query.take(-1, [1, 2])) == []
+
+  def test_drop(self):
+    assert self._q(query.drop(1, [1, 2])) == [2]
+    assert self._q(query.drop(3, [1, 2])) == []
+    assert self._q(query.drop(-1, [1, 2])) == [1, 2]
 
   def test_prepend(self):
     assert self._q(query.prepend([1, 2, 3], [4, 5, 6])) == [1, 2, 3, 4, 5, 6]
