@@ -152,6 +152,22 @@ def foreach(lambda_expr, coll):
   return {"foreach": _to_lambda(lambda_expr), "collection": coll}
 
 
+def filter_expr(lambda_expr, coll):
+  """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
+  # pylint: disable=redefined-outer-name
+  return {"filter": _to_lambda(lambda_expr), "collection": coll}
+
+
+def take(num, coll):
+  """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
+  return {"take": num, "collection": coll}
+
+
+def drop(num, coll):
+  """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
+  return {"drop": num, "collection": coll}
+
+
 def prepend(elems, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   return {"prepend": elems, "collection": collection}
