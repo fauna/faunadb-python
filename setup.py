@@ -11,7 +11,7 @@ setup(
   url="github.com/faunadb/faunadb-python",
   version=0,
   install_requires=["requests"],
-  tests_require=["nose", "pynt", "sphinx", "sphinx_rtd_theme", "testfixtures"],
+  tests_require=["nose", "pylint", "pynt", "sphinx", "sphinx_rtd_theme", "testfixtures"],
   packages=["faunadb"],
   scripts=[],
   license="MPL 2.0")
