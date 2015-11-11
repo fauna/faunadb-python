@@ -14,10 +14,19 @@ examples.
 
 ### Setup
 
-  virtualenv venv
-  source venv/bin/activate
-  pip install .
-  pynt
+Python 2:
+
+    virtualenv venv
+    source venv/bin/activate
+
+Python 3:
+
+    python3 -m venv venv3
+    source venv3/bin/activate
+
+Both (after `source`):
+
+    pip install -e .
 
 ### Testing
 
@@ -25,13 +34,16 @@ To run the tests you must have a FaunaDB database available.
 Then set the environment variable `FAUNA_ROOT_KEY` to your database's root key.
 If you use FaunaDB cloud, this is the password you log in with.
 
-Then run `pynt test`.
+Then run `pip install pynt nose testfixtures`, then `pynt test`.
 To test a single test, use e.g. `nosetests tests/client_test.py:ClientTest.test_ping`.
 
 ### Documenting
 
-Run `pynt document`, then open `docs/_build/html/index.html` in a web browser.
+Run `pip install pynt sphinx sphinx_rtd_theme`, then `pynt document`, then open `docs/_build/html/index.html` in a web browser.
 
+### Linting
+
+Run `pip install pylint`, then `pynt lint`.
 
 ## Contributing
 

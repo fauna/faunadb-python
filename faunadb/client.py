@@ -8,6 +8,7 @@ from .errors import BadRequest, FaunaError, FaunaHTTPError, InternalError, Metho
   NotFound, PermissionDenied, Unauthorized, UnavailableError
 from .objects import Ref
 from ._json import parse_json, to_json
+from ._util import no_null_values
 
 if environ.get("FAUNA_DEBUG"):
   _debug_logger = getLogger(__name__)
@@ -156,7 +157,7 @@ class Client(object):
     if isinstance(path, Ref):
       path = path.value
     if query is not None:
-      query = {k: v for k, v in query.iteritems() if v is not None}
+      query = no_null_values(query)
 
     if self.logger is not None or _debug_logger is not None:
       self._log(False, "Fauna %s /%s%s" % (action, path, Client._query_string_for_logging(query)))
@@ -227,7 +228,7 @@ class Client(object):
     """Converts a query dict to URL params."""
     if not query:
       return ""
-    return "?" + "&".join(("%s=%s" % (k, v) for k, v in query.iteritems()))
+    return "?" + "&".join(("%s=%s" % (k, v) for k, v in query.items()))
 
   @staticmethod
   def _parse_secret(secret):

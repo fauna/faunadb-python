@@ -1,8 +1,13 @@
+from json import dumps
+
 from faunadb.errors import InvalidValue
 from faunadb.objects import Event, Page, Ref, Set
-from faunadb._json import parse_json, to_json
+from faunadb._json import parse_json, _FaunaJSONEncoder
 from faunadb import query
-from test_case import FaunaTestCase
+from .test_case import FaunaTestCase
+
+def to_json(dct):
+  return dumps(dct, cls=_FaunaJSONEncoder, separators=(",", ":"), sort_keys=True)
 
 class ObjectsTest(FaunaTestCase):
   def setUp(self):
