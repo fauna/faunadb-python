@@ -91,16 +91,8 @@ class ObjectsTest(FaunaTestCase):
     assert to_json(test_ts) == test_ts_json
     assert parse_json(test_ts_json) == test_ts
 
-    # We also support inputting datetime objects
-    dt = datetime.utcnow()
-    print to_json(dt)
-    print to_json(FaunaTime(dt))
-    assert to_json(dt) == to_json(FaunaTime(dt))
-
   def test_date(self):
     test_date = date(1970, 1, 1)
     test_date_json = '{"@date":"1970-01-01"}'
     assert to_json(test_date) == test_date_json
-    print parse_json(test_date_json)
-    print test_date
     assert parse_json(test_date_json) == test_date
