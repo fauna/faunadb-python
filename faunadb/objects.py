@@ -205,7 +205,7 @@ class FaunaTime(object):
     if isinstance(value, datetime):
       value = value.isoformat()
     self.value = value
-    """iso8601 time string"""
+    """ISO8601 time string"""
 
   def to_datetime(self):
     """
