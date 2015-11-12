@@ -1,9 +1,10 @@
 from collections import OrderedDict
+from datetime import date
 from threading import Thread
 from time import sleep
 
 from faunadb.errors import BadRequest, InvalidQuery, NotFound
-from faunadb.objects import Set
+from faunadb.objects import FaunaTime, Set
 from faunadb import query
 from test_case import FaunaTestCase
 
@@ -299,6 +300,18 @@ class QueryTest(FaunaTestCase):
     # For each obj with n=12, get the set of elements whose data.m refers to it.
     joined = query.join(source, lambda a: query.match(a, self.m_index_ref))
     assert self._set_to_list(joined) == referencers
+
+  def test_time(self):
+    time = "1970-01-01T00:00:00.123456789Z"
+    assert self._q(query.time(time)) == FaunaTime(time)
+
+  def test_epoch(self):
+    assert self._q(query.epoch(12, "second")) == FaunaTime("1970-01-01T00:00:12Z")
+    nano_time = FaunaTime("1970-01-01T00:00:00.123456789Z")
+    assert self._q(query.epoch(123456789, "nanosecond")) == nano_time
+
+  def test_date(self):
+    assert self._q(query.date("1970-01-01")) == date(1970, 1, 1)
 
   def test_equals(self):
     assert self._q(query.equals(1, 1, 1)) == True

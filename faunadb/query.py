@@ -3,7 +3,7 @@ Constructors for creating queries to be passed into Client.query.
 For query documentation see the `docs <https://faunadb.com/documentation/queries>`_.
 
 When constructing queries, you must use these functions or
-the :any:`Ref`, :any:`Set`, and :any:`Event` constructors.
+the :any:`Ref`, :any:`Set`, :any:`FaunaTime`, :class:`datetime.date`, and :any:`Event` constructors.
 To pass raw data to a query, use :any:`object` or :any:`quote`.
 """
 
@@ -263,6 +263,24 @@ def difference(*sets):
 def join(source, target):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
   return {"join": source, "with": _to_lambda(target)}
+
+#endregion
+
+#region Time and Date Functions
+
+def time(string):
+  """See the `docs <https://faunadb.com/documentation/queries#time_functions>`__."""
+  return {"time": string}
+
+
+def epoch(number, unit):
+  """See the `docs <https://faunadb.com/documentation/queries#time_functions>`__."""
+  return {"epoch": number, "unit": unit}
+
+
+def date(string):
+  """See the `docs <https://faunadb.com/documentation/queries#time_functions>`__."""
+  return {"date": string}
 
 #endregion
 

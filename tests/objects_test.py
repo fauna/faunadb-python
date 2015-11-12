@@ -1,5 +1,7 @@
+from datetime import date, datetime
+
 from faunadb.errors import InvalidValue
-from faunadb.objects import Event, Page, Ref, Set
+from faunadb.objects import Event, FaunaTime, Page, Ref, Set
 from faunadb._json import parse_json, to_json
 from faunadb import query
 from test_case import FaunaTestCase
@@ -73,3 +75,32 @@ class ObjectsTest(FaunaTestCase):
 
     mapped_iter = Page.set_iterator(self.client, gadgets_set, mapper=lambda x: [x])
     assert list(mapped_iter) == [[a], [b]]
+
+  def test_time_conversion(self):
+    dt = datetime.utcnow()
+    assert FaunaTime(dt).to_datetime() == dt
+
+    dt = datetime.utcfromtimestamp(0)
+    ft = FaunaTime(dt)
+    assert ft == FaunaTime("1970-01-01T00:00:00")
+    assert ft.to_datetime() == dt
+
+  def test_time(self):
+    test_ts = FaunaTime("1970-01-01T00:00:00.123456789Z")
+    test_ts_json = '{"@ts":"1970-01-01T00:00:00.123456789Z"}'
+    assert to_json(test_ts) == test_ts_json
+    assert parse_json(test_ts_json) == test_ts
+
+    # We also support inputting datetime objects
+    dt = datetime.utcnow()
+    print to_json(dt)
+    print to_json(FaunaTime(dt))
+    assert to_json(dt) == to_json(FaunaTime(dt))
+
+  def test_date(self):
+    test_date = date(1970, 1, 1)
+    test_date_json = '{"@date":"1970-01-01"}'
+    assert to_json(test_date) == test_date_json
+    print parse_json(test_date_json)
+    print test_date
+    assert parse_json(test_date_json) == test_date

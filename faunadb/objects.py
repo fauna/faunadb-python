@@ -3,6 +3,9 @@ Types used in queries and responses.
 See the `docs <https://faunadb.com/documentation/queries#values>`__.
 """
 
+from datetime import datetime
+from iso8601 import parse_date
+
 from .errors import InvalidQuery, InvalidValue
 from . import query
 
@@ -186,3 +189,40 @@ class Page(object):
       page = get_page(**{"size": page_size, next_cursor: getattr(page, next_cursor)})
       for val in page.data:
         yield val if mapper is None else mapper(val)
+
+
+class FaunaTime(object):
+  """
+  FaunaDB time. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.
+
+  For dates, regular :class:`datetime.date` objects are used.
+  """
+
+  def __init__(self, value):
+    """
+    :param value: If a :class:`datetime.date` is passed, it is converted to a string.
+    """
+    if isinstance(value, datetime):
+      value = value.isoformat()
+    self.value = value
+    """iso8601 time string"""
+
+  def to_datetime(self):
+    """
+    Convert to a datetime object.
+    This is lossy as datetimes have microsecond rather than nanosecond precision.
+    """
+    local_time = parse_date(self.value)
+    return local_time.replace(tzinfo=None) - local_time.utcoffset()
+
+  def to_fauna_json(self):
+    return {"@ts": self.value}
+
+  def __repr__(self):
+    return "FaunaTime(%s)" % repr(self.value)
+
+  def __eq__(self, other):
+    return isinstance(other, FaunaTime) and self.value == other.value
+
+  def __ne__(self, other):
+    return not self == other

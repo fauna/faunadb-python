@@ -1,12 +1,14 @@
+from datetime import date, datetime
+from iso8601 import parse_date
 from json import dumps, loads, JSONEncoder
 
-from .objects import Ref, Set
+from .objects import FaunaTime, Ref, Set
 
 
 def parse_json(json_string):
   """
   Parses a JSON string into python values.
-  Also parses :any:`Ref` and :any:`Set`.
+  Also parses :any:`Ref`, :any:`Set`, :any:`FaunaTime`, and :class:`date`.
   """
   return loads(json_string, object_hook=_parse_json_hook)
 
@@ -21,6 +23,10 @@ def _parse_json_hook(dct):
     return dct["@obj"]
   if "@set" in dct:
     return Set(dct["@set"])
+  if "@ts" in dct:
+    return FaunaTime(dct["@ts"])
+  if "@date" in dct:
+    return parse_date(dct["@date"]).date()
   else:
     return dct
 
@@ -41,21 +47,19 @@ class _FaunaJSONEncoder(JSONEncoder):
   # pylint: disable=method-hidden
   def default(self, obj):
     if hasattr(obj, "to_fauna_json"):
-      return _FaunaJSONEncoder._to_fauna_json_recursive(obj)
+      return self._to_fauna_json_recursive(obj)
+    elif isinstance(obj, datetime):
+      return FaunaTime(obj).to_fauna_json()
+    elif isinstance(obj, date):
+      return {"@date": obj.isoformat()}
     else:
-      return JSONEncoder.default(self, obj)
+      return obj
 
-  @staticmethod
-  def _to_fauna_json_recursive(obj):
+  def _to_fauna_json_recursive(self, obj):
     """
     Calls to_fauna on obj if possible.
     Recursively calls .to_fauna() on the results of that too.
     This ensures that values implementing to_fauna don't need to call it recursively themselves.
     """
     dct = obj.to_fauna_json()
-    def fauna(v):
-      if hasattr(v, "to_fauna_json"):
-        return _FaunaJSONEncoder._to_fauna_json_recursive(v)
-      else:
-        return v
-    return {k: fauna(v) for k, v in dct.iteritems()}
+    return {k: self.default(v) for k, v in dct.iteritems()}
