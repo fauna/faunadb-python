@@ -28,9 +28,9 @@ def var(var_name):
   return {"var": var_name}
 
 
-def if_expr(condition, true_expr, false_expr):
+def if_expr(condition, then, else_):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"if": condition, "then": true_expr, "else": false_expr}
+  return {"if": condition, "then": then, "else": else_}
 
 
 def do(*expressions):
@@ -38,9 +38,9 @@ def do(*expressions):
   return {"do": _varargs(expressions)}
 
 
-def object(**keys_vals):
+def object(**fields):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"object": keys_vals}
+  return {"object": fields}
 
 
 def quote(expr):
@@ -140,42 +140,42 @@ def lambda_expr(var_name, expr):
 
 #region Collection functions
 
-def map_expr(lambda_expr, coll):
+def map_expr(lambda_expr, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
-  return {"map": _to_lambda(lambda_expr), "collection": coll}
+  return {"map": _to_lambda(lambda_expr), "collection": collection}
 
 
-def foreach(lambda_expr, coll):
+def foreach(lambda_expr, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
-  return {"foreach": _to_lambda(lambda_expr), "collection": coll}
+  return {"foreach": _to_lambda(lambda_expr), "collection": collection}
 
 
-def filter_expr(lambda_expr, coll):
+def filter_expr(lambda_expr, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
   # pylint: disable=redefined-outer-name
-  return {"filter": _to_lambda(lambda_expr), "collection": coll}
+  return {"filter": _to_lambda(lambda_expr), "collection": collection}
 
 
-def take(num, coll):
+def take(number, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  return {"take": num, "collection": coll}
+  return {"take": number, "collection": collection}
 
 
-def drop(num, coll):
+def drop(number, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  return {"drop": num, "collection": coll}
+  return {"drop": number, "collection": collection}
 
 
-def prepend(elems, collection):
+def prepend(elements, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  return {"prepend": elems, "collection": collection}
+  return {"prepend": elements, "collection": collection}
 
 
-def append(elems, collection):
+def append(elements, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  return {"append": elems, "collection": collection}
+  return {"append": elements, "collection": collection}
 
 #endregion
 
@@ -240,9 +240,9 @@ def delete(ref):
 
 #region Sets
 
-def match(matched, index):
+def match(terms, index):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"match": matched, "index": index}
+  return {"match": terms, "index": index}
 
 
 def union(*sets):
@@ -301,21 +301,21 @@ def concat_with_separator(separator, *strings):
   return {"concat": _varargs(strings), "separator": separator}
 
 
-def contains(path, value):
+def contains(path, in_):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"contains": path, "in": value}
+  return {"contains": path, "in": in_}
 
 
-def select(path, data):
+def select(path, from_):
   """
   See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__.
   See also :py:func:`select_with_default`."""
-  return {"select": path, "from": data}
+  return {"select": path, "from": from_}
 
 
-def select_with_default(path, data, default):
+def select_with_default(path, from_, default):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"select": path, "from": data, "default": default}
+  return {"select": path, "from": from_, "default": default}
 
 
 def add(*numbers):
