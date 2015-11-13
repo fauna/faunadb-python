@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import iso8601
 
 from faunadb.errors import InvalidValue
 from faunadb.objects import Event, FaunaTime, Page, Ref, Set
@@ -77,12 +78,12 @@ class ObjectsTest(FaunaTestCase):
     assert list(mapped_iter) == [[a], [b]]
 
   def test_time_conversion(self):
-    dt = datetime.utcnow()
+    dt = datetime.now(iso8601.UTC)
     assert FaunaTime(dt).to_datetime() == dt
 
-    dt = datetime.utcfromtimestamp(0)
+    dt = datetime.fromtimestamp(0, iso8601.UTC)
     ft = FaunaTime(dt)
-    assert ft == FaunaTime("1970-01-01T00:00:00")
+    assert ft == FaunaTime("1970-01-01T00:00:00Z")
     assert ft.to_datetime() == dt
 
   def test_time(self):
