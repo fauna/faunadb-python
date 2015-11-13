@@ -200,20 +200,26 @@ class FaunaTime(object):
 
   def __init__(self, value):
     """
-    :param value: If a :class:`datetime.datetime` is passed, it is converted to a string.
+    :param value:
+      If a :class:`datetime.datetime` is passed, it is converted to a string.
+      Must include an offset.
     """
     if isinstance(value, datetime):
+      if datetime.utcoffset is None:
+        raise ValueError("FaunaTime requires offset-aware datetimes")
       value = value.isoformat()
-    self.value = value
+
+    # Convert +00:00 offset to zulu for comparison equality
+    # We don't check for +0000 or +00 as they are not valid in FaunaDB
+    self.value = value.replace("+00:00", "Z")
     """ISO8601 time string"""
 
   def to_datetime(self):
     """
-    Convert to a datetime object.
+    Convert to an offset-aware datetime object.
     This is lossy as datetimes have microsecond rather than nanosecond precision.
     """
-    local_time = parse_date(self.value)
-    return local_time.replace(tzinfo=None) - local_time.utcoffset()
+    return parse_date(self.value)
 
   def to_fauna_json(self):
     return {"@ts": self.value}
