@@ -200,7 +200,7 @@ class FaunaTime(object):
 
   def __init__(self, value):
     """
-    :param value: If a :class:`datetime.date` is passed, it is converted to a string.
+    :param value: If a :class:`datetime.datetime` is passed, it is converted to a string.
     """
     if isinstance(value, datetime):
       value = value.isoformat()
