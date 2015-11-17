@@ -3,22 +3,15 @@ import re
 from testfixtures import LogCapture
 
 from faunadb.client import Client
-from faunadb.errors import FaunaError, NotFound, Unauthorized
+from faunadb.errors import FaunaError, HttpNotFound
 from test_case import get_client, FaunaTestCase
 
 class ClientTest(FaunaTestCase):
-  def setUp(self):
-    super(ClientTest, self).setUp()
-
   def test_parse_secret(self):
     assert Client._parse_secret(("user", "pass")) == ("user", "pass")
     assert Client._parse_secret("user") == ("user", "")
     assert Client._parse_secret("user:pass") == ("user", "pass")
     self.assertRaises(FaunaError, lambda: Client._parse_secret(("user", "pass", "potato")))
-
-  def test_invalid_key(self):
-    client = get_client("bad_key")
-    self.assertRaises(Unauthorized, lambda: client.get(self.db_ref))
 
   def test_ping(self):
     assert self.client.ping() == "Scope Global is OK"
@@ -62,7 +55,7 @@ class ClientTest(FaunaTestCase):
   def test_delete(self):
     cls_ref = self._create_class()["ref"]
     self.client.delete(cls_ref)
-    self.assertRaises(NotFound, lambda: self.client.get(cls_ref))
+    self.assertRaises(HttpNotFound, lambda: self.client.get(cls_ref))
 
   def test_logging(self):
     with LogCapture() as l:

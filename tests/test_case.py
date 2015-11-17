@@ -3,7 +3,7 @@ from os import environ
 from unittest import TestCase
 
 from faunadb.client import Client
-from faunadb.errors import NotFound
+from faunadb.errors import HttpNotFound
 from faunadb.objects import Ref
 
 _FAUNA_ROOT_KEY = environ["FAUNA_ROOT_KEY"]
@@ -26,7 +26,7 @@ class FaunaTestCase(TestCase):
     # TODO: See `core` issue #1975
     try:
       self.root_client.delete(self.db_ref)
-    except NotFound:
+    except HttpNotFound:
       pass
 
     self.root_client.post("databases", {"name": db_name})
