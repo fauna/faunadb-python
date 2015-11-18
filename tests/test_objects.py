@@ -33,7 +33,7 @@ class ObjectsTest(FaunaTestCase):
     assert to_json(match) == json_match
 
   def test_event(self):
-    event = Event(123, "create", self.ref)
+    event = Event(self.ref, 123, "create")
     event_json = '{"action":"create","resource":{"@ref":"classes/frogs/123"},"ts":123}'
     assert Event.from_raw(parse_json(event_json)) == event
     assert to_json(event) == event_json
