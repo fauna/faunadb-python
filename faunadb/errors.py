@@ -15,7 +15,12 @@ class InvalidValue(FaunaError):
   def __init__(self, message="The field value is not valid."):
     super(InvalidValue, self).__init__(message)
 
-#region HTTPError
+
+class InvalidResponse(FaunaError):
+  """Thrown when the response from the server is unusable."""
+
+
+#region FaunaHttpError
 class FaunaHttpError(FaunaError):
   """
   Error returned by the FaunaDB server.
@@ -23,9 +28,10 @@ class FaunaHttpError(FaunaError):
   """
 
   def __init__(self, response_dict):
-    self.errors = [ErrorData.from_dict(error) for error in response_dict["errors"]]
+    self.errors = [ErrorData.from_dict(error) for error in get_or_invalid(response_dict, "errors")]
     """List of all :py:class:`ErrorData` objects sent by the server."""
-    super(FaunaHttpError, self).__init__(self.errors[0].description)
+    super(FaunaHttpError, self).__init__(
+      self.errors[0].description if self.errors else "(empty `errors`)")
 
   def __repr__(self):
     return "%s(%s)" % (self.__class__.__name__, [repr(error) for error in self.errors])
@@ -72,10 +78,10 @@ class HttpUnavailableError(FaunaHttpError):
 class ErrorData(object):
   @staticmethod
   def from_dict(dct):
-    return _ERROR_CODE_TO_CLASS[dct["code"]](dct)
+    return _error_from_code_or_invalid(_ERROR_CODE_TO_CLASS, get_or_invalid(dct, "code"))(dct)
 
   def __init__(self, dct):
-    self.description = dct["description"]
+    self.description = get_or_invalid(dct, "description")
     self.position = dct.get("position")
 
   def __repr__(self):
@@ -90,6 +96,7 @@ class ErrorData(object):
 
 class BadRequest(ErrorData):
   code = "bad request"
+
 
 class Unauthorized(ErrorData):
   code = "unauthorized"
@@ -171,11 +178,11 @@ class Failure(object):
 
   @staticmethod
   def from_dict(dct):
-    return _FAILURE_CODE_TO_CLASS[dct["code"]](dct)
+    return _error_from_code_or_invalid(_FAILURE_CODE_TO_CLASS, get_or_invalid(dct, "code"))(dct)
 
   def __init__(self, dct):
-    self.description = dct["description"]
-    self.field = dct["field"]
+    self.description = get_or_invalid(dct, "description")
+    self.field = get_or_invalid(dct, "field")
 
   def __repr__(self):
     return "%s(%s, %s)" % (self.__class__.__name__, self.field, self.description)
@@ -197,3 +204,18 @@ _FAILURE_CODE_TO_CLASS = {cls.code: cls for cls in Failure.__subclasses__()}
 
 #endregion
 
+def get_or_invalid(dct, key):
+  """Get a value from a dict or throw InvalidResponse."""
+  try:
+    return dct[key]
+  except KeyError:
+    raise InvalidResponse("Response should have '%s' key, but got: %s" % (key, dct))
+  except TypeError:
+    raise InvalidResponse("Response should be a dict, but got: %s" % dct)
+
+
+def _error_from_code_or_invalid(errors_dict, code):
+  try:
+    return errors_dict[code]
+  except KeyError:
+    raise InvalidResponse("Unexpected error code: %s" % code)

@@ -266,7 +266,7 @@ def join(source, target):
 
 #endregion
 
-#region Time and Date Functions
+#region Time and date functions
 
 def time(string):
   """See the `docs <https://faunadb.com/documentation/queries#time_functions>`__."""
@@ -284,7 +284,7 @@ def date(string):
 
 #endregion
 
-#region Miscellaneous Functions
+#region Miscellaneous functions
 
 def equals(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""

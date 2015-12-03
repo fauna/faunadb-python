@@ -1,13 +1,25 @@
+from requests import codes
+
 from faunadb.errors import FaunaHttpError, HttpBadRequest, HttpInternalError, \
-  HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, HttpUnavailableError
+  HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, \
+  HttpUnavailableError, InvalidResponse
 from faunadb.errors import DivideByZero, InstanceAlreadyExists, InternalError, InvalidArgument,\
   InvalidExpression, InstanceNotFound, MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, \
   UnavailableError, UnboundVariable, ValidationFailed, ValueNotFound
 from faunadb.errors import DuplicateValue, InvalidType, ValueRequired
 
-from test_case import get_client, FaunaTestCase
+from test_case import get_client, FaunaTestCase, mock_client
 
 class ErrorsTest(FaunaTestCase):
+  def test_invalid_response(self):
+    # Response must be valid json
+    self.assertRaises(InvalidResponse, lambda: mock_client('I like fine wine').get(''))
+    # Response must have "resource"
+    self.assertRaises(InvalidResponse, lambda: mock_client('{"resoars": 1}').get(''))
+    # Error response must have valid "code"
+    code_client = mock_client('{"errors": [{"code": "foo"}]}', codes.bad_request)
+    self.assertRaises(InvalidResponse, lambda: code_client.get(''))
+
   #region HTTP errors
   def test_http_bad_request(self):
     self.assertRaises(HttpBadRequest, lambda: self.client.query({"foo": "bar"}))
@@ -30,8 +42,10 @@ class ErrorsTest(FaunaTestCase):
     assert_http_error(lambda: self.client.get("error"), HttpInternalError, InternalError)
 
   def test_unavailable_error(self):
-    # TODO
-    pass
+    client = mock_client(
+      '{"errors": [{"code": "unavailable", "description": "on vacation"}]}',
+      codes.unavailable)
+    assert_http_error(lambda: client.get(''), HttpUnavailableError, UnavailableError)
   #endregion
 
   #region ErrorData

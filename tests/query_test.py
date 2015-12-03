@@ -64,7 +64,7 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.exists(ref)) == False
 
   def test_object(self):
-    # unlike quote, contents are evaluated
+    # Unlike query.quote, contents are evaluated.
     assert self._q(query.object(x=query.let({"x": 1}, query.var("x")))) == {"x": 1}
 
   def test_quote(self):
@@ -182,7 +182,7 @@ class QueryTest(FaunaTestCase):
 
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
-    assert self._q(query.map_expr(lambda a: query.multiply([2, a]), [1, 2, 3])) == [2, 4, 6]
+    assert self._q(query.map_expr(lambda a: query.multiply(2, a), [1, 2, 3])) == [2, 4, 6]
 
     page = query.paginate(self._set_n(1))
     ns = query.map_expr(lambda a: query.select(["data", "n"], query.get(a)), page)
@@ -190,8 +190,7 @@ class QueryTest(FaunaTestCase):
 
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
-    q = query.foreach(query.delete, refs)
-    self._q(q)
+    self._q(query.foreach(query.delete, refs))
     for ref in refs:
       assert self._q(query.exists(ref)) == False
 
@@ -216,13 +215,9 @@ class QueryTest(FaunaTestCase):
 
   def test_prepend(self):
     assert self._q(query.prepend([1, 2, 3], [4, 5, 6])) == [1, 2, 3, 4, 5, 6]
-    # Fails for non-array.
-    self._assert_bad_query(query.prepend([1, 2], "foo"))
 
   def test_append(self):
     assert self._q(query.append([4, 5, 6], [1, 2, 3])) == [1, 2, 3, 4, 5, 6]
-    # Fails for non-array.
-    self._assert_bad_query(query.append([1, 2], "foo"))
 
   def test_get(self):
     instance = self._create()

@@ -4,7 +4,7 @@ from time import time
 
 from requests import codes, Request, Session
 
-from .errors import FaunaError, FaunaHttpError, HttpBadRequest, HttpInternalError, \
+from .errors import FaunaError, get_or_invalid, FaunaHttpError, HttpBadRequest, HttpInternalError, \
   HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, HttpUnavailableError
 from .objects import Ref
 from ._json import parse_json, to_json
@@ -205,7 +205,7 @@ class Client(object):
     # pylint: disable=no-member
     code = response.status_code
     if 200 <= code <= 299:
-      return response_dict["resource"]
+      return get_or_invalid(response_dict, "resource")
     elif code == codes.bad_request:
       raise HttpBadRequest(response_dict)
     elif code == codes.unauthorized:
