@@ -73,16 +73,23 @@ class HttpUnavailableError(FaunaHttpError):
 
 #endregion
 
-#region ErrorData
-
 class ErrorData(object):
+  """
+  Data for one error returned by the server.
+  """
+
   @staticmethod
   def from_dict(dct):
-    return _error_from_code_or_invalid(_ERROR_CODE_TO_CLASS, get_or_invalid(dct, "code"))(dct)
+    code = get_or_invalid(dct, "code")
+    return ValidationFailed(dct) if code == "validation failed" else ErrorData(dct, code)
 
-  def __init__(self, dct):
+  def __init__(self, dct, code):
+    self.code = code
+    """Error code. See the many error codes `here <https://faunadb.com/documentation#errors>`__."""
     self.description = get_or_invalid(dct, "description")
+    """Error description."""
     self.position = dct.get("position")
+    """Position of the error in a query. May be None."""
 
   def __repr__(self):
     return "%s(%s)" % (self.__class__.__name__, self.position)
@@ -92,83 +99,18 @@ class ErrorData(object):
       self.description == other.description and \
       self.position == other.position
 
-#region Analogues of HTTP errors
-
-class BadRequest(ErrorData):
-  code = "bad request"
-
-
-class Unauthorized(ErrorData):
-  code = "unauthorized"
-
-
-class PermissionDenied(ErrorData):
-  code = "permission denied"
-
-
-class NotFound(ErrorData):
-  code = "not found"
-
-
-class MethodNotAllowed(ErrorData):
-  code = "method not allowed"
-
-
-class InternalError(ErrorData):
-  code = "internal server error"
-
-
-class UnavailableError(ErrorData):
-  code = "unavailable"
-
-#endregion
-
-
-class InvalidExpression(ErrorData):
-  code = "invalid expression"
-
-
-class UnboundVariable(ErrorData):
-  code = "unbound variable"
-
-
-class InvalidArgument(ErrorData):
-  code = "invalid argument"
-
-
-class DivideByZero(ErrorData):
-  code = "divide by zero"
-
-
-class InstanceNotFound(ErrorData):
-  code = "instance not found"
-
-
-class ValueNotFound(ErrorData):
-  code = "value not found"
-
-
-class InstanceAlreadyExists(ErrorData):
-  code = "instance already exists"
-
 
 class ValidationFailed(ErrorData):
-  code = "validation failed"
+  """An ErrorData that also stores Failure information."""
 
   def __init__(self, dct):
-    super(ValidationFailed, self).__init__(dct)
-    self.failures = [Failure.from_dict(failure) for failure in dct["failures"]]
+    super(ValidationFailed, self).__init__(dct, "validation failed")
+    self.failures = [Failure(failure) for failure in dct["failures"]]
+    """List of all :py:class:`Failure` objects returned by the server."""
 
   def __repr__(self):
     return "%s(%s, %s)" % (self.__class__.__name__, self.position, self.failures)
 
-# pylint thinks __subclasses__ doesn't exist
-# pylint:disable=no-member
-_ERROR_CODE_TO_CLASS = {cls.code: cls for cls in ErrorData.__subclasses__()}
-
-#endregion
-
-#region Failure
 
 class Failure(object):
   """
@@ -176,33 +118,17 @@ class Failure(object):
   See the ``Invalid Data`` section of the `docs <https://faunadb.com/documentation#errors>`__.
   """
 
-  @staticmethod
-  def from_dict(dct):
-    return _error_from_code_or_invalid(_FAILURE_CODE_TO_CLASS, get_or_invalid(dct, "code"))(dct)
-
   def __init__(self, dct):
+    self.code = get_or_invalid(dct, "code")
+    """Failure code."""
     self.description = get_or_invalid(dct, "description")
+    """Failure description."""
     self.field = get_or_invalid(dct, "field")
+    """Field of the failure in the instance."""
 
   def __repr__(self):
     return "%s(%s, %s)" % (self.__class__.__name__, self.field, self.description)
 
-
-class InvalidType(Failure):
-  code = "invalid type"
-
-
-class ValueRequired(Failure):
-  code = "value required"
-
-
-class DuplicateValue(Failure):
-  code = "duplicate value"
-
-
-_FAILURE_CODE_TO_CLASS = {cls.code: cls for cls in Failure.__subclasses__()}
-
-#endregion
 
 def get_or_invalid(dct, key):
   """Get a value from a dict or throw InvalidResponse."""
@@ -212,10 +138,3 @@ def get_or_invalid(dct, key):
     raise InvalidResponse("Response should have '%s' key, but got: %s" % (key, dct))
   except TypeError:
     raise InvalidResponse("Response should be a dict, but got: %s" % dct)
-
-
-def _error_from_code_or_invalid(errors_dict, code):
-  try:
-    return errors_dict[code]
-  except KeyError:
-    raise InvalidResponse("Unexpected error code: %s" % code)
