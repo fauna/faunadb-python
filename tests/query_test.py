@@ -3,7 +3,7 @@ from datetime import date
 from threading import Thread
 from time import sleep
 
-from faunadb.errors import HttpBadRequest, HttpNotFound, InvalidQuery
+from faunadb.errors import HttpBadRequest, HttpNotFound
 from faunadb.objects import FaunaTime, Set
 from faunadb import query
 from test_case import FaunaTestCase
@@ -164,7 +164,7 @@ class QueryTest(FaunaTestCase):
       [{"alpha": 1, "beta": 2}]))
 
     # Lambda generator fails for bad pattern.
-    self.assertRaises(InvalidQuery, lambda: query.lambda_pattern({"alpha": 0}, lambda args: 0))
+    self.assertRaises(ValueError, lambda: query.lambda_pattern({"alpha": 0}, lambda args: 0))
 
     # Can use other Sequence types.
     tuple_lambda = query.lambda_pattern(("a", "b"), lambda (a, b): b)

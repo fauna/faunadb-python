@@ -14,8 +14,6 @@ from threading import local
 from types import FunctionType
 _thread_local = local()
 
-from .errors import InvalidQuery
-
 #region Basic forms
 
 def let(vars, in_expr):
@@ -128,7 +126,7 @@ def _pattern_args(pattern):
     for entry in pattern.values():
       args.extend(_pattern_args(entry))
   else:
-    raise InvalidQuery, "Pattern must be a str, Sequence, or Mapping; got %s" % repr(pattern)
+    raise ValueError("Pattern must be a str, Sequence, or Mapping; got %s" % repr(pattern))
   return args
 
 

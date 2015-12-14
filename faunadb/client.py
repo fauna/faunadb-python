@@ -4,7 +4,7 @@ from time import time
 
 from requests import codes, Request, Session
 
-from .errors import FaunaError, get_or_invalid, FaunaHttpError, HttpBadRequest, HttpInternalError, \
+from .errors import get_or_invalid, FaunaError, HttpBadRequest, HttpInternalError, \
   HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, HttpUnavailableError
 from .objects import Ref
 from ._json import parse_json, to_json
@@ -221,7 +221,7 @@ class Client(object):
     elif code == codes.unavailable:
       raise HttpUnavailableError(response_dict)
     else:
-      raise FaunaHttpError(response_dict)
+      raise FaunaError(response_dict)
 
   @staticmethod
   def _query_string_for_logging(query):
@@ -234,7 +234,7 @@ class Client(object):
   def _parse_secret(secret):
     if isinstance(secret, tuple):
       if len(secret) != 2:
-        raise FaunaError("Secret tuple must have exactly two entries")
+        raise ValueError("Secret tuple must have exactly two entries")
       return secret
     else:
       pair = secret.split(":", 1)

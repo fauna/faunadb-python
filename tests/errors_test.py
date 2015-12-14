@@ -1,6 +1,6 @@
 from requests import codes
 
-from faunadb.errors import FaunaHttpError, HttpBadRequest, HttpInternalError, \
+from faunadb.errors import FaunaError, HttpBadRequest, HttpInternalError, \
   HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, \
   HttpUnavailableError, InvalidResponse
 
@@ -108,7 +108,7 @@ class ErrorsTest(FaunaTestCase):
 def capture_exception(func):
   try:
     func()
-  except FaunaHttpError as exception:
+  except FaunaError as exception:
     return exception
 
 

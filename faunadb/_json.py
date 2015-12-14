@@ -14,7 +14,7 @@ def parse_json(json_string):
   try:
     return loads(json_string, object_hook=_parse_json_hook)
   except ValueError:
-    raise InvalidResponse("Bad json: %s" % json_string)
+    raise InvalidResponse("Bad JSON", json_string)
 
 
 def _parse_json_hook(dct):

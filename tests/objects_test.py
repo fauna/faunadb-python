@@ -1,7 +1,6 @@
 from datetime import date, datetime
 import iso8601
 
-from faunadb.errors import InvalidValue
 from faunadb.objects import Event, FaunaTime, Page, Ref, Set
 from faunadb._json import parse_json, to_json
 from faunadb import query
@@ -19,7 +18,7 @@ class ObjectsTest(FaunaTestCase):
 
     keys = Ref("keys")
     assert keys.to_class() == keys
-    self.assertRaises(InvalidValue, keys.id)
+    self.assertRaises(ValueError, keys.id)
 
     ref = Ref(keys, "123")
     assert ref.to_class() == keys

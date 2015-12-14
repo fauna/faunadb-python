@@ -3,7 +3,7 @@ import re
 from testfixtures import LogCapture
 
 from faunadb.client import Client
-from faunadb.errors import FaunaError, HttpNotFound
+from faunadb.errors import HttpNotFound
 from test_case import get_client, FaunaTestCase
 
 class ClientTest(FaunaTestCase):
@@ -11,7 +11,7 @@ class ClientTest(FaunaTestCase):
     assert Client._parse_secret(("user", "pass")) == ("user", "pass")
     assert Client._parse_secret("user") == ("user", "")
     assert Client._parse_secret("user:pass") == ("user", "pass")
-    self.assertRaises(FaunaError, lambda: Client._parse_secret(("user", "pass", "potato")))
+    self.assertRaises(ValueError, lambda: Client._parse_secret(("user", "pass", "potato")))
 
   def test_ping(self):
     assert self.client.ping() == "Scope Global is OK"
