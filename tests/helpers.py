@@ -1,3 +1,4 @@
+import random, string
 from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ
@@ -8,8 +9,9 @@ from requests import codes
 
 from faunadb._json import to_json, parse_json
 from faunadb.client import Client
-from faunadb.errors import HttpNotFound
+from faunadb.errors import HttpBadRequest
 from faunadb.objects import Ref
+from faunadb import query
 
 _FAUNA_ROOT_KEY = environ["FAUNA_ROOT_KEY"]
 # If None, these have defaults in Client.
@@ -26,22 +28,23 @@ class FaunaTestCase(TestCase):
 
     self.root_client = self.get_client(secret=_FAUNA_ROOT_KEY)
 
-    db_name = "faunadb-python-test"
+    rnd = ''.join(random.choice(string.lowercase) for i in range(10))
+    db_name = "faunadb-python-test" + rnd
     self.db_ref = Ref("databases", db_name)
     # TODO: See `core` issue #1975
     try:
-      self.root_client.delete(self.db_ref)
-    except HttpNotFound:
+      self.root_client.query(query.delete(self.db_ref))
+    except HttpBadRequest:
       pass
 
-    self.root_client.post("databases", {"name": db_name})
+    self.root_client.query(query.create(Ref("databases"), query.object(name=db_name)))
 
-    self.server_key = self.root_client.post(
-      "keys", {"database": self.db_ref, "role": "server"})["secret"]
+    self.server_key = self.root_client.query(
+      query.create(Ref("keys"), query.object(database=self.db_ref, role="server")))["secret"]
     self.client = self.get_client()
 
   def tearDown(self):
-    self.root_client.delete(self.db_ref)
+    self.root_client.query(query.delete(self.db_ref))
 
   def assertJson(self, obj, json):
     self.assertToJson(obj, json)

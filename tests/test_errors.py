@@ -87,7 +87,8 @@ class ErrorsTest(FaunaTestCase):
       "name": "gerbils_by_x",
       "source": {"@ref": "classes/gerbils"},
       "terms": [{"path": "data.x"}],
-      "unique": True
+      "unique": True,
+      "active": True
     })
     self.client.post("classes/gerbils", {"data": {"x": 1}})
     self._assert_invalid_data(

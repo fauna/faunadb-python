@@ -1,0 +1,14 @@
+language: python
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+env:
+  global:
+    - secure: "F9dZyPKN1TGHGKi+VgFFcZxW2i2oN1lZC9D6U7uja/49GzszUF99CNhlvX9x/gRXatRdTEmPl/1YYJIgcQXiWuio33CPKjAab9PJEiXXP1Eo7izVAPsCXBh1+vsomGuSqJCel679jnIIACLEIj0PW2LRUycSPGObX424C9KxDHMG/pOa/+LWwHzY1czh33jbL4gEnSR2/nZqePEHv9XmmnoPGeWcQaXfvUcvWj3FWtaefP4xFXsBLkgfB2Q15jeIuqVx0z9NECBJdYXJktpJRRnkwT8LN5+gFa02MvQ8SUT6P6AlJ5Vg2eexO6C4YfCudML0M0Zh6spE3zCfpCWIXwvDd8zTOmDr3r3CP1NhMr0UQ1dcREEbXb+OKV9AlHKkmwFscgLHvlk3xlz3j9HUuEopQEFyUbYWeViq6OHnv862LWxHSrGd/vN2sY/xZoj9NfV3l5vFP0ECtfvvCf9AGeaJ/f4eKDOSu2GUrDtD5a6cx+ZVrwFUWYYn1JYY2l9jcG7hWcYwdB39yY5zw25Y+ATa2p2r8pF57iFS8+LlrzF3d6yOKGj66liRA1QuLxf8ihBYTtGM8csVyrCe0pt3MyYdQ5xMGNuj9poAiyJx0yonM5y4ShYXoEw2X7ds8tIt+C738EQQ/kzdpPXEeRVzimQsPDPYVXyl+yuZdLQBqU0="
+    - FAUNA_DOMAIN=rest.faunadb.com
+    - FAUNA_SCHEME=https
+    - FAUNA_PORT=443
+script:
+  - python setup.py test
