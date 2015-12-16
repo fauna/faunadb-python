@@ -2,6 +2,7 @@ from datetime import date, datetime
 from iso8601 import parse_date
 from json import dumps, loads, JSONEncoder
 
+from .errors import InvalidResponse
 from .objects import FaunaTime, Ref, Set
 
 
@@ -10,7 +11,10 @@ def parse_json(json_string):
   Parses a JSON string into python values.
   Also parses :any:`Ref`, :any:`Set`, :any:`FaunaTime`, and :class:`date`.
   """
-  return loads(json_string, object_hook=_parse_json_hook)
+  try:
+    return loads(json_string, object_hook=_parse_json_hook)
+  except ValueError:
+    raise InvalidResponse("Bad JSON", json_string)
 
 
 def _parse_json_hook(dct):

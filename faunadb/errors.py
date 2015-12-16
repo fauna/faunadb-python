@@ -1,63 +1,131 @@
 """Error types that methods in the FaunaDB client throw."""
 
+
+class InvalidResponse(Exception):
+  """Thrown when the response from the server is unusable."""
+  def __init__(self, description, response_data):
+    self.description = description
+    """Description of the kind of response expected."""
+    self.response_data = response_data
+    """Actual response data. (Type varies.)"""
+    super(InvalidResponse, self).__init__(description)
+
+
+#region FaunaHttpError
 class FaunaError(Exception):
-  """Base class for all FaunaDB errors."""
-  pass
+  """
+  Error returned by the FaunaDB server.
+  For documentation of error types, see the `docs <https://faunadb.com/documentation#errors>`__.
+  """
 
-class InvalidQuery(FaunaError):
-  """Thrown when a query is malformed."""
-  pass
-
-
-class InvalidValue(FaunaError):
-  """Thrown when a value cannot be accepted."""
-  def __init__(self, message="The field value is not valid."):
-    super(InvalidValue, self).__init__(message)
-
-
-#region HTTPError
-class FaunaHTTPError(FaunaError):
-  """Error in FaunaDB server connection."""
   def __init__(self, response_dict):
-    if "error" in response_dict:
-      self.errors = [response_dict["error"]]
-    else:
-      self.errors = response_dict["errors"]
-    self.reason = response_dict.get("reason", "")
-    self.parameters = response_dict.get("parameters", {})
-    super(FaunaHTTPError, self).__init__(self.reason or self.errors[0])
+    self.errors = [ErrorData.from_dict(error) for error in get_or_invalid(response_dict, "errors")]
+    """List of all :py:class:`ErrorData` objects sent by the server."""
+    super(FaunaError, self).__init__(
+      self.errors[0].description if self.errors else "(empty `errors`)")
 
-class BadRequest(FaunaHTTPError):
+  def __repr__(self):
+    return "%s(%s)" % (self.__class__.__name__, self.errors)
+
+
+class HttpBadRequest(FaunaError):
   """HTTP 400 error."""
   pass
 
 
-class Unauthorized(FaunaHTTPError):
+class HttpUnauthorized(FaunaError):
   """HTTP 401 error."""
   pass
 
 
-class PermissionDenied(FaunaHTTPError):
+class HttpPermissionDenied(FaunaError):
   """HTTP 403 error."""
   pass
 
 
-class NotFound(FaunaHTTPError):
+class HttpNotFound(FaunaError):
   """HTTP 404 error."""
   pass
 
 
-class MethodNotAllowed(FaunaHTTPError):
+class HttpMethodNotAllowed(FaunaError):
   """HTTP 405 error."""
   pass
 
 
-class InternalError(FaunaHTTPError):
+class HttpInternalError(FaunaError):
   """HTTP 500 error."""
   pass
 
 
-class UnavailableError(FaunaHTTPError):
+class HttpUnavailableError(FaunaError):
   """HTTP 503 error."""
   pass
+
 #endregion
+
+class ErrorData(object):
+  """
+  Data for one error returned by the server.
+  """
+
+  @staticmethod
+  def from_dict(dct):
+    code = get_or_invalid(dct, "code")
+    return ValidationFailed(dct) if code == "validation failed" else ErrorData(dct, code)
+
+  def __init__(self, dct, code):
+    self.code = code
+    """Error code. See the many error codes `here <https://faunadb.com/documentation#errors>`__."""
+    self.description = get_or_invalid(dct, "description")
+    """Error description."""
+    self.position = dct.get("position")
+    """Position of the error in a query. May be None."""
+
+  def __repr__(self):
+    return "%s(%s)" % (self.__class__.__name__, self.position)
+
+  def __eq__(self, other):
+    return self.__class__ == other.__class__ and \
+      self.description == other.description and \
+      self.position == other.position
+
+
+class ValidationFailed(ErrorData):
+  """An ErrorData that also stores Failure information."""
+
+  def __init__(self, dct):
+    super(ValidationFailed, self).__init__(dct, "validation failed")
+    self.failures = [Failure(failure) for failure in dct["failures"]]
+    """List of all :py:class:`Failure` objects returned by the server."""
+
+  def __repr__(self):
+    return "%s(%s, %s)" % (self.__class__.__name__, self.position, self.failures)
+
+
+class Failure(object):
+  """
+  Part of a :py:class:`ValidationFailed`.
+  See the ``Invalid Data`` section of the `docs <https://faunadb.com/documentation#errors>`__.
+  """
+
+  def __init__(self, dct):
+    self.code = get_or_invalid(dct, "code")
+    """Failure code."""
+    self.description = get_or_invalid(dct, "description")
+    """Failure description."""
+    self.field = get_or_invalid(dct, "field")
+    """Field of the failure in the instance."""
+
+  def __repr__(self):
+    return "%s(%s, %s)" % (self.__class__.__name__, self.field, repr(self.description))
+
+
+def get_or_invalid(dct, key):
+  """Get a value from a dict or throw InvalidResponse."""
+  try:
+    return dct[key]
+  except KeyError:
+    raise InvalidResponse("Response should have '%s' key." % key, dct)
+  except TypeError:
+    raise InvalidResponse("Response should be a dict.", dct)

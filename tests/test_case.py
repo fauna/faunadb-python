@@ -1,9 +1,11 @@
+from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ
+from requests import codes
 from unittest import TestCase
 
 from faunadb.client import Client
-from faunadb.errors import NotFound
+from faunadb.errors import HttpNotFound
 from faunadb.objects import Ref
 
 _FAUNA_ROOT_KEY = environ["FAUNA_ROOT_KEY"]
@@ -26,7 +28,7 @@ class FaunaTestCase(TestCase):
     # TODO: See `core` issue #1975
     try:
       self.root_client.delete(self.db_ref)
-    except NotFound:
+    except HttpNotFound:
       pass
 
     self.root_client.post("databases", {"name": db_name})
@@ -43,3 +45,25 @@ def get_client(secret, logger=None):
   # If None, use default instead
   non_null_args = {k: v for k, v in args.iteritems() if v is not None}
   return Client(secret=secret, logger=logger, **non_null_args)
+
+
+def mock_client(response_text, status_code=codes.ok):
+  c = Client()
+  c.session = _MockSession(response_text, status_code)
+  return c
+
+
+class _MockSession(object):
+  def __init__(self, response_text, status_code):
+    self.response_text = response_text
+    self.status_code = status_code
+
+  def prepare_request(self, *args):
+    pass
+
+  def send(self, *args):
+    # pylint: disable=unused-argument
+    return _MockResponse(self.status_code, self.response_text)
+
+
+_MockResponse = namedtuple('MockResponse', ['status_code', 'text'])

@@ -6,7 +6,6 @@ See the `docs <https://faunadb.com/documentation/queries#values>`__.
 from datetime import datetime
 from iso8601 import parse_date
 
-from .errors import InvalidQuery, InvalidValue
 from . import query
 
 class Ref(object):
@@ -43,7 +42,7 @@ class Ref(object):
     """
     parts = self.value.split("/")
     if len(parts) == 1:
-      raise InvalidValue("The Ref does not have an id.")
+      raise ValueError("The Ref does not have an id.")
     return parts[-1]
 
   def to_fauna_json(self):
@@ -100,7 +99,7 @@ class Event(object):
     self.ts = ts
     "Microsecond UNIX timestamp at which the event occurred."
     if action not in (None, "create", "delete"):
-      raise InvalidQuery("Action must be create or delete or None.")
+      raise ValueError("Action must be create or delete or None.")
     self.action = action
     """"create" or "delete"""""
     self.resource = resource

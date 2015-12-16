@@ -14,8 +14,6 @@ from threading import local
 from types import FunctionType
 _thread_local = local()
 
-from .errors import InvalidQuery
-
 #region Basic forms
 
 def let(vars, in_expr):
@@ -128,7 +126,7 @@ def _pattern_args(pattern):
     for entry in pattern.values():
       args.extend(_pattern_args(entry))
   else:
-    raise InvalidQuery, "Pattern must be a str, Sequence, or Mapping; got %s" % repr(pattern)
+    raise ValueError("Pattern must be a str, Sequence, or Mapping; got %s" % repr(pattern))
   return args
 
 
@@ -266,7 +264,7 @@ def join(source, target):
 
 #endregion
 
-#region Time and Date Functions
+#region Time and date functions
 
 def time(string):
   """See the `docs <https://faunadb.com/documentation/queries#time_functions>`__."""
@@ -284,7 +282,7 @@ def date(string):
 
 #endregion
 
-#region Miscellaneous Functions
+#region Miscellaneous functions
 
 def equals(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""

@@ -4,8 +4,8 @@ from time import time
 
 from requests import codes, Request, Session
 
-from .errors import BadRequest, FaunaError, FaunaHTTPError, InternalError, MethodNotAllowed,\
-  NotFound, PermissionDenied, Unauthorized, UnavailableError
+from .errors import get_or_invalid, FaunaError, HttpBadRequest, HttpInternalError, \
+  HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, HttpUnavailableError
 from .objects import Ref
 from ._json import parse_json, to_json
 
@@ -205,23 +205,23 @@ class Client(object):
     # pylint: disable=no-member
     code = response.status_code
     if 200 <= code <= 299:
-      return response_dict["resource"]
+      return get_or_invalid(response_dict, "resource")
     elif code == codes.bad_request:
-      raise BadRequest(response_dict)
+      raise HttpBadRequest(response_dict)
     elif code == codes.unauthorized:
-      raise Unauthorized(response_dict)
+      raise HttpUnauthorized(response_dict)
     elif code == codes.forbidden:
-      raise PermissionDenied(response_dict)
+      raise HttpPermissionDenied(response_dict)
     elif code == codes.not_found:
-      raise NotFound(response_dict)
+      raise HttpNotFound(response_dict)
     elif code == codes.method_not_allowed:
-      raise MethodNotAllowed(response_dict)
+      raise HttpMethodNotAllowed(response_dict)
     elif code == codes.internal_server_error:
-      raise InternalError(response_dict)
+      raise HttpInternalError(response_dict)
     elif code == codes.unavailable:
-      raise UnavailableError(response_dict)
+      raise HttpUnavailableError(response_dict)
     else:
-      raise FaunaHTTPError(response_dict)
+      raise FaunaError(response_dict)
 
   @staticmethod
   def _query_string_for_logging(query):
@@ -234,7 +234,7 @@ class Client(object):
   def _parse_secret(secret):
     if isinstance(secret, tuple):
       if len(secret) != 2:
-        raise FaunaError("Secret tuple must have exactly two entries")
+        raise ValueError("Secret tuple must have exactly two entries")
       return secret
     else:
       pair = secret.split(":", 1)

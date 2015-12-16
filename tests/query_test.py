@@ -3,7 +3,7 @@ from datetime import date
 from threading import Thread
 from time import sleep
 
-from faunadb.errors import BadRequest, InvalidQuery, NotFound
+from faunadb.errors import HttpBadRequest, HttpNotFound
 from faunadb.objects import FaunaTime, Set
 from faunadb import query
 from test_case import FaunaTestCase
@@ -49,7 +49,7 @@ class QueryTest(FaunaTestCase):
     return self._q(query.paginate(_set, size=1000))["data"]
 
   def _assert_bad_query(self, q):
-    self.assertRaises(BadRequest, lambda: self._q(q))
+    self.assertRaises(HttpBadRequest, lambda: self._q(q))
 
   def test_let_var(self):
     assert self._q(query.let({"x": 1}, query.var("x"))) == 1
@@ -64,7 +64,7 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.exists(ref)) == False
 
   def test_object(self):
-    # unlike quote, contents are evaluated
+    # Unlike query.quote, contents are evaluated.
     assert self._q(query.object(x=query.let({"x": 1}, query.var("x")))) == {"x": 1}
 
   def test_quote(self):
@@ -164,7 +164,7 @@ class QueryTest(FaunaTestCase):
       [{"alpha": 1, "beta": 2}]))
 
     # Lambda generator fails for bad pattern.
-    self.assertRaises(InvalidQuery, lambda: query.lambda_pattern({"alpha": 0}, lambda args: 0))
+    self.assertRaises(ValueError, lambda: query.lambda_pattern({"alpha": 0}, lambda args: 0))
 
     # Can use other Sequence types.
     tuple_lambda = query.lambda_pattern(("a", "b"), lambda (a, b): b)
@@ -182,7 +182,7 @@ class QueryTest(FaunaTestCase):
 
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
-    assert self._q(query.map_expr(lambda a: query.multiply([2, a]), [1, 2, 3])) == [2, 4, 6]
+    assert self._q(query.map_expr(lambda a: query.multiply(2, a), [1, 2, 3])) == [2, 4, 6]
 
     page = query.paginate(self._set_n(1))
     ns = query.map_expr(lambda a: query.select(["data", "n"], query.get(a)), page)
@@ -190,8 +190,7 @@ class QueryTest(FaunaTestCase):
 
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
-    q = query.foreach(query.delete, refs)
-    self._q(q)
+    self._q(query.foreach(query.delete, refs))
     for ref in refs:
       assert self._q(query.exists(ref)) == False
 
@@ -216,13 +215,9 @@ class QueryTest(FaunaTestCase):
 
   def test_prepend(self):
     assert self._q(query.prepend([1, 2, 3], [4, 5, 6])) == [1, 2, 3, 4, 5, 6]
-    # Fails for non-array.
-    self._assert_bad_query(query.prepend([1, 2], "foo"))
 
   def test_append(self):
     assert self._q(query.append([4, 5, 6], [1, 2, 3])) == [1, 2, 3, 4, 5, 6]
-    # Fails for non-array.
-    self._assert_bad_query(query.append([1, 2], "foo"))
 
   def test_get(self):
     instance = self._create()
@@ -337,12 +332,12 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.select("a", obj)) == {"b": 1}
     assert self._q(query.select(["a", "b"], obj)) == 1
     assert self._q(query.select_with_default("c", obj, None)) == None
-    self.assertRaises(NotFound, lambda: self._q(query.select("c", obj)))
+    self.assertRaises(HttpNotFound, lambda: self._q(query.select("c", obj)))
 
   def test_select_array(self):
     arr = [1, 2, 3]
     assert self._q(query.select(2, arr)) == 3
-    self.assertRaises(NotFound, lambda: self._q(query.select(3, arr)))
+    self.assertRaises(HttpNotFound, lambda: self._q(query.select(3, arr)))
 
   def test_add(self):
     assert self._q(query.add(2, 3, 5)) == 10
