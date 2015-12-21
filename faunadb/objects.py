@@ -95,19 +95,18 @@ class Event(object):
     return Event(raw["ts"], raw["action"], raw["resource"])
 
   # pylint: disable=invalid-name
-  def __init__(self, ts, action=None, resource=None):
+  def __init__(self, ts, action, resource):
+    if action not in ("create", "delete"):
+      raise ValueError('Action must be "create" or "delete".')
     self.ts = ts
     "Microsecond UNIX timestamp at which the event occurred."
-    if action not in (None, "create", "delete"):
-      raise ValueError("Action must be create or delete or None.")
     self.action = action
-    """"create" or "delete"""""
+    '''"create" or "delete"'''
     self.resource = resource
-    "The Ref of the affected instance."
+    """The Ref of the affected instance."""
 
   def to_fauna_json(self):
-    dct = {"ts": self.ts, "action": self.action, "resource": self.resource}
-    return {k: v for k, v in dct.iteritems() if v is not None}
+    return {"ts": self.ts, "action": self.action, "resource": self.resource}
 
   def __repr__(self):
     return "Event(ts=%s, action=%s, resource=%s)" % (

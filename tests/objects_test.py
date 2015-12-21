@@ -37,8 +37,6 @@ class ObjectsTest(FaunaTestCase):
     assert Event.from_raw(parse_json(event_json)) == event
     assert to_json(event) == event_json
 
-    assert to_json(Event(123, None, None)) == '{"ts":123}'
-
   def test_page(self):
     assert Page.from_raw({"data": 1, "before": 2, "after": 3}) == Page(1, 2, 3)
     assert Page([1, 2, 3], 2, 3).map_data(lambda x: x + 1) == Page([2, 3, 4], 2, 3)
