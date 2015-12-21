@@ -1,5 +1,7 @@
 """Error types that methods in the FaunaDB client throw."""
 
+from requests import codes
+
 
 class InvalidResponse(Exception):
   """Thrown when the response from the server is unusable."""
@@ -12,17 +14,44 @@ class InvalidResponse(Exception):
 
 
 #region FaunaHttpError
+
 class FaunaError(Exception):
   """
   Error returned by the FaunaDB server.
   For documentation of error types, see the `docs <https://faunadb.com/documentation#errors>`__.
   """
 
-  def __init__(self, response_dict):
-    self.errors = [ErrorData.from_dict(error) for error in get_or_invalid(response_dict, "errors")]
+  @staticmethod
+  def raise_for_status_code(request_result):
+    code = request_result.status_code
+    # pylint: disable=no-member, too-many-return-statements
+    if 200 <= code <= 299:
+      pass
+    elif code == codes.bad_request:
+      raise HttpBadRequest(request_result)
+    elif code == codes.unauthorized:
+      raise HttpUnauthorized(request_result)
+    elif code == codes.forbidden:
+      raise HttpPermissionDenied(request_result)
+    elif code == codes.not_found:
+      raise HttpNotFound(request_result)
+    elif code == codes.method_not_allowed:
+      raise HttpMethodNotAllowed(request_result)
+    elif code == codes.internal_server_error:
+      raise HttpInternalError(request_result)
+    elif code == codes.unavailable:
+      raise HttpUnavailableError(request_result)
+    else:
+      raise FaunaError(request_result)
+
+  def __init__(self, request_result):
+    response = request_result.response_content
+    self.errors = [ErrorData.from_dict(error) for error in get_or_invalid(response, "errors")]
     """List of all :py:class:`ErrorData` objects sent by the server."""
     super(FaunaError, self).__init__(
       self.errors[0].description if self.errors else "(empty `errors`)")
+    self.request_result = request_result
+    """:any:`RequestResult` for the request that caused this error."""
 
   def __repr__(self):
     return "%s(%s)" % (self.__class__.__name__, self.errors)
