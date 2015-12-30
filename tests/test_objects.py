@@ -4,7 +4,7 @@ import iso8601
 from faunadb.objects import Event, FaunaTime, Page, Ref, Set
 from faunadb._json import parse_json, to_json
 from faunadb import query
-from helpers import FaunaTestCase
+from tests.helpers import FaunaTestCase
 
 class ObjectsTest(FaunaTestCase):
   def setUp(self):

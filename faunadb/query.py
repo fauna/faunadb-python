@@ -69,7 +69,7 @@ def lambda_query(func):
     (To destructure single-element arrays use :any:`lambda_expr`.)
   """
 
-  n_args = func.func_code.co_argcount
+  n_args = func.__code__.co_argcount
   if n_args == 0:
     raise ValueError("Function must take at least 1 argument.")
 

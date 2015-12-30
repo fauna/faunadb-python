@@ -5,7 +5,7 @@ from time import sleep
 from faunadb.errors import HttpBadRequest, HttpNotFound
 from faunadb.objects import Event, FaunaTime, Set
 from faunadb import query
-from helpers import FaunaTestCase
+from tests.helpers import FaunaTestCase
 
 class QueryTest(FaunaTestCase):
   def setUp(self):

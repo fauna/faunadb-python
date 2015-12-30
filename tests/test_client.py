@@ -4,7 +4,7 @@ from re import search
 from faunadb.client import Client
 from faunadb.client_logger import logger
 from faunadb.errors import HttpNotFound
-from helpers import FaunaTestCase
+from tests.helpers import FaunaTestCase
 
 class ClientTest(FaunaTestCase):
   def test_parse_secret(self):
