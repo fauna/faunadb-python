@@ -1,8 +1,8 @@
 from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ
-from requests import codes
 from unittest import TestCase
+from requests import codes
 
 from faunadb.client import Client
 from faunadb.errors import HttpNotFound
@@ -25,7 +25,6 @@ class FaunaTestCase(TestCase):
 
     db_name = "faunadb-python-test"
     self.db_ref = Ref("databases", db_name)
-    # TODO: See `core` issue #1975
     try:
       self.root_client.delete(self.db_ref)
     except HttpNotFound:

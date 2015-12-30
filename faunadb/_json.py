@@ -1,6 +1,6 @@
 from datetime import date, datetime
-from iso8601 import parse_date
 from json import dumps, loads, JSONEncoder
+from iso8601 import parse_date
 
 from .errors import InvalidResponse
 from .objects import FaunaTime, Ref, Set

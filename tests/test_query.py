@@ -67,7 +67,7 @@ class QueryTest(FaunaTestCase):
   def test_do(self):
     ref = self._create()["ref"]
     assert self._q(query.do(query.delete(ref), 1)) == 1
-    assert self._q(query.exists(ref)) == False
+    assert self._q(query.exists(ref)) is False
 
   def test_object(self):
     # Unlike query.quote, contents are evaluated.
@@ -82,6 +82,7 @@ class QueryTest(FaunaTestCase):
       "lambda": "auto0", "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
     }
 
+    # pylint: disable=undefined-variable
     expected = query.lambda_query(
       lambda a: query.lambda_query(
         lambda b: query.lambda_query(
@@ -202,7 +203,7 @@ class QueryTest(FaunaTestCase):
     refs = [self._create()["ref"], self._create()["ref"]]
     self._q(query.foreach(query.delete, refs))
     for ref in refs:
-      assert self._q(query.exists(ref)) == False
+      assert self._q(query.exists(ref)) is False
 
   def test_filter(self):
     evens = query.filter_expr(lambda a: query.equals(query.modulo(a, 2), 0), [1, 2, 3, 4])
@@ -251,9 +252,9 @@ class QueryTest(FaunaTestCase):
 
   def test_exists(self):
     ref = self._create()["ref"]
-    assert self._q(query.exists(ref)) == True
+    assert self._q(query.exists(ref)) is True
     self._q(query.delete(ref))
-    assert self._q(query.exists(ref)) == False
+    assert self._q(query.exists(ref)) is False
 
   def test_count(self):
     self._create(123)
@@ -285,7 +286,7 @@ class QueryTest(FaunaTestCase):
   def test_delete(self):
     ref = self._create()["ref"]
     self._q(query.delete(ref))
-    assert self._q(query.exists(ref)) == False
+    assert self._q(query.exists(ref)) is False
 
   #endregion
 
@@ -342,9 +343,9 @@ class QueryTest(FaunaTestCase):
   #region Miscellaneous functions
 
   def test_equals(self):
-    assert self._q(query.equals(1, 1, 1)) == True
-    assert self._q(query.equals(1, 1, 2)) == False
-    assert self._q(query.equals(1)) == True
+    assert self._q(query.equals(1, 1, 1)) is True
+    assert self._q(query.equals(1, 1, 2)) is False
+    assert self._q(query.equals(1)) is True
     self._assert_bad_query(query.equals())
 
   def test_concat(self):
@@ -353,15 +354,15 @@ class QueryTest(FaunaTestCase):
 
   def test_contains(self):
     obj = query.quote({"a": {"b": 1}})
-    assert self._q(query.contains(["a", "b"], obj)) == True
-    assert self._q(query.contains("a", obj)) == True
-    assert self._q(query.contains(["a", "c"], obj)) == False
+    assert self._q(query.contains(["a", "b"], obj)) is True
+    assert self._q(query.contains("a", obj)) is True
+    assert self._q(query.contains(["a", "c"], obj)) is False
 
   def test_select(self):
     obj = query.quote({"a": {"b": 1}})
     assert self._q(query.select("a", obj)) == {"b": 1}
     assert self._q(query.select(["a", "b"], obj)) == 1
-    assert self._q(query.select_with_default("c", obj, None)) == None
+    assert self._q(query.select_with_default("c", obj, None)) is None
     self.assertRaises(HttpNotFound, lambda: self._q(query.select("c", obj)))
 
   def test_select_array(self):
@@ -397,22 +398,22 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.modulo())
 
   def test_and(self):
-    assert self._q(query.and_expr(True, True, False)) == False
-    assert self._q(query.and_expr(True, True, True)) == True
-    assert self._q(query.and_expr(True)) == True
-    assert self._q(query.and_expr(False)) == False
+    assert self._q(query.and_expr(True, True, False)) is False
+    assert self._q(query.and_expr(True, True, True)) is True
+    assert self._q(query.and_expr(True)) is True
+    assert self._q(query.and_expr(False)) is False
     self._assert_bad_query(query.and_expr())
 
   def test_or(self):
-    assert self._q(query.or_expr(False, False, True)) == True
-    assert self._q(query.or_expr(False, False, False)) == False
-    assert self._q(query.or_expr(True)) == True
-    assert self._q(query.or_expr(False)) == False
+    assert self._q(query.or_expr(False, False, True)) is True
+    assert self._q(query.or_expr(False, False, False)) is False
+    assert self._q(query.or_expr(True)) is True
+    assert self._q(query.or_expr(False)) is False
     self._assert_bad_query(query.or_expr())
 
   def test_not(self):
-    assert self._q(query.not_expr(True)) == False
-    assert self._q(query.not_expr(False)) == True
+    assert self._q(query.not_expr(True)) is False
+    assert self._q(query.not_expr(False)) is True
 
   #endregion
 

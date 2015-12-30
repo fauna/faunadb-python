@@ -58,6 +58,7 @@ class Ref(object):
     return isinstance(other, Ref) and self.value == other.value
 
   def __ne__(self, other):
+    # pylint: disable=unneeded-not
     return not self == other
 
 
@@ -80,6 +81,7 @@ class Set(object):
     return isinstance(other, Set) and self.query == other.query
 
   def __ne__(self, other):
+    # pylint: disable=unneeded-not
     return not self == other
 
 
@@ -119,6 +121,7 @@ class Event(object):
       self.resource == other.resource
 
   def __ne__(self, other):
+    # pylint: disable=unneeded-not
     return not self == other
 
 
@@ -229,4 +232,5 @@ class FaunaTime(object):
     return isinstance(other, FaunaTime) and self.value == other.value
 
   def __ne__(self, other):
+    # pylint: disable=unneeded-not
     return not self == other
