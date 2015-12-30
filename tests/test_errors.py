@@ -4,7 +4,7 @@ from faunadb.errors import FaunaError, HttpBadRequest, HttpInternalError, \
   HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, \
   HttpUnavailableError, InvalidResponse
 
-from test_case import get_client, FaunaTestCase, mock_client
+from helpers import get_client, FaunaTestCase, mock_client
 
 class ErrorsTest(FaunaTestCase):
   def test_invalid_response(self):

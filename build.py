@@ -31,7 +31,7 @@ def lint():
 
 @task()
 def test():
-  check_call(["nosetests"])
+  call(["python", "-m", "unittest", "discover"])
 
 
 @task(document, lint, test)

@@ -44,7 +44,7 @@ Then set the environment variable ``FAUNA_ROOT_KEY`` to your database's root key
 If you use FaunaDB cloud, this is the password you log in with.
 
 Then run ``pynt test``.
-To test a single test, use e.g. ``nosetests tests/client_test.py:ClientTest.test_ping``.
+To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTest.test_ping``.
 
 
 Documenting
