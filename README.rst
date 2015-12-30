@@ -33,7 +33,7 @@ Setup
     $ virtualenv venv
     $ source venv/bin/activate
     $ pip install .
-    $ pynt
+    $ make
 
 
 Testing
@@ -43,14 +43,14 @@ To run the tests you must have a FaunaDB database available.
 Then set the environment variable ``FAUNA_ROOT_KEY`` to your database's root key.
 If you use FaunaDB cloud, this is the password you log in with.
 
-Then run ``pynt test``.
+Then run ``make test``.
 To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTest.test_ping``.
 
 
 Documenting
 ~~~~~~~~~~~
 
-Run ``pynt document``, then open ``docs/_build/html/index.html`` in a web browser.
+Run ``make document``, then open ``docs/_build/html/index.html`` in a web browser.
 
 
 Contribute

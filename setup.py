@@ -15,8 +15,8 @@ requires = [
 ]
 
 extra_requires = {
-  "docs": ["pynt", "sphinx", "sphinx_rtd_theme"],
-  "test": ["pynt", "pylint", "testfixtures"]
+  "docs": ["sphinx", "sphinx_rtd_theme"],
+  "test": ["pylint", "testfixtures"]
 }
 
 setup(
