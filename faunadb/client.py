@@ -1,5 +1,6 @@
-from builtins import object
 from time import time
+# pylint: disable=redefined-builtin
+from builtins import object
 
 from requests import Request, Session
 

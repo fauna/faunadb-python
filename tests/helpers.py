@@ -1,8 +1,9 @@
-from builtins import object
 from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ
 from unittest import TestCase
+# pylint: disable=redefined-builtin
+from builtins import object
 from requests import codes
 
 from faunadb._json import to_json, parse_json
