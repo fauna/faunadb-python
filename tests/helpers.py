@@ -5,6 +5,7 @@ from os import environ
 from unittest import TestCase
 from requests import codes
 
+from faunadb._json import to_json, parse_json
 from faunadb.client import Client
 from faunadb.errors import HttpNotFound
 from faunadb.objects import Ref
@@ -40,6 +41,16 @@ class FaunaTestCase(TestCase):
 
   def tearDown(self):
     self.root_client.delete(self.db_ref)
+
+  def assertJson(self, obj, json):
+    self.assertToJson(obj, json)
+    self.assertParseJson(obj, json)
+
+  def assertToJson(self, obj, json):
+    assert to_json(obj) == json
+
+  def assertParseJson(self, obj, json):
+    assert parse_json(json) == obj
 
   def get_client(self, secret=None, observer=None):
     if secret is None:
