@@ -47,7 +47,7 @@ class FaunaTestCase(TestCase):
     self.assertParseJson(obj, json)
 
   def assertToJson(self, obj, json):
-    assert to_json(obj) == json
+    assert to_json(obj, sort_keys=True) == json
 
   def assertParseJson(self, obj, json):
     assert parse_json(json) == obj

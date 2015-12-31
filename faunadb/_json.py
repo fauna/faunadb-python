@@ -35,7 +35,7 @@ def _parse_json_hook(dct):
     return dct
 
 
-def to_json(dct, pretty=False):
+def to_json(dct, pretty=False, sort_keys=False):
   """
   Opposite of parse_json.
   Converts a dict into a request body, calling :any:`to_fauna_json`.
@@ -43,7 +43,7 @@ def to_json(dct, pretty=False):
   if pretty:
     return dumps(dct, cls=_FaunaJSONEncoder, sort_keys=True, indent=2, separators=(", ", ": "))
   else:
-    return dumps(dct, cls=_FaunaJSONEncoder, separators=(",", ":"))
+    return dumps(dct, cls=_FaunaJSONEncoder, sort_keys=sort_keys, separators=(",", ":"))
 
 
 class _FaunaJSONEncoder(JSONEncoder):
