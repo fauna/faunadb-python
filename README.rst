@@ -12,6 +12,17 @@ Installation
     $ pip install faunadb
 
 
+Compatibility
+-------------
+
+The following versions of Python are supported:
+
+* Python 2.7
+* Python 3.3
+* Python 3.4
+* Python 3.5
+
+
 Documentation
 -------------
 
