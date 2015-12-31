@@ -62,6 +62,9 @@ class _MockSession(object):
     self.response_text = response_text
     self.status_code = status_code
 
+  def close(self):
+    pass
+
   def prepare_request(self, *args):
     pass
 
