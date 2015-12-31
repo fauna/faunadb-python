@@ -2,8 +2,8 @@ from datetime import date, datetime
 from json import dumps, loads, JSONEncoder
 from iso8601 import parse_date
 
-from .errors import InvalidResponse
-from .objects import FaunaTime, Ref, Set
+from faunadb.errors import InvalidResponse
+from faunadb.objects import FaunaTime, Ref, Set
 
 
 def parse_json(json_string):

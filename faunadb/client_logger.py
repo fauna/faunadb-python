@@ -1,4 +1,4 @@
-from ._json import to_json
+from faunadb._json import to_json
 
 
 def logger(logger_func):

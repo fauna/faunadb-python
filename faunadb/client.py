@@ -2,10 +2,10 @@ from time import time
 
 from requests import Request, Session
 
-from .errors import get_or_invalid, FaunaError
-from .objects import Ref
-from ._json import parse_json, to_json
-from .request_result import RequestResult
+from faunadb.errors import get_or_invalid, FaunaError
+from faunadb.objects import Ref
+from faunadb.request_result import RequestResult
+from faunadb._json import parse_json, to_json
 
 
 class Client(object):
