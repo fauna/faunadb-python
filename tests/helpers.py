@@ -1,3 +1,4 @@
+from builtins import object
 from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ
@@ -46,7 +47,7 @@ class FaunaTestCase(TestCase):
 
     args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
     # If None, use default instead
-    non_null_args = {k: v for k, v in args.iteritems() if v is not None}
+    non_null_args = {k: v for k, v in args.items() if v is not None}
     return Client(secret=secret, observer=observer, **non_null_args)
 
 

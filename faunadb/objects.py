@@ -2,6 +2,7 @@
 Types used in queries and responses.
 See the `docs <https://faunadb.com/documentation/queries#values>`__.
 """
+from builtins import str, object
 
 from datetime import datetime
 from iso8601 import parse_date

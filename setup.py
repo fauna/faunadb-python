@@ -11,6 +11,7 @@ with open(path.join(local_dir, "README.rst"), encoding="utf-8") as f:
 requires = [
   "iso8601",
   "requests",
+  "future",
 ]
 
 extras_require = {

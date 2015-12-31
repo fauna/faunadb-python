@@ -1,4 +1,5 @@
 """Error types that methods in the FaunaDB client throw."""
+from builtins import object
 
 from requests import codes
 

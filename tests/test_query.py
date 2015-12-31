@@ -1,3 +1,4 @@
+from __future__ import division
 from datetime import date
 from threading import Thread
 from time import sleep
@@ -383,7 +384,7 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.subtract())
 
   def test_divide(self):
-    assert self._q(query.divide(2.0, 3, 5)) == 2.0/15
+    assert self._q(query.divide(2.0, 3, 5)) == 2 / 15
     assert self._q(query.divide(2)) == 2
     self._assert_bad_query(query.divide(1, 0))
     self._assert_bad_query(query.divide())

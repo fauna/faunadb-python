@@ -12,6 +12,7 @@ To pass raw data to a query, use :any:`object` or :any:`quote`.
 from contextlib import contextmanager
 from threading import local
 from types import FunctionType
+from builtins import range
 _thread_local = local()
 
 #region Basic forms
@@ -363,7 +364,7 @@ def _auto_vars(n_vars):
 
 def _params(main_params, optional_params):
   """Hash of query arguments with None values removed."""
-  for key, val in optional_params.iteritems():
+  for key, val in optional_params.items():
     if val is not None:
       main_params[key] = val
   return main_params

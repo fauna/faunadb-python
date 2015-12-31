@@ -66,4 +66,4 @@ class _FaunaJSONEncoder(JSONEncoder):
     This ensures that values implementing to_fauna don't need to call it recursively themselves.
     """
     dct = obj.to_fauna_json()
-    return {k: self.default(v) for k, v in dct.iteritems()}
+    return {k: self.default(v) for k, v in dct.items()}

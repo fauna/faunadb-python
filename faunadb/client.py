@@ -1,3 +1,4 @@
+from builtins import object
 from time import time
 
 from requests import Request, Session
@@ -136,7 +137,7 @@ class Client(object):
     if isinstance(path, Ref):
       path = path.value
     if query is not None:
-      query = {k: v for k, v in query.iteritems() if v is not None}
+      query = {k: v for k, v in query.items() if v is not None}
 
     start_time = time()
     response = self._perform_request(action, path, data, query)
