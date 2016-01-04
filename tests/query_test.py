@@ -227,7 +227,7 @@ class QueryTest(FaunaTestCase):
     test_set = self._set_n(1)
     assert self._q(query.paginate(test_set)) == {"data": [self.ref_n1, self.ref_n1m1]}
     assert self._q(query.paginate(test_set, size=1)) ==\
-      {"data": [self.ref_n1], "after": self.ref_n1m1}
+      {"data": [self.ref_n1], "after": [self.ref_n1m1]}
     assert self._q(query.paginate(test_set, sources=True)) == {
       "data": [
         {"sources": [Set(test_set)], "value": self.ref_n1},

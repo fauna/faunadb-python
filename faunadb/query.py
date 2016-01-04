@@ -240,7 +240,7 @@ def delete(ref):
 
 def match(terms, index):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"match": terms, "index": index}
+  return {"match": index, "terms": terms}
 
 
 def union(*sets):
