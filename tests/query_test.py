@@ -32,6 +32,8 @@ class QueryTest(FaunaTestCase):
     self.ref_m1 = self._create(m=1)["ref"]
     self.ref_n1m1 = self._create(n=1, m=1)["ref"]
 
+  #region Helpers
+
   def _set_n(self, n):
     return query.match(n, self.n_index_ref)
 
@@ -50,6 +52,10 @@ class QueryTest(FaunaTestCase):
 
   def _assert_bad_query(self, q):
     self.assertRaises(HttpBadRequest, lambda: self._q(q))
+
+  #endregion
+
+  #region Basic forms
 
   def test_let_var(self):
     assert self._q(query.let({"x": 1}, query.var("x"))) == 1
@@ -180,6 +186,10 @@ class QueryTest(FaunaTestCase):
            query.lambda_pattern(["foo", "", "bar"], lambda (bar, foo): [bar, foo])
     assert self._q(query.map_expr(destructure_lambda, [[1, 2, 3], [4, 5, 6]])) == [[3, 1], [6, 4]]
 
+  #endregion
+
+  #region Collection functions
+
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
     assert self._q(query.map_expr(lambda a: query.multiply(2, a), [1, 2, 3])) == [2, 4, 6]
@@ -219,6 +229,10 @@ class QueryTest(FaunaTestCase):
   def test_append(self):
     assert self._q(query.append([4, 5, 6], [1, 2, 3])) == [1, 2, 3, 4, 5, 6]
 
+  #endregion
+
+  #region Read functions
+
   def test_get(self):
     instance = self._create()
     assert self._q(query.get(instance["ref"])) == instance
@@ -248,6 +262,10 @@ class QueryTest(FaunaTestCase):
     # `count` is currently only approximate. Should be 2.
     assert isinstance(self._q(query.count(instances)), int)
 
+  #endregion
+
+  #region Write functions
+
   def test_create(self):
     instance = self._create()
     assert "ref" in instance
@@ -268,6 +286,10 @@ class QueryTest(FaunaTestCase):
     ref = self._create()["ref"]
     self._q(query.delete(ref))
     assert self._q(query.exists(ref)) == False
+
+  #endregion
+
+  #region Sets
 
   def test_match(self):
     q = self._set_n(1)
@@ -296,6 +318,10 @@ class QueryTest(FaunaTestCase):
     joined = query.join(source, lambda a: query.match(a, self.m_index_ref))
     assert self._set_to_list(joined) == referencers
 
+  #endregion
+
+  #region Time and date functions
+
   def test_time(self):
     time = "1970-01-01T00:00:00.123456789Z"
     assert self._q(query.time(time)) == FaunaTime(time)
@@ -310,6 +336,10 @@ class QueryTest(FaunaTestCase):
 
   def test_date(self):
     assert self._q(query.date("1970-01-01")) == date(1970, 1, 1)
+
+  #endregion
+
+  #region Miscellaneous functions
 
   def test_equals(self):
     assert self._q(query.equals(1, 1, 1)) == True
@@ -383,6 +413,8 @@ class QueryTest(FaunaTestCase):
   def test_not(self):
     assert self._q(query.not_expr(True)) == False
     assert self._q(query.not_expr(False)) == True
+
+  #endregion
 
   def test_varargs(self):
     # Works for lists too
