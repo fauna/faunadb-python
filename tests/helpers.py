@@ -25,6 +25,7 @@ class FaunaTestCase(TestCase):
 
     db_name = "faunadb-python-test"
     self.db_ref = Ref("databases", db_name)
+    # TODO: See `core` issue #1975
     try:
       self.root_client.delete(self.db_ref)
     except HttpNotFound:
