@@ -10,12 +10,12 @@ with open(path.join(local_dir, "README.rst"), encoding="utf-8") as f:
 
 requires = [
   "iso8601",
-  "requests"
+  "requests",
 ]
 
 extras_require = {
   "docs": ["sphinx", "sphinx_rtd_theme"],
-  "test": ["pylint"]
+  "lint": ["pylint"],
 }
 
 setup(
