@@ -4,7 +4,7 @@ from threading import Thread
 from time import sleep
 
 from faunadb.errors import HttpBadRequest, HttpNotFound
-from faunadb.objects import FaunaTime, Set
+from faunadb.objects import Event, FaunaTime, Set
 from faunadb import query
 from helpers import FaunaTestCase
 
@@ -32,6 +32,8 @@ class QueryTest(FaunaTestCase):
     self.ref_m1 = self._create(m=1)["ref"]
     self.ref_n1m1 = self._create(n=1, m=1)["ref"]
 
+    self.thimble_class_ref = self.client.post("classes", {"name": "thimbles"})["ref"]
+
   #region Helpers
 
   def _set_n(self, n):
@@ -43,6 +45,9 @@ class QueryTest(FaunaTestCase):
   def _create(self, n=0, m=None):
     data = {"n": n} if m is None else {"n": n, "m": m}
     return self._q(query.create(self.class_ref, query.quote({"data": data})))
+
+  def _create_thimble(self, data):
+    return self._q(query.create(self.thimble_class_ref, query.quote({"data": data})))
 
   def _q(self, query_json):
     return self.client.query(query_json)
@@ -291,6 +296,40 @@ class QueryTest(FaunaTestCase):
   #endregion
 
   #region Sets
+
+  def test_insert(self):
+    instance = self._create_thimble({"weight": 1})
+    ref = instance["ref"]
+    ts = instance["ts"]
+    prev_ts = ts - 1
+
+    # Add previous event
+    inserted = query.quote({"data": {"weight": 0}})
+    add = query.insert(ref, prev_ts, "create", inserted)
+    self._q(add)
+    # Test alternate syntax
+    assert query.insert_event(Event(ref, prev_ts, "create"), inserted) == add
+
+    # Get version from previous event
+    old = self._q(query.get(ref, ts=prev_ts))
+    assert old["data"] == {"weight": 0}
+
+  def test_remove(self):
+    instance = self._create_thimble({"weight": 0})
+    ref = instance["ref"]
+
+    # Change it
+    new_instance = self._q(query.replace(ref, query.quote({"data": {"weight": 1}})))
+    assert self._q(query.get(ref)) == new_instance
+
+    # Delete that event
+    remove = query.remove(ref, new_instance["ts"], "create")
+    self._q(remove)
+    # Test alternate syntax
+    assert query.remove_event(Event(ref, new_instance["ts"], "create")) == remove
+
+    # Assert that it was undone
+    assert self._q(query.get(ref)) == instance
 
   def test_match(self):
     q = self._set_n(1)

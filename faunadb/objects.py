@@ -94,31 +94,31 @@ class Event(object):
     Events are not automatically converted.
     Use this on a dict that you know represents an Event.
     """
-    return Event(raw["ts"], raw["action"], raw["resource"])
+    return Event(raw["resource"], raw["ts"], raw["action"])
 
   # pylint: disable=invalid-name
-  def __init__(self, ts, action, resource):
+  def __init__(self, resource, ts, action):
     if action not in ("create", "delete"):
       raise ValueError('Action must be "create" or "delete".')
+    self.resource = resource
+    """The Ref of the affected instance."""
     self.ts = ts
     "Microsecond UNIX timestamp at which the event occurred."
     self.action = action
     '''"create" or "delete"'''
-    self.resource = resource
-    """The Ref of the affected instance."""
 
   def to_fauna_json(self):
-    return {"ts": self.ts, "action": self.action, "resource": self.resource}
+    return {"resource": self.resource, "ts": self.ts, "action": self.action}
 
   def __repr__(self):
-    return "Event(ts=%s, action=%s, resource=%s)" % (
-      repr(self.ts), repr(self.action), repr(self.resource))
+    return "Event(resource=%s, ts=%s, action=%s)" % (
+      repr(self.resource), repr(self.ts), repr(self.action))
 
   def __eq__(self, other):
     return isinstance(other, Event) and \
+      self.resource == other.resource and \
       self.ts == other.ts and \
-      self.action == other.action and \
-      self.resource == other.resource
+      self.action == other.action
 
   def __ne__(self, other):
     # pylint: disable=unneeded-not

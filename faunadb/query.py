@@ -234,6 +234,26 @@ def delete(ref):
   """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
   return {"delete": ref}
 
+
+def insert(ref, ts, action, params):
+  """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
+  return {"insert": ref, "ts": ts, "action": action, "params": params}
+
+
+def insert_event(event, params):
+  """:any:`insert` that takes an :any:`Event` object instead of separate parameters."""
+  return insert(event.resource, event.ts, event.action, params)
+
+
+def remove(ref, ts, action):
+  """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
+  return {"remove": ref, "ts": ts, "action": action}
+
+
+def remove_event(event):
+  """:any:`remove` that takes an :any:`Event` object instead of separate parameters."""
+  return remove(event.resource, event.ts, event.action)
+
 #endregion
 
 #region Sets
