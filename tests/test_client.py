@@ -1,10 +1,10 @@
-from logging import getLogger
-import re
-from testfixtures import LogCapture
+from io import StringIO
+from re import search
 
 from faunadb.client import Client
+from faunadb.client_logger import logger
 from faunadb.errors import HttpNotFound
-from helpers import get_client, FaunaTestCase
+from helpers import FaunaTestCase
 
 class ClientTest(FaunaTestCase):
   def test_parse_secret(self):
@@ -58,22 +58,24 @@ class ClientTest(FaunaTestCase):
     self.assertRaises(HttpNotFound, lambda: self.client.get(cls_ref))
 
   def test_logging(self):
-    with LogCapture() as l:
-      self.client.logger = getLogger()
-      self.client.ping()
-      messages = [r.getMessage() for r in l.records]
-      assert messages[0] == "Fauna GET /ping"
-      assert re.search("^  Credentials:", messages[1])
-      assert messages[2].startswith("  Response headers: {")
-      assert messages[3] == """  Response JSON: {
-    "resource": "Scope Global is OK"
-  }"""
-      assert re.search(
-        r"^  Response \(200\): API processing \d+ms, network latency \d+ms$",
-        messages[4])
+    logged_box = []
+    client = self.get_client(observer=logger(logged_box.append))
+    client.ping()
+    logged = logged_box[0]
 
-  def test_logging_no_auth(self):
-    with LogCapture() as l:
-      get_client(secret=None, logger=getLogger()).ping()
-      messages = [r.getMessage() for r in l.records]
-      assert messages[1] == "  Credentials: None"
+    read_line = StringIO(logged).readline
+    assert read_line() == "Fauna GET /ping\n"
+    assert search("^  Credentials:", read_line())
+    assert read_line() == "  Response headers: {\n"
+    # Skip through headers
+    while True:
+      line = read_line()
+      if not line.startswith("    "):
+        assert line == "  }\n"
+        break
+    assert read_line() == "  Response JSON: {\n"
+    assert read_line() == '    "resource": "Scope Global is OK"\n'
+    assert read_line() == "  }\n"
+    assert search(
+      r"^  Response \(200\): API processing \d+ms, network latency \d+ms\n$",
+      read_line())

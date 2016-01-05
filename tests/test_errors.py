@@ -4,9 +4,13 @@ from faunadb.errors import FaunaError, HttpBadRequest, HttpInternalError, \
   HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, \
   HttpUnavailableError, InvalidResponse
 
-from helpers import get_client, FaunaTestCase, mock_client
+from helpers import FaunaTestCase, mock_client
 
 class ErrorsTest(FaunaTestCase):
+  def test_info(self):
+    err = capture_exception(lambda: self.client.query({"foo": "bar"}))
+    assert err.request_result.request_content == {"foo": "bar"}
+
   def test_invalid_response(self):
     # Response must be valid json
     self.assertRaises(InvalidResponse, lambda: mock_client('I like fine wine').get(''))
@@ -22,7 +26,7 @@ class ErrorsTest(FaunaTestCase):
     # Tests of HttpBadRequest.errors go in ErrorData section.
 
   def test_http_unauthorized(self):
-    client = get_client("bad_key")
+    client = self.get_client(secret="bad_key")
     assert_http_error(lambda: client.get(self.db_ref), HttpUnauthorized, "unauthorized")
 
   def test_http_permission_denied(self):
@@ -97,7 +101,6 @@ class ErrorsTest(FaunaTestCase):
     failure = failures[0]
     assert failure.code == code
     assert failure.field == field
-
   #endregion
 
   def _assert_query_error(self, query, code, position=None):

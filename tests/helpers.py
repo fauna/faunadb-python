@@ -21,7 +21,7 @@ class FaunaTestCase(TestCase):
     # Turn off annoying logging about reset connections.
     getLogger("requests").setLevel(WARNING)
 
-    self.root_client = get_client(_FAUNA_ROOT_KEY)
+    self.root_client = self.get_client(secret=_FAUNA_ROOT_KEY)
 
     db_name = "faunadb-python-test"
     self.db_ref = Ref("databases", db_name)
@@ -33,18 +33,21 @@ class FaunaTestCase(TestCase):
 
     self.root_client.post("databases", {"name": db_name})
 
-    key = self.root_client.post("keys", {"database": self.db_ref, "role": "server"})
-    self.client = get_client(key["secret"])
+    self.server_key = self.root_client.post(
+      "keys", {"database": self.db_ref, "role": "server"})["secret"]
+    self.client = self.get_client()
 
   def tearDown(self):
     self.root_client.delete(self.db_ref)
 
+  def get_client(self, secret=None, observer=None):
+    if secret is None:
+      secret = self.server_key
 
-def get_client(secret, logger=None):
-  args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
-  # If None, use default instead
-  non_null_args = {k: v for k, v in args.iteritems() if v is not None}
-  return Client(secret=secret, logger=logger, **non_null_args)
+    args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
+    # If None, use default instead
+    non_null_args = {k: v for k, v in args.iteritems() if v is not None}
+    return Client(secret=secret, observer=observer, **non_null_args)
 
 
 def mock_client(response_text, status_code=codes.ok):
@@ -63,7 +66,7 @@ class _MockSession(object):
 
   def send(self, *args):
     # pylint: disable=unused-argument
-    return _MockResponse(self.status_code, self.response_text)
+    return _MockResponse(self.status_code, self.response_text, {})
 
 
-_MockResponse = namedtuple('MockResponse', ['status_code', 'text'])
+_MockResponse = namedtuple('MockResponse', ['status_code', 'text', 'headers'])

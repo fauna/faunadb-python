@@ -1,20 +1,12 @@
-from logging import DEBUG, getLogger, StreamHandler
-from os import environ
 from time import time
 
-from requests import codes, Request, Session
+from requests import Request, Session
 
-from .errors import get_or_invalid, FaunaError, HttpBadRequest, HttpInternalError, \
-  HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, HttpUnavailableError
+from .errors import get_or_invalid, FaunaError
 from .objects import Ref
 from ._json import parse_json, to_json
+from .request_result import RequestResult
 
-if environ.get("FAUNA_DEBUG"):
-  _debug_logger = getLogger(__name__)
-  _debug_logger.setLevel(DEBUG)
-  _debug_logger.addHandler(StreamHandler())
-else:
-  _debug_logger = None
 
 class Client(object):
   """
@@ -36,17 +28,13 @@ class Client(object):
   # pylint: disable=too-many-arguments, too-many-instance-attributes
   def __init__(
       self,
-      logger=None,
       domain="rest.faunadb.com",
       scheme="https",
       port=None,
       timeout=60,
-      secret=None):
+      secret=None,
+      observer=None):
     """
-    :param logger:
-      A `Logger <https://docs.python.org/2/library/logging.html#logger-objects>`_.
-      Will be called to log every request and response.
-      Setting the ``FAUNA_DEBUG`` environment variable will also log to ``STDERR``.
     :param domain:
       Base URL for the FaunaDB server.
     :param scheme:
@@ -58,9 +46,10 @@ class Client(object):
     :param secret:
       Auth token for the FaunaDB server.
       May be a (username, password) tuple, or "username:password", or just the username (no colon).
+    :param observer:
+      Callback that will be passed a :any:`RequestResult` after every completed request.
     """
 
-    self.logger = logger
     self.domain = domain
     self.scheme = scheme
     self.port = (443 if scheme == "https" else 80) if port is None else port
@@ -76,6 +65,8 @@ class Client(object):
     self.session.timeout = timeout
 
     self.base_url = "%s://%s:%s" % (self.scheme, self.domain, self.port)
+
+    self.observer = observer
 
   def get(self, path, query=None):
     """
@@ -139,96 +130,36 @@ class Client(object):
     """
     return self.get("ping", {"scope": scope, "timeout": timeout})
 
-  def _log(self, indented, logged):
-    """Indents `logged` before sending it to self.logger."""
-    if indented:
-      indent_str = "  "
-      logged = indent_str + ("\n" + indent_str).join(logged.split("\n"))
-
-    if _debug_logger:
-      _debug_logger.debug(logged)
-    if self.logger:
-      self.logger.debug(logged)
-
   def _execute(self, action, path, data=None, query=None):
     """Performs an HTTP action, logs it, and looks for errors."""
-    # pylint: disable=too-many-branches
-
+    # pylint: disable=raising-bad-type
     if isinstance(path, Ref):
       path = path.value
     if query is not None:
       query = {k: v for k, v in query.iteritems() if v is not None}
 
-    if self.logger is not None or _debug_logger is not None:
-      self._log(False, "Fauna %s /%s%s" % (action, path, Client._query_string_for_logging(query)))
+    start_time = time()
+    response = self._perform_request(action, path, data, query)
+    end_time = time()
+    response_dict = parse_json(response.text)
 
-      if self.session.auth is None:
-        self._log(True, "Credentials: None")
-      else:
-        self._log(True, "Credentials: %s:%s" % self.session.auth)
+    request_result = RequestResult(
+      self,
+      action, path, query, data,
+      response_dict, response.status_code, response.headers,
+      start_time, end_time)
 
-      if data:
-        self._log(True, "Request JSON: %s" % to_json(data, pretty=True))
+    if self.observer is not None:
+      self.observer(request_result)
 
-      real_time_begin = time()
-      response = self._execute_without_logging(action, path, data, query)
-      real_time_end = time()
-      real_time = real_time_end - real_time_begin
+    FaunaError.raise_for_status_code(request_result)
+    return get_or_invalid(response_dict, "resource")
 
-      # response.headers a CaseInsensitiveDict, which can't be converted to JSON directly
-      headers_json = to_json(dict(response.headers), pretty=True)
-      response_dict = parse_json(response.text)
-      response_json = to_json(response_dict, pretty=True)
-      self._log(True, "Response headers: %s" % headers_json)
-      self._log(True, "Response JSON: %s" % response_json)
-      self._log(
-        True,
-        "Response (%i): API processing %sms, network latency %ims" % (
-          response.status_code,
-          response.headers.get("X-HTTP-Request-Processing-Time", "N/A"),
-          int(real_time * 1000)))
-      return Client._handle_response(response, response_dict)
-    else:
-      response = self._execute_without_logging(action, path, data, query)
-      response_dict = parse_json(response.text)
-      return Client._handle_response(response, response_dict)
-
-  def _execute_without_logging(self, action, path, data, query):
+  def _perform_request(self, action, path, data, query):
     """Performs an HTTP action."""
     url = self.base_url + "/" + path
     req = Request(action, url, params=query, data=to_json(data))
     return self.session.send(self.session.prepare_request(req))
-
-  @staticmethod
-  def _handle_response(response, response_dict):
-    """Looks for error codes in response. If not, parses it."""
-    # pylint: disable=no-member
-    code = response.status_code
-    if 200 <= code <= 299:
-      return get_or_invalid(response_dict, "resource")
-    elif code == codes.bad_request:
-      raise HttpBadRequest(response_dict)
-    elif code == codes.unauthorized:
-      raise HttpUnauthorized(response_dict)
-    elif code == codes.forbidden:
-      raise HttpPermissionDenied(response_dict)
-    elif code == codes.not_found:
-      raise HttpNotFound(response_dict)
-    elif code == codes.method_not_allowed:
-      raise HttpMethodNotAllowed(response_dict)
-    elif code == codes.internal_server_error:
-      raise HttpInternalError(response_dict)
-    elif code == codes.unavailable:
-      raise HttpUnavailableError(response_dict)
-    else:
-      raise FaunaError(response_dict)
-
-  @staticmethod
-  def _query_string_for_logging(query):
-    """Converts a query dict to URL params."""
-    if not query:
-      return ""
-    return "?" + "&".join(("%s=%s" % (k, v) for k, v in query.iteritems()))
 
   @staticmethod
   def _parse_secret(secret):
