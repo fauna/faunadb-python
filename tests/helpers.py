@@ -1,8 +1,8 @@
 from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ
-from requests import codes
 from unittest import TestCase
+from requests import codes
 
 from faunadb.client import Client
 from faunadb.errors import HttpNotFound
