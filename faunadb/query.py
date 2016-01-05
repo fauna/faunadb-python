@@ -264,6 +264,24 @@ def join(source, target):
 
 #endregion
 
+#region String functions
+
+def concat(*strings):
+  """See the `docs <https://faunadb.com/documentation/queries#string_functions>`__."""
+  return {"concat": _varargs(strings)}
+
+
+def concat_with_separator(separator, *strings):
+  """See the `docs <https://faunadb.com/documentation/queries#string_functions>`__."""
+  return {"concat": _varargs(strings), "separator": separator}
+
+
+def casefold(string):
+  """See the `docs <https://faunadb.com/documentation/queries#string_functions>`__."""
+  return {"casefold": string}
+
+#endregion
+
 #region Time and date functions
 
 def time(string):
@@ -287,16 +305,6 @@ def date(string):
 def equals(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
   return {"equals": _varargs(values)}
-
-
-def concat(*strings):
-  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"concat": _varargs(strings)}
-
-
-def concat_with_separator(separator, *strings):
-  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"concat": _varargs(strings), "separator": separator}
 
 
 def contains(path, in_):
