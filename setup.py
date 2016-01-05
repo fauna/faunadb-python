@@ -43,4 +43,5 @@ setup(
   packages=["faunadb"],
   install_requires=requires,
   extras_require=extras_require,
+  test_suite="tests",
 )
