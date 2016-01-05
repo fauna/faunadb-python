@@ -10,12 +10,12 @@ with open(path.join(local_dir, "README.rst"), encoding="utf-8") as f:
 
 requires = [
   "iso8601",
-  "requests"
+  "requests",
 ]
 
-extra_requires = {
+extras_require = {
   "docs": ["sphinx", "sphinx_rtd_theme"],
-  "test": ["pylint"]
+  "lint": ["pylint"],
 }
 
 setup(
@@ -42,5 +42,6 @@ setup(
   keywords="faunadb fauna",
   packages=["faunadb"],
   install_requires=requires,
-  extra_requires=extra_requires
+  extras_require=extras_require,
+  test_suite="tests",
 )
