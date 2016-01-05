@@ -321,6 +321,18 @@ class QueryTest(FaunaTestCase):
 
   #endregion
 
+  #region String functions
+
+  def test_concat(self):
+    assert self._q(query.concat("a", "b", "c")) == "abc"
+    assert self._q(query.concat()) == ""
+    assert self._q(query.concat_with_separator(".", "a", "b", "c")) == "a.b.c"
+
+  def test_casefold(self):
+    assert self._q(query.casefold("Hen Wen")) == "hen wen"
+
+  #endregion
+
   #region Time and date functions
 
   def test_time(self):
@@ -347,10 +359,6 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.equals(1, 1, 2)) is False
     assert self._q(query.equals(1)) is True
     self._assert_bad_query(query.equals())
-
-  def test_concat(self):
-    assert self._q(query.concat("a", "b", "c")) == "abc"
-    assert self._q(query.concat()) == ""
 
   def test_contains(self):
     obj = query.quote({"a": {"b": 1}})
