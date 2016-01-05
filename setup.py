@@ -13,7 +13,7 @@ requires = [
   "requests"
 ]
 
-extra_requires = {
+extras_require = {
   "docs": ["sphinx", "sphinx_rtd_theme"],
   "test": ["pylint"]
 }
@@ -42,5 +42,5 @@ setup(
   keywords="faunadb fauna",
   packages=["faunadb"],
   install_requires=requires,
-  extra_requires=extra_requires
+  extras_require=extras_require,
 )
