@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import date
 from threading import Thread
 from time import sleep
@@ -110,6 +109,13 @@ class QueryTest(FaunaTestCase):
       query.lambda_query(lambda a: fail())
     assert query.lambda_query(lambda a: a) == {"lambda": "auto0", "expr": {"var": "auto0"}}
 
+  def test_lambda_query_multiple_args(self):
+    expected = query.lambda_query(lambda a, b: [b, a])
+    assert expected == {
+      "lambda": ["auto0", "auto1"],
+      "expr": [{"var": "auto1"}, {"var": "auto0"}]
+    }
+
   def test_lambda_query_multithreaded(self):
     """Test that lambda_query works in simultaneous threads."""
     events = []
@@ -137,60 +143,6 @@ class QueryTest(FaunaTestCase):
 
     # Assert that events happened in the order expected.
     assert events == [0, 1, 2]
-
-  def test_lambda_pattern(self):
-    array_lambda = query.lambda_pattern(["a", "b"], lambda (a, b): [b, a])
-    assert array_lambda == query.lambda_expr(["a", "b"], [query.var("b"), query.var("a")])
-    assert self._q(query.map_expr(array_lambda, [[1, 2], [3, 4]])) == [[2, 1], [4, 3]]
-
-    object_lambda = query.lambda_pattern(
-      {"alpha": "a", "beta": "b"},
-      lambda (a, b): [b, a])
-    assert object_lambda == query.lambda_expr(
-      {"alpha": "a", "beta": "b"},
-      [query.var("b"), query.var("a")])
-    object_data = query.quote([{"alpha": 1, "beta": 2}, {"alpha": 3, "beta": 4}])
-    assert self._q(query.map_expr(object_lambda, object_data)) == [[2, 1], [4, 3]]
-
-    mixed_pattern = {"alpha": ["a", "b"], "beta": {"gamma": "c", "delta": "d"}}
-    mixed_lambda = query.lambda_pattern(mixed_pattern, lambda (a, b, c, d): [a, b, c, d])
-    assert mixed_lambda == query.lambda_expr(
-      mixed_pattern,
-      [query.var("a"), query.var("b"), query.var("c"), query.var("d")])
-    mixed_data = query.quote([{"alpha": [1, 2], "beta": {"gamma": 3, "delta": 4}}])
-    assert self._q(query.map_expr(mixed_lambda, mixed_data)) == [[1, 2, 3, 4]]
-
-    # Allows ignored variables.
-    ignore_lambda = query.lambda_pattern(["foo", "", "bar"], lambda (bar, foo): [bar, foo])
-    assert ignore_lambda == query.lambda_expr(
-      ["foo", "", "bar"],
-      [query.var("bar"), query.var("foo")])
-    assert self._q(query.map_expr(ignore_lambda, [[1, 2, 3], [4, 5, 6]])) == [[3, 1], [6, 4]]
-
-    # Extra array elements are ignored.
-    assert self._q(query.map_expr(array_lambda, [[1, 2, 3]])) == [[2, 1]]
-
-    # Object patterns must have all keys.
-    self._assert_bad_query(query.map_expr(
-      query.lambda_pattern({"alpha": "a"}, lambda (a,): 0),
-      [{"alpha": 1, "beta": 2}]))
-
-    # Lambda generator fails for bad pattern.
-    self.assertRaises(ValueError, lambda: query.lambda_pattern({"alpha": 0}, lambda args: 0))
-
-    # Can use other Sequence types.
-    tuple_lambda = query.lambda_pattern(("a", "b"), lambda (a, b): b)
-    assert self._q(query.map_expr(tuple_lambda, [[1, 2]])) == [2]
-
-    # Can use other Mapping types.
-    ordered_dict_lambda = query.lambda_pattern(OrderedDict([["a", "a"]]), lambda (a,): a)
-    assert self._q(query.map_expr(ordered_dict_lambda, query.quote([{"a": 1}]))) == [1]
-
-    # Can also use args with dot syntax.
-    destructure_lambda = query.lambda_pattern(["foo", "", "bar"], lambda args: [args.bar, args.foo])
-    assert destructure_lambda ==\
-           query.lambda_pattern(["foo", "", "bar"], lambda (bar, foo): [bar, foo])
-    assert self._q(query.map_expr(destructure_lambda, [[1, 2, 3], [4, 5, 6]])) == [[3, 1], [6, 4]]
 
   #endregion
 

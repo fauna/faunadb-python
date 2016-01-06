@@ -9,7 +9,7 @@ To pass raw data to a query, use :any:`object` or :any:`quote`.
 
 # pylint: disable=invalid-name, redefined-builtin
 
-from collections import Mapping, Sequence, namedtuple
+from contextlib import contextmanager
 from threading import local
 from types import FunctionType
 _thread_local = local()
@@ -57,25 +57,27 @@ def lambda_query(func):
       #  "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
       # }
 
-  Query functions requiring lambdas can be passed raw lambdas
+  Query functions requiring lambdas can be passed Python lambdas
   without explicitly calling :any:`lambda_query`.
   For example: ``query.map(lambda a: query.add(a, 1), collection)``.
 
   You can also use :any:`lambda_expr` directly.
 
-  :param func: Takes a :any:`var` and uses it to construct an expression.
+  :param func:
+    Takes one or more :any:`var` expressions and uses them to construct an expression.
+    If this has more than one argument, the lambda destructures an array argument.
+    (To destructure single-element arrays use :any:`lambda_expr`.)
   """
-  if not hasattr(_thread_local, "fauna_lambda_var_number"):
-    _thread_local.fauna_lambda_var_number = 0
 
-  var_name = "auto%i" % _thread_local.fauna_lambda_var_number
-  _thread_local.fauna_lambda_var_number += 1
+  n_args = func.func_code.co_argcount
+  if n_args == 0:
+    raise ValueError("Function must take at least 1 argument.")
 
-  # Make sure lambda_auto_var_number returns to its former value even if there are errors.
-  try:
-    return lambda_expr(var_name, func(var(var_name)))
-  finally:
-    _thread_local.fauna_lambda_var_number -= 1
+  with _auto_vars(n_args) as vars:
+    if n_args == 1:
+      return lambda_expr(vars[0], func(var(vars[0])))
+    else:
+      return lambda_expr(vars, func(*[var(v) for v in vars]))
 
 
 def _to_lambda(value):
@@ -86,53 +88,9 @@ def _to_lambda(value):
     return value
 
 
-def lambda_pattern(pattern, func):
-  """
-  See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__.
-  This form gathers variables from the pattern you provide and puts them in an object.
-  It is called like::
-
-      q = query.map_expr(
-        query.lambda_pattern(["foo", "", "bar"], lambda args: [args.bar, args.foo]),
-        [[1, 2, 3], [4, 5, 6]]))
-      # Result of client.query(q) is: [[3, 1], [6, 4]].
-
-  You can also destructure the namedtuple; in this case, variables are sorted alphabetically::
-
-      query.lambda_pattern(["foo", "", "bar"], lambda (bar, foo): [bar, foo])
-
-  :param Sequence|Mapping pattern:
-    Tree of lists and dicts. Leaves are the names of variables.
-    If a leaf is the empty string ``""``, it is ignored.
-  :param function func:
-    Takes a ``namedtuple`` of variables taken from the leaves of ``pattern``, and returns a query.
-  """
-  arg_names = sorted(_pattern_args(pattern))
-  PatternArgs = namedtuple("PatternArgs", arg_names)
-  args = PatternArgs(*[var(name) for name in arg_names])
-  return lambda_expr(pattern, func(args))
-
-
-def _pattern_args(pattern):
-  """Collects all args from the leaves of a pattern."""
-  args = []
-  if isinstance(pattern, str):
-    if pattern != "":
-      args.append(pattern)
-  elif isinstance(pattern, Sequence):
-    for entry in pattern:
-      args.extend(_pattern_args(entry))
-  elif isinstance(pattern, Mapping):
-    for entry in pattern.values():
-      args.extend(_pattern_args(entry))
-  else:
-    raise ValueError("Pattern must be a str, Sequence, or Mapping; got %s" % repr(pattern))
-  return args
-
-
-def lambda_expr(var_name, expr):
+def lambda_expr(var_name_or_pattern, expr):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"lambda": var_name, "expr": expr}
+  return {"lambda": var_name_or_pattern, "expr": expr}
 
 #endregion
 
@@ -385,6 +343,24 @@ def not_expr(boolean):
 
 #endregion
 
+#region Helpers
+
+@contextmanager
+def _auto_vars(n_vars):
+  if not hasattr(_thread_local, "fauna_lambda_var_number"):
+    _thread_local.fauna_lambda_var_number = 0
+
+  low_var_number = _thread_local.fauna_lambda_var_number
+  next_var_number = low_var_number + n_vars
+
+  _thread_local.fauna_lambda_var_number = next_var_number
+
+  try:
+    yield ["auto%i" % i for i in range(low_var_number, next_var_number)]
+  finally:
+    _thread_local.fauna_lambda_var_number = low_var_number
+
+
 def _params(main_params, optional_params):
   """Hash of query arguments with None values removed."""
   for key, val in optional_params.iteritems():
@@ -400,3 +376,5 @@ def _varargs(values):
   ``query.add([1, 2])`` will work as well as ``query.add(1, 2)``.
   """
   return values[0] if len(values) == 1 else values
+
+#endregion
