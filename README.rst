@@ -21,6 +21,15 @@ See the `FaunaDB Documentation <https://faunadb.com/documentation>`_ for a compl
 for more examples.
 
 
+Basic Usage
+-----------
+
+The first step for any program is to create a :doc:`client` instance.
+This object must be explicitly threaded through any code that needs to access FaunaDB.
+
+FaunaDB can be used directly using the :doc:`query` API.
+
+
 Building it yourself
 --------------------
 
@@ -50,7 +59,8 @@ To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTes
 Documenting
 ~~~~~~~~~~~
 
-Run ``make docs``, then open ``docs/_build/html/index.html`` in a web browser.
+Run ``pip install sphinx sphinx_rtd_theme`` to install the needed packages to generate the docs.
+Then run ``make doc``, then open ``docs/_build/html/index.html`` in a web browser.
 
 
 Contribute
@@ -62,7 +72,7 @@ GitHub pull requests are very welcome.
 License
 -------
 
-Copyright 2015 `Fauna, Inc. <https://faunadb.com>`_
+Copyright 2016 `Fauna, Inc. <https://faunadb.com>`_
 
 Licensed under the Mozilla Public License, Version 2.0 (the
 "License"); you may not use this software except in compliance with

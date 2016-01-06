@@ -1,7 +1,7 @@
 from setuptools import setup
 from codecs import open
 from os import path
-from faunadb import __version__ as version
+from faunadb import __version__ as pkg_version, __author__ as pkg_author, __license__ as pkg_license
 
 # Load the README file for use in the long description
 local_dir = path.abspath(path.dirname(__file__))
@@ -14,19 +14,19 @@ requires = [
 ]
 
 extras_require = {
-  "docs": ["sphinx", "sphinx_rtd_theme"],
+  "doc": ["sphinx", "sphinx_rtd_theme"],
   "lint": ["pylint"],
 }
 
 setup(
   name="faunadb",
-  version=version,
+  version=pkg_version,
   description="FaunaDB Python client",
   long_description=long_description,
   url="https://github.com/faunadb/faunadb-python",
-  author="FaunaDB",
+  author=pkg_author,
   author_email="priority@faunadb.com",
-  license="MPL 2.0",
+  license=pkg_license,
   classifiers=[
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",

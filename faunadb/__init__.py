@@ -1,1 +1,5 @@
+__title__ = "FaunaDB"
 __version__ = "0.0.0.dev1"
+__author__ = "FaunaDB, Inc"
+__license__ = "MPL 2.0"
+__copyright__ = "2016 FaunaDB, Inc"
