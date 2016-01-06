@@ -59,7 +59,8 @@ To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTes
 Documenting
 ~~~~~~~~~~~
 
-Run ``make doc``, then open ``docs/_build/html/index.html`` in a web browser.
+Run ``pip install sphinx sphinx_rtd_theme`` to install the needed packages to generate the docs.
+Then run ``make doc``, then open ``docs/_build/html/index.html`` in a web browser.
 
 
 Contribute
