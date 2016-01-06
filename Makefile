@@ -1,6 +1,6 @@
-all: test lint docs
+all: test lint doc
 
-docs:
+doc:
 	sphinx-build -E -b html docs docs/_build/html
 
 test:

@@ -50,7 +50,7 @@ To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTes
 Documenting
 ~~~~~~~~~~~
 
-Run ``make docs``, then open ``docs/_build/html/index.html`` in a web browser.
+Run ``make doc``, then open ``docs/_build/html/index.html`` in a web browser.
 
 
 Contribute
