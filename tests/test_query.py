@@ -315,9 +315,9 @@ class QueryTest(FaunaTestCase):
   #region String functions
 
   def test_concat(self):
-    assert self._q(query.concat("a", "b", "c")) == "abc"
-    assert self._q(query.concat()) == ""
-    assert self._q(query.concat_with_separator(".", "a", "b", "c")) == "a.b.c"
+    assert self._q(query.concat(["a", "b", "c"])) == "abc"
+    assert self._q(query.concat([])) == ""
+    assert self._q(query.concat(["a", "b", "c"], ".")) == "a.b.c"
 
   def test_casefold(self):
     assert self._q(query.casefold("Hen Wen")) == "hen wen"
