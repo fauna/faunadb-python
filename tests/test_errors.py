@@ -1,8 +1,10 @@
 from requests import codes
 
+from faunadb import query
 from faunadb.errors import FaunaError, HttpBadRequest, HttpInternalError, \
   HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, \
   HttpUnavailableError, InvalidResponse
+from faunadb.objects import Ref
 
 from tests.helpers import FaunaTestCase, mock_client
 
@@ -27,11 +29,19 @@ class ErrorsTest(FaunaTestCase):
 
   def test_http_unauthorized(self):
     client = self.get_client(secret="bad_key")
-    assert_http_error(lambda: client.get(self.db_ref), HttpUnauthorized, "unauthorized")
+    assert_http_error(
+      lambda: client.query(query.get(self.db_ref)), HttpUnauthorized, "unauthorized")
 
   def test_http_permission_denied(self):
-    assert_http_error(
-      lambda: self.client.get("databases"), HttpPermissionDenied, "permission denied")
+    # Create client with client key
+    client = self.get_client(
+      secret=self.root_client.query(
+        query.create(Ref("keys"), query.object(database=self.db_ref, role="client")))["secret"]
+    )
+
+    exception = capture_exception(lambda: client.query(query.paginate(Ref("databases"))))
+    assert isinstance(exception, HttpPermissionDenied)
+    assert_error(exception, "permission denied", ["paginate"])
 
   def test_http_not_found(self):
     assert_http_error(lambda: self.client.get("classes/not_found"), HttpNotFound, "not found")
@@ -41,7 +51,11 @@ class ErrorsTest(FaunaTestCase):
       lambda: self.client.delete("classes"), HttpMethodNotAllowed, "method not allowed")
 
   def test_internal_error(self):
-    assert_http_error(lambda: self.client.get("error"), HttpInternalError, "internal server error")
+    # pylint: disable=line-too-long
+    code_client = mock_client(
+      '{"errors": [{"code": "internal server error", "description": "sample text", "stacktrace": []}]}',
+      codes.internal_server_error)
+    assert_http_error(lambda: code_client.get("error"), HttpInternalError, "internal server error")
 
   def test_unavailable_error(self):
     client = mock_client(
@@ -87,7 +101,8 @@ class ErrorsTest(FaunaTestCase):
       "name": "gerbils_by_x",
       "source": {"@ref": "classes/gerbils"},
       "terms": [{"path": "data.x"}],
-      "unique": True
+      "unique": True,
+      "active": True
     })
     self.client.post("classes/gerbils", {"data": {"x": 1}})
     self._assert_invalid_data(
@@ -103,9 +118,9 @@ class ErrorsTest(FaunaTestCase):
     assert failure.field == field
   #endregion
 
-  def _assert_query_error(self, query, code, position=None):
+  def _assert_query_error(self, q, code, position=None):
     position = position or []
-    assert_error(capture_exception(lambda: self.client.query(query)), code, position)
+    assert_error(capture_exception(lambda: self.client.query(q)), code, position)
 
 
 def capture_exception(func):
