@@ -245,14 +245,9 @@ def join(source, target):
 
 #region String functions
 
-def concat(*strings):
+def concat(strings, separator=None):
   """See the `docs <https://faunadb.com/documentation/queries#string_functions>`__."""
-  return {"concat": _varargs(strings)}
-
-
-def concat_with_separator(separator, *strings):
-  """See the `docs <https://faunadb.com/documentation/queries#string_functions>`__."""
-  return {"concat": _varargs(strings), "separator": separator}
+  return _params({"concat": strings}, {"separator": separator})
 
 
 def casefold(string):
