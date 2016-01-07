@@ -198,9 +198,16 @@ class QueryTest(FaunaTestCase):
 
   def test_paginate(self):
     test_set = self._set_n(1)
-    assert self._q(query.paginate(test_set)) == {"data": [self.ref_n1, self.ref_n1m1]}
-    assert self._q(query.paginate(test_set, size=1)) ==\
-      {"data": [self.ref_n1], "after": [self.ref_n1m1]}
+    control = [self.ref_n1, self.ref_n1m1]
+    assert self._q(query.paginate(test_set)) == {"data": control}
+
+    data = []
+    page1 = self._q(query.paginate(test_set, size=1))
+    data.extend(page1["data"])
+    page2 = self._q(query.paginate(test_set, size=1, after=page1["after"]))
+    data.extend(page2["data"])
+    assert data == control
+
     assert self._q(query.paginate(test_set, sources=True)) == {
       "data": [
         {"sources": [Set(test_set)], "value": self.ref_n1},
