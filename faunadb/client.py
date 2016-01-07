@@ -1,11 +1,13 @@
 from time import time
+# pylint: disable=redefined-builtin
+from builtins import object
 
 from requests import Request, Session
 
-from .errors import get_or_invalid, FaunaError
-from .objects import Ref
-from ._json import parse_json, to_json
-from .request_result import RequestResult
+from faunadb.errors import get_or_invalid, FaunaError
+from faunadb.objects import Ref
+from faunadb.request_result import RequestResult
+from faunadb._json import parse_json, to_json
 
 
 class Client(object):
@@ -67,6 +69,9 @@ class Client(object):
     self.base_url = "%s://%s:%s" % (self.scheme, self.domain, self.port)
 
     self.observer = observer
+
+  def __del__(self):
+    self.session.close()
 
   def get(self, path, query=None):
     """
@@ -136,7 +141,7 @@ class Client(object):
     if isinstance(path, Ref):
       path = path.value
     if query is not None:
-      query = {k: v for k, v in query.iteritems() if v is not None}
+      query = {k: v for k, v in query.items() if v is not None}
 
     start_time = time()
     response = self._perform_request(action, path, data, query)

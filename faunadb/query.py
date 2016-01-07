@@ -12,6 +12,7 @@ To pass raw data to a query, use :any:`object` or :any:`quote`.
 from contextlib import contextmanager
 from threading import local
 from types import FunctionType
+from builtins import range
 _thread_local = local()
 
 #region Basic forms
@@ -69,7 +70,7 @@ def lambda_query(func):
     (To destructure single-element arrays use :any:`lambda_expr`.)
   """
 
-  n_args = func.func_code.co_argcount
+  n_args = func.__code__.co_argcount
   if n_args == 0:
     raise ValueError("Function must take at least 1 argument.")
 
@@ -363,7 +364,7 @@ def _auto_vars(n_vars):
 
 def _params(main_params, optional_params):
   """Hash of query arguments with None values removed."""
-  for key, val in optional_params.iteritems():
+  for key, val in optional_params.items():
     if val is not None:
       main_params[key] = val
   return main_params

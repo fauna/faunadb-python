@@ -2,8 +2,11 @@ from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ
 from unittest import TestCase
+# pylint: disable=redefined-builtin
+from builtins import object
 from requests import codes
 
+from faunadb._json import to_json, parse_json
 from faunadb.client import Client
 from faunadb.errors import HttpNotFound
 from faunadb.objects import Ref
@@ -40,13 +43,23 @@ class FaunaTestCase(TestCase):
   def tearDown(self):
     self.root_client.delete(self.db_ref)
 
+  def assertJson(self, obj, json):
+    self.assertToJson(obj, json)
+    self.assertParseJson(obj, json)
+
+  def assertToJson(self, obj, json):
+    assert to_json(obj, sort_keys=True) == json
+
+  def assertParseJson(self, obj, json):
+    assert parse_json(json) == obj
+
   def get_client(self, secret=None, observer=None):
     if secret is None:
       secret = self.server_key
 
     args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
     # If None, use default instead
-    non_null_args = {k: v for k, v in args.iteritems() if v is not None}
+    non_null_args = {k: v for k, v in args.items() if v is not None}
     return Client(secret=secret, observer=observer, **non_null_args)
 
 
@@ -60,6 +73,9 @@ class _MockSession(object):
   def __init__(self, response_text, status_code):
     self.response_text = response_text
     self.status_code = status_code
+
+  def close(self):
+    pass
 
   def prepare_request(self, *args):
     pass

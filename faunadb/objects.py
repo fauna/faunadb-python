@@ -2,11 +2,12 @@
 Types used in queries and responses.
 See the `docs <https://faunadb.com/documentation/queries#values>`__.
 """
-
 from datetime import datetime
+# pylint: disable=redefined-builtin
+from builtins import str, object
 from iso8601 import parse_date
 
-from . import query
+from faunadb import query
 
 class Ref(object):
   """

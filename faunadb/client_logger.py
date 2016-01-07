@@ -1,4 +1,4 @@
-from ._json import to_json
+from faunadb._json import to_json
 
 
 def logger(logger_func):
@@ -23,7 +23,7 @@ def show_request_result(request_result):
     return ("\n" + indent_str).join(s.split("\n"))
 
   if rr.query:
-    query_string = "?" + "&".join(("%s=%s" % (k, v) for k, v in rr.query.iteritems()))
+    query_string = "?" + "&".join(("%s=%s" % (k, v) for k, v in rr.query.items()))
   else:
     query_string = ""
 

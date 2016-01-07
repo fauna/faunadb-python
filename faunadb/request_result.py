@@ -1,3 +1,7 @@
+# pylint: disable=redefined-builtin
+from builtins import object
+
+
 class RequestResult(object):
   """Stores information about a single request and response."""
   # pylint: disable=too-many-instance-attributes

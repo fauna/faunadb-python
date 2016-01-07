@@ -11,6 +11,7 @@ with open(path.join(local_dir, "README.rst"), encoding="utf-8") as f:
 requires = [
   "iso8601",
   "requests",
+  "future",
 ]
 
 extras_require = {
@@ -31,8 +32,12 @@ setup(
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
-    "Programming Language :: Python :: 2 :: Only",
+    "Programming Language :: Python :: 2",
     "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.3",
+    "Programming Language :: Python :: 3.4",
+    "Programming Language :: Python :: 3.5",
     "Topic :: Database",
     "Topic :: Database :: Front-Ends",
     "Operating System :: MacOS :: MacOS X",

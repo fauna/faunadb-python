@@ -3,11 +3,9 @@
 .idea
 .Python
 .eggs/
-bin
 build
 dist
 docs/_build
 faunadb.egg-info
-include
-lib
 venv
+venv3

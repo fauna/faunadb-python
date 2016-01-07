@@ -2,9 +2,9 @@ from datetime import date, datetime
 import iso8601
 
 from faunadb.objects import Event, FaunaTime, Page, Ref, Set
-from faunadb._json import parse_json, to_json
+from faunadb._json import parse_json
 from faunadb import query
-from helpers import FaunaTestCase
+from tests.helpers import FaunaTestCase
 
 class ObjectsTest(FaunaTestCase):
   def setUp(self):
@@ -13,8 +13,7 @@ class ObjectsTest(FaunaTestCase):
     self.json_ref = '{"@ref":"classes/frogs/123"}'
 
   def test_ref(self):
-    assert parse_json(self.json_ref) == self.ref
-    assert to_json(self.ref) == self.json_ref
+    self.assertJson(self.ref, self.json_ref)
 
     keys = Ref("keys")
     assert keys.to_class() == keys
@@ -28,15 +27,14 @@ class ObjectsTest(FaunaTestCase):
     index = Ref("indexes", "frogs_by_size")
     json_index = '{"@ref":"indexes/frogs_by_size"}'
     match = Set(query.match(self.ref, index))
-    json_match = '{"@set":{"terms":%s,"match":%s}}' % (self.json_ref, json_index)
-    assert parse_json(json_match) == match
-    assert to_json(match) == json_match
+    json_match = '{"@set":{"match":%s,"terms":%s}}' % (json_index, self.json_ref)
+    self.assertJson(match, json_match)
 
   def test_event(self):
     event = Event(self.ref, 123, "create")
     event_json = '{"action":"create","resource":{"@ref":"classes/frogs/123"},"ts":123}'
     assert Event.from_raw(parse_json(event_json)) == event
-    assert to_json(event) == event_json
+    self.assertToJson(event, event_json)
 
   def test_page(self):
     assert Page.from_raw({"data": 1, "before": 2, "after": 3}) == Page(1, 2, 3)
@@ -82,11 +80,9 @@ class ObjectsTest(FaunaTestCase):
   def test_time(self):
     test_ts = FaunaTime("1970-01-01T00:00:00.123456789Z")
     test_ts_json = '{"@ts":"1970-01-01T00:00:00.123456789Z"}'
-    assert to_json(test_ts) == test_ts_json
-    assert parse_json(test_ts_json) == test_ts
+    self.assertJson(test_ts, test_ts_json)
 
   def test_date(self):
     test_date = date(1970, 1, 1)
     test_date_json = '{"@date":"1970-01-01"}'
-    assert to_json(test_date) == test_date_json
-    assert parse_json(test_date_json) == test_date
+    self.assertJson(test_date, test_date_json)
