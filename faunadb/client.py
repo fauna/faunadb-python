@@ -71,7 +71,10 @@ class Client(object):
     self.observer = observer
 
   def __del__(self):
-    self.session.close()
+    try:
+      self.session.close()
+    except:
+      pass
 
   def get(self, path, query=None):
     """
