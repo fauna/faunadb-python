@@ -1,8 +1,10 @@
 from requests import codes
 
+from faunadb import query
 from faunadb.errors import FaunaError, HttpBadRequest, HttpInternalError, \
   HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, \
   HttpUnavailableError, InvalidResponse
+from faunadb.objects import Ref
 
 from tests.helpers import FaunaTestCase, mock_client
 
@@ -27,11 +29,18 @@ class ErrorsTest(FaunaTestCase):
 
   def test_http_unauthorized(self):
     client = self.get_client(secret="bad_key")
-    assert_http_error(lambda: client.get(self.db_ref), HttpUnauthorized, "unauthorized")
+    assert_http_error(lambda: client.query(query.get(self.db_ref)), HttpUnauthorized, "unauthorized")
 
   def test_http_permission_denied(self):
-    assert_http_error(
-      lambda: self.client.get("databases"), HttpPermissionDenied, "permission denied")
+    # Create client with client key
+    client = self.get_client(
+      secret=self.root_client.query(
+        query.create(Ref("keys"), query.object(database=self.db_ref, role="client")))["secret"]
+    )
+
+    exception = capture_exception(lambda: client.query(query.paginate(Ref("databases"))))
+    assert isinstance(exception, HttpPermissionDenied)
+    assert_error(exception, "permission denied", ["paginate"])
 
   def test_http_not_found(self):
     assert_http_error(lambda: self.client.get("classes/not_found"), HttpNotFound, "not found")
