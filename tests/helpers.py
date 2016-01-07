@@ -4,7 +4,7 @@ from logging import getLogger, WARNING
 from os import environ
 from unittest import TestCase
 # pylint: disable=redefined-builtin
-from builtins import object
+from builtins import object, range
 from requests import codes
 
 from faunadb._json import to_json, parse_json
@@ -28,7 +28,7 @@ class FaunaTestCase(TestCase):
 
     self.root_client = self.get_client(secret=_FAUNA_ROOT_KEY)
 
-    rnd = ''.join(random.choice(string.lowercase) for i in range(10))
+    rnd = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
     db_name = "faunadb-python-test" + rnd
     self.db_ref = Ref("databases", db_name)
     # TODO: See `core` issue #1975
