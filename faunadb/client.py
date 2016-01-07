@@ -24,7 +24,6 @@ class Client(object):
   (So instead of ``{ "@ref": "classes/frogs/123" }``, you will get ``Ref("classes/frogs", "123")``.)
   """
 
-  # pylint: disable=too-many-arguments, too-many-instance-attributes
   def __init__(
       self,
       domain="rest.faunadb.com",
