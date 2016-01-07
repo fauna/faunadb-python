@@ -41,7 +41,10 @@ class ErrorsTest(FaunaTestCase):
       lambda: self.client.delete("classes"), HttpMethodNotAllowed, "method not allowed")
 
   def test_internal_error(self):
-    assert_http_error(lambda: self.client.get("error"), HttpInternalError, "internal server error")
+    code_client = mock_client(
+      '{"errors": [{"code": "internal server error", "description": "sample text", "stacktrace": []}]}',
+      codes.internal_server_error)
+    assert_http_error(lambda: code_client.get("error"), HttpInternalError, "internal server error")
 
   def test_unavailable_error(self):
     client = mock_client(
