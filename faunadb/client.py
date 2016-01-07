@@ -71,6 +71,7 @@ class Client(object):
     self.observer = observer
 
   def __del__(self):
+    # pylint: disable=bare-except
     try:
       self.session.close()
     except:

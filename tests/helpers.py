@@ -1,4 +1,5 @@
-import random, string
+import string
+import random
 from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ

@@ -29,7 +29,8 @@ class ErrorsTest(FaunaTestCase):
 
   def test_http_unauthorized(self):
     client = self.get_client(secret="bad_key")
-    assert_http_error(lambda: client.query(query.get(self.db_ref)), HttpUnauthorized, "unauthorized")
+    assert_http_error(
+      lambda: client.query(query.get(self.db_ref)), HttpUnauthorized, "unauthorized")
 
   def test_http_permission_denied(self):
     # Create client with client key
@@ -50,6 +51,7 @@ class ErrorsTest(FaunaTestCase):
       lambda: self.client.delete("classes"), HttpMethodNotAllowed, "method not allowed")
 
   def test_internal_error(self):
+    # pylint: disable=line-too-long
     code_client = mock_client(
       '{"errors": [{"code": "internal server error", "description": "sample text", "stacktrace": []}]}',
       codes.internal_server_error)
@@ -116,9 +118,9 @@ class ErrorsTest(FaunaTestCase):
     assert failure.field == field
   #endregion
 
-  def _assert_query_error(self, query, code, position=None):
+  def _assert_query_error(self, q, code, position=None):
     position = position or []
-    assert_error(capture_exception(lambda: self.client.query(query)), code, position)
+    assert_error(capture_exception(lambda: self.client.query(q)), code, position)
 
 
 def capture_exception(func):
