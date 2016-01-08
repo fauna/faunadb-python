@@ -1,9 +1,8 @@
 from requests import codes
 
 from faunadb import query
-from faunadb.errors import FaunaError, HttpBadRequest, HttpInternalError, \
-  HttpMethodNotAllowed, HttpNotFound, HttpPermissionDenied, HttpUnauthorized, \
-  HttpUnavailableError, InvalidResponse
+from faunadb.errors import FaunaError, BadRequest, InternalError, MethodNotAllowed, NotFound, \
+  PermissionDenied, Unauthorized, UnavailableError, InvalidResponse
 from faunadb.objects import Ref
 
 from tests.helpers import FaunaTestCase, mock_client
@@ -22,17 +21,17 @@ class ErrorsTest(FaunaTestCase):
     code_client = mock_client('{"errors": [{"code": "foo"}]}', codes.bad_request)
     self.assertRaises(InvalidResponse, lambda: code_client.get(''))
 
-  #region HTTP errors
-  def test_http_bad_request(self):
-    self.assertRaises(HttpBadRequest, lambda: self.client.query({"foo": "bar"}))
+  #region FaunaError
+  def test_bad_request(self):
+    self.assertRaises(BadRequest, lambda: self.client.query({"foo": "bar"}))
     # Tests of HttpBadRequest.errors go in ErrorData section.
 
-  def test_http_unauthorized(self):
+  def test_unauthorized(self):
     client = self.get_client(secret="bad_key")
     assert_http_error(
-      lambda: client.query(query.get(self.db_ref)), HttpUnauthorized, "unauthorized")
+      lambda: client.query(query.get(self.db_ref)), Unauthorized, "unauthorized")
 
-  def test_http_permission_denied(self):
+  def test_permission_denied(self):
     # Create client with client key
     client = self.get_client(
       secret=self.root_client.query(
@@ -40,28 +39,28 @@ class ErrorsTest(FaunaTestCase):
     )
 
     exception = capture_exception(lambda: client.query(query.paginate(Ref("databases"))))
-    assert isinstance(exception, HttpPermissionDenied)
+    assert isinstance(exception, PermissionDenied)
     assert_error(exception, "permission denied", ["paginate"])
 
-  def test_http_not_found(self):
-    assert_http_error(lambda: self.client.get("classes/not_found"), HttpNotFound, "not found")
+  def test_not_found(self):
+    assert_http_error(lambda: self.client.get("classes/not_found"), NotFound, "not found")
 
-  def test_http_method_not_allowed(self):
+  def test_method_not_allowed(self):
     assert_http_error(
-      lambda: self.client.delete("classes"), HttpMethodNotAllowed, "method not allowed")
+      lambda: self.client.delete("classes"), MethodNotAllowed, "method not allowed")
 
   def test_internal_error(self):
     # pylint: disable=line-too-long
     code_client = mock_client(
       '{"errors": [{"code": "internal server error", "description": "sample text", "stacktrace": []}]}',
       codes.internal_server_error)
-    assert_http_error(lambda: code_client.get("error"), HttpInternalError, "internal server error")
+    assert_http_error(lambda: code_client.get("error"), InternalError, "internal server error")
 
   def test_unavailable_error(self):
     client = mock_client(
       '{"errors": [{"code": "unavailable", "description": "on vacation"}]}',
       codes.unavailable)
-    assert_http_error(lambda: client.get(''), HttpUnavailableError, "unavailable")
+    assert_http_error(lambda: client.get(''), UnavailableError, "unavailable")
   #endregion
 
   #region ErrorData

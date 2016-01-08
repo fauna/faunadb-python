@@ -3,7 +3,7 @@ from datetime import date
 from threading import Thread
 from time import sleep
 
-from faunadb.errors import HttpBadRequest, HttpNotFound
+from faunadb.errors import BadRequest, NotFound
 from faunadb.objects import Event, FaunaTime, Set
 from faunadb import query
 from tests.helpers import FaunaTestCase
@@ -56,7 +56,7 @@ class QueryTest(FaunaTestCase):
     return self._q(query.paginate(_set, size=1000))["data"]
 
   def _assert_bad_query(self, q):
-    self.assertRaises(HttpBadRequest, lambda: self._q(q))
+    self.assertRaises(BadRequest, lambda: self._q(q))
 
   #endregion
 
@@ -370,12 +370,12 @@ class QueryTest(FaunaTestCase):
     assert self._q(query.select("a", obj)) == {"b": 1}
     assert self._q(query.select(["a", "b"], obj)) == 1
     assert self._q(query.select_with_default("c", obj, None)) is None
-    self.assertRaises(HttpNotFound, lambda: self._q(query.select("c", obj)))
+    self.assertRaises(NotFound, lambda: self._q(query.select("c", obj)))
 
   def test_select_array(self):
     arr = [1, 2, 3]
     assert self._q(query.select(2, arr)) == 3
-    self.assertRaises(HttpNotFound, lambda: self._q(query.select(3, arr)))
+    self.assertRaises(NotFound, lambda: self._q(query.select(3, arr)))
 
   def test_add(self):
     assert self._q(query.add(2, 3, 5)) == 10
