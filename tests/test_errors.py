@@ -1,19 +1,20 @@
 from requests import codes
 
 from faunadb import query
-from faunadb.errors import FaunaError, BadRequest, InternalError, MethodNotAllowed, NotFound, \
-  PermissionDenied, Unauthorized, UnavailableError, InvalidResponse
+from faunadb.errors import ErrorData, Failure, ValidationFailed, FaunaError, BadRequest, \
+  InternalError, MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, UnavailableError, \
+  InvalidResponse
 from faunadb.objects import Ref
 
 from tests.helpers import FaunaTestCase, mock_client
 
 class ErrorsTest(FaunaTestCase):
-  def test_info(self):
+  def test_request_result(self):
     err = capture_exception(lambda: self.client.query({"foo": "bar"}))
     assert err.request_result.request_content == {"foo": "bar"}
 
   def test_invalid_response(self):
-    # Response must be valid json
+    # Response must be valid JSON
     self.assertRaises(InvalidResponse, lambda: mock_client('I like fine wine').get(''))
     # Response must have "resource"
     self.assertRaises(InvalidResponse, lambda: mock_client('{"resoars": 1}').get(''))
@@ -116,6 +117,14 @@ class ErrorsTest(FaunaTestCase):
     assert failure.code == code
     assert failure.field == field
   #endregion
+
+  def test_repr(self):
+    err = ErrorData("code", "desc", None)
+    assert repr(err) == "ErrorData('code', 'desc', None)"
+
+    failure = Failure("code", "desc", ["a", "b"])
+    vf = ValidationFailed("vf_desc", ["vf"], [failure])
+    assert repr(vf) == "ValidationFailed('vf_desc', ['vf'], [Failure('code', 'desc', ['a', 'b'])])"
 
   def _assert_query_error(self, q, code, position=None):
     position = position or []
