@@ -3,7 +3,7 @@ from re import search
 
 from faunadb.client import Client
 from faunadb.client_logger import logger
-from faunadb.errors import HttpNotFound
+from faunadb.errors import NotFound
 from tests.helpers import FaunaTestCase
 
 class ClientTest(FaunaTestCase):
@@ -55,7 +55,7 @@ class ClientTest(FaunaTestCase):
   def test_delete(self):
     cls_ref = self._create_class()["ref"]
     self.client.delete(cls_ref)
-    self.assertRaises(HttpNotFound, lambda: self.client.get(cls_ref))
+    self.assertRaises(NotFound, lambda: self.client.get(cls_ref))
 
   def test_logging(self):
     logged_box = []

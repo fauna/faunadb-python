@@ -15,7 +15,7 @@ class InvalidResponse(Exception):
     super(InvalidResponse, self).__init__(description)
 
 
-#region FaunaHttpError
+#region FaunaError
 
 class FaunaError(Exception):
   """
@@ -30,19 +30,19 @@ class FaunaError(Exception):
     if 200 <= code <= 299:
       pass
     elif code == codes.bad_request:
-      raise HttpBadRequest(request_result)
+      raise BadRequest(request_result)
     elif code == codes.unauthorized:
-      raise HttpUnauthorized(request_result)
+      raise Unauthorized(request_result)
     elif code == codes.forbidden:
-      raise HttpPermissionDenied(request_result)
+      raise PermissionDenied(request_result)
     elif code == codes.not_found:
-      raise HttpNotFound(request_result)
+      raise NotFound(request_result)
     elif code == codes.method_not_allowed:
-      raise HttpMethodNotAllowed(request_result)
+      raise MethodNotAllowed(request_result)
     elif code == codes.internal_server_error:
-      raise HttpInternalError(request_result)
+      raise InternalError(request_result)
     elif code == codes.unavailable:
-      raise HttpUnavailableError(request_result)
+      raise UnavailableError(request_result)
     else:
       raise FaunaError(request_result)
 
@@ -59,37 +59,37 @@ class FaunaError(Exception):
     return "%s(%s)" % (self.__class__.__name__, self.errors)
 
 
-class HttpBadRequest(FaunaError):
+class BadRequest(FaunaError):
   """HTTP 400 error."""
   pass
 
 
-class HttpUnauthorized(FaunaError):
+class Unauthorized(FaunaError):
   """HTTP 401 error."""
   pass
 
 
-class HttpPermissionDenied(FaunaError):
+class PermissionDenied(FaunaError):
   """HTTP 403 error."""
   pass
 
 
-class HttpNotFound(FaunaError):
+class NotFound(FaunaError):
   """HTTP 404 error."""
   pass
 
 
-class HttpMethodNotAllowed(FaunaError):
+class MethodNotAllowed(FaunaError):
   """HTTP 405 error."""
   pass
 
 
-class HttpInternalError(FaunaError):
+class InternalError(FaunaError):
   """HTTP 500 error."""
   pass
 
 
-class HttpUnavailableError(FaunaError):
+class UnavailableError(FaunaError):
   """HTTP 503 error."""
   pass
 

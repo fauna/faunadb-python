@@ -10,7 +10,7 @@ from requests import codes
 
 from faunadb._json import to_json, parse_json
 from faunadb.client import Client
-from faunadb.errors import HttpBadRequest
+from faunadb.errors import BadRequest
 from faunadb.objects import Ref
 from faunadb import query
 
@@ -35,7 +35,7 @@ class FaunaTestCase(TestCase):
     # TODO: See `core` issue #1975
     try:
       self.root_client.query(query.delete(self.db_ref))
-    except HttpBadRequest:
+    except BadRequest:
       pass
 
     self.root_client.query(query.create(Ref("databases"), query.object(name=db_name)))
