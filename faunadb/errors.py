@@ -55,9 +55,6 @@ class FaunaError(Exception):
     self.request_result = request_result
     """:any:`RequestResult` for the request that caused this error."""
 
-  def __repr__(self):
-    return "%s(%s)" % (self.__class__.__name__, self.errors)
-
 
 class BadRequest(FaunaError):
   """HTTP 400 error."""
@@ -103,18 +100,24 @@ class ErrorData(object):
   @staticmethod
   def from_dict(dct):
     code = get_or_invalid(dct, "code")
-    return ValidationFailed(dct) if code == "validation failed" else ErrorData(dct, code)
+    description = get_or_invalid(dct, "description")
+    position = dct.get("position")
+    if code == "validation failed":
+      failures = [Failure.from_dict(failure) for failure in get_or_invalid(dct, "failures")]
+      return ValidationFailed(description, position, failures)
+    else:
+      return ErrorData(code, description, position)
 
-  def __init__(self, dct, code):
+  def __init__(self, code, description, position):
     self.code = code
-    """Error code. See the many error codes `here <https://faunadb.com/documentation#errors>`__."""
-    self.description = get_or_invalid(dct, "description")
+    """Error code. See all error codes `here <https://faunadb.com/documentation#errors>`__."""
+    self.description = description
     """Error description."""
-    self.position = dct.get("position")
+    self.position = position
     """Position of the error in a query. May be None."""
 
   def __repr__(self):
-    return "%s(%s)" % (self.__class__.__name__, self.position)
+    return "ErrorData(%s, %s, %s)" % (repr(self.code), repr(self.description), repr(self.position))
 
   def __eq__(self, other):
     return self.__class__ == other.__class__ and \
@@ -125,13 +128,14 @@ class ErrorData(object):
 class ValidationFailed(ErrorData):
   """An ErrorData that also stores Failure information."""
 
-  def __init__(self, dct):
-    super(ValidationFailed, self).__init__(dct, "validation failed")
-    self.failures = [Failure(failure) for failure in dct["failures"]]
+  def __init__(self, description, position, failures):
+    super(ValidationFailed, self).__init__("validation failed", description, position)
+    self.failures = failures
     """List of all :py:class:`Failure` objects returned by the server."""
 
   def __repr__(self):
-    return "%s(%s, %s)" % (self.__class__.__name__, self.position, self.failures)
+    return "ValidationFailed(%s, %s, %s)" % \
+      (repr(self.description), repr(self.position), repr(self.failures))
 
 
 class Failure(object):
@@ -140,16 +144,23 @@ class Failure(object):
   See the ``Invalid Data`` section of the `docs <https://faunadb.com/documentation#errors>`__.
   """
 
-  def __init__(self, dct):
-    self.code = get_or_invalid(dct, "code")
+  @staticmethod
+  def from_dict(dct):
+    return Failure(
+      get_or_invalid(dct, "code"),
+      get_or_invalid(dct, "description"),
+      get_or_invalid(dct, "field"))
+
+  def __init__(self, code, description, field):
+    self.code = code
     """Failure code."""
-    self.description = get_or_invalid(dct, "description")
+    self.description = description
     """Failure description."""
-    self.field = get_or_invalid(dct, "field")
+    self.field = field
     """Field of the failure in the instance."""
 
   def __repr__(self):
-    return "%s(%s, %s)" % (self.__class__.__name__, self.field, repr(self.description))
+    return "Failure(%s, %s, %s)" % (repr(self.code), repr(self.description), repr(self.field))
 
 
 def get_or_invalid(dct, key):
