@@ -35,10 +35,10 @@ for more examples.
 Basic Usage
 -----------
 
-The first step for any program is to create a ``client`` instance.
+The first step for any program is to create a :doc:`client` instance.
 This object must be explicitly threaded through any code that needs to access FaunaDB.
 
-FaunaDB can be used directly using the ``query`` API.
+FaunaDB can be used directly using the :doc:`query` API.
 
 
 Building it yourself
