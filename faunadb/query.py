@@ -22,6 +22,31 @@ def let(vars, in_expr):
   return {"let": vars, "in": in_expr}
 
 
+def let_query(*args):
+  """
+  Alternate form of :any:`let`.
+  Use like::
+
+    let_query(1, 2, lambda a, b: query.add(a, b))
+    # {"let": {"auto0": 1, "auto1": 2}, "in": {"add": ({"var": "auto0"}, {"var": "auto1"})}}
+
+  :param args:
+    All but last argument: values for the `let` expression.
+
+    Last argument: Function whose arguments are a :any:`var` for each value. Should return a query.
+  """
+
+  func = args[-1]
+  values = args[:-1]
+  n_args = len(values)
+
+  with _auto_vars(n_args) as vars:
+    dct = {}
+    for i in range(n_args):
+      dct[vars[i]] = values[i]
+    return let(dct, func(*[var(v) for v in vars]))
+
+
 def var(var_name):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
   return {"var": var_name}

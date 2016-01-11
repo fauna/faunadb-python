@@ -64,6 +64,12 @@ class QueryTest(FaunaTestCase):
 
   def test_let_var(self):
     self.assertEqual(self._q(query.let({"x": 1}, query.var("x"))), 1)
+    q = query.let_query(1, 2, query.add)
+    self.assertEqual(q, {
+      "let": {"auto0": 1, "auto1": 2},
+      "in": {"add": ({"var": "auto0"}, {"var": "auto1"})}
+    })
+    self.assertEqual(self._q(q), 3)
 
   def test_if(self):
     self.assertEqual(self._q(query.if_expr(True, "t", "f")), "t")
