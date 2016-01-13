@@ -66,6 +66,12 @@ class FaunaTestCase(TestCase):
     non_null_args = {k: v for k, v in args.items() if v is not None}
     return Client(secret=secret, observer=observer, **non_null_args)
 
+  def assert_raises(self, exception_class, action):
+    """Like self.assertRaises and returns the exception too."""
+    with self.assertRaises(exception_class) as cm:
+      action()
+    return cm.exception
+
 
 def mock_client(response_text, status_code=codes.ok):
   c = Client()
