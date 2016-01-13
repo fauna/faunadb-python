@@ -24,7 +24,7 @@ class RequestResult(object):
     self.response_content = response_content
     """
     Value returned by the response.
-    Includes "resource" wrapper object, or may be an "errors" object instead.
+    Includes "resource" wrapper dict, or may be an "errors" dict instead.
     """
     self.status_code = status_code
     """HTTP status code."""
