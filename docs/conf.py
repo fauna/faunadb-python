@@ -25,6 +25,11 @@ from faunadb import __title__ as pkg_title, __version__ as pkg_version, __author
 
 # -- General configuration ------------------------------------------------
 
+def setup(app):
+  def skip(app, what, name, obj, skip, options):
+    return name != "__init__" and skip
+  app.connect("autodoc-skip-member", skip)
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
