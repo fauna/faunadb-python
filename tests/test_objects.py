@@ -1,8 +1,7 @@
 from datetime import date, datetime
 import iso8601
 
-from faunadb.objects import Event, FaunaTime, Ref, Set
-from faunadb._json import parse_json
+from faunadb.objects import FaunaTime, Ref, Set
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -29,12 +28,6 @@ class ObjectsTest(FaunaTestCase):
     match = Set(query.match(self.ref, index))
     json_match = '{"@set":{"match":%s,"terms":%s}}' % (json_index, self.json_ref)
     self.assertJson(match, json_match)
-
-  def test_event(self):
-    event = Event(self.ref, 123, "create")
-    event_json = '{"action":"create","resource":{"@ref":"classes/frogs/123"},"ts":123}'
-    self.assertEqual(Event.from_raw(parse_json(event_json)), event)
-    self.assertToJson(event, event_json)
 
   def test_time_conversion(self):
     dt = datetime.now(iso8601.UTC)

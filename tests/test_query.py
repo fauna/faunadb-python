@@ -4,7 +4,7 @@ from threading import Thread
 from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import Event, FaunaTime, Set
+from faunadb.objects import FaunaTime, Set
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -271,10 +271,7 @@ class QueryTest(FaunaTestCase):
 
     # Add previous event
     inserted = query.quote({"data": {"weight": 0}})
-    add = query.insert(ref, prev_ts, "create", inserted)
-    self._q(add)
-    # Test alternate syntax
-    self.assertEqual(query.insert_event(Event(ref, prev_ts, "create"), inserted), add)
+    self._q(query.insert(ref, prev_ts, "create", inserted))
 
     # Get version from previous event
     old = self._q(query.get(ref, ts=prev_ts))
@@ -289,10 +286,7 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.get(ref)), new_instance)
 
     # Delete that event
-    remove = query.remove(ref, new_instance["ts"], "create")
-    self._q(remove)
-    # Test alternate syntax
-    self.assertEqual(query.remove_event(Event(ref, new_instance["ts"], "create")), remove)
+    self._q(query.remove(ref, new_instance["ts"], "create"))
 
     # Assert that it was undone
     self.assertEqual(self._q(query.get(ref)), instance)

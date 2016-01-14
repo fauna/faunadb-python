@@ -84,46 +84,6 @@ class Set(object):
     return not self == other
 
 
-class Event(object):
-  """FaunaDB Event. See the `docs <https://faunadb.com/documentation/queries#values>`__."""
-
-  @staticmethod
-  def from_raw(raw):
-    """
-    Events are not automatically converted.
-    Use this on a dict that you know represents an Event.
-    """
-    return Event(raw["resource"], raw["ts"], raw["action"])
-
-  # pylint: disable=invalid-name
-  def __init__(self, resource, ts, action):
-    if action not in ("create", "delete"):
-      raise ValueError('Action must be "create" or "delete".')
-    self.resource = resource
-    """The Ref of the affected instance."""
-    self.ts = ts
-    "Microsecond UNIX timestamp at which the event occurred."
-    self.action = action
-    '''"create" or "delete"'''
-
-  def to_fauna_json(self):
-    return {"resource": self.resource, "ts": self.ts, "action": self.action}
-
-  def __repr__(self):
-    return "Event(resource=%s, ts=%s, action=%s)" % (
-      repr(self.resource), repr(self.ts), repr(self.action))
-
-  def __eq__(self, other):
-    return isinstance(other, Event) and \
-      self.resource == other.resource and \
-      self.ts == other.ts and \
-      self.action == other.action
-
-  def __ne__(self, other):
-    # pylint: disable=unneeded-not
-    return not self == other
-
-
 class FaunaTime(object):
   """
   FaunaDB time. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.

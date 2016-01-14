@@ -5,11 +5,11 @@ from tests.helpers import FaunaTestCase
 class PageTest(FaunaTestCase):
   def test_page(self):
     self.assertEqual(
-        Page.from_raw({"data": 1, "before": 2, "after": 3}),
-        Page(1, 2, 3))
+      Page.from_raw({"data": 1, "before": 2, "after": 3}),
+      Page(1, 2, 3))
     self.assertEqual(
-        Page([1, 2, 3], 2, 3).map_data(lambda x: x + 1),
-        Page([2, 3, 4], 2, 3))
+      Page([1, 2, 3], 2, 3).map_data(lambda x: x + 1),
+      Page([2, 3, 4], 2, 3))
 
   def test_set_iterator(self):
     class_ref = self.client.post("classes", {"name": "gadgets"})["ref"]
