@@ -47,7 +47,7 @@ class Client(object):
       Read timeout in seconds.
     :param secret:
       Auth token for the FaunaDB server.
-      May be a (username, password) tuple, or "username:password", or just the username (no colon).
+      Should resemble "username", "username:password", or ("username", "password").
     :param observer:
       Callback that will be passed a :any:`RequestResult` after every completed request.
     """
