@@ -1,5 +1,6 @@
 import string
 import random
+import warnings
 from collections import namedtuple
 from logging import getLogger, WARNING
 from os import environ
@@ -52,10 +53,17 @@ class FaunaTestCase(TestCase):
     self.assertParseJson(obj, json)
 
   def assertToJson(self, obj, json):
-    assert to_json(obj, sort_keys=True) == json
+    self.assertEqual(to_json(obj, sort_keys=True), json)
 
   def assertParseJson(self, obj, json):
-    assert parse_json(json) == obj
+    self.assertEqual(parse_json(json), obj)
+
+  def assertRegexCompat(self, text, regex, msg=None):
+    # pylint: disable=deprecated-method
+    with warnings.catch_warnings():
+      # Deprecated in 3.x but 2.x does not have it under the new name.
+      warnings.filterwarnings("ignore", category=DeprecationWarning)
+      self.assertRegexpMatches(text, regex, msg=msg)
 
   def get_client(self, secret=None, observer=None):
     if secret is None:
