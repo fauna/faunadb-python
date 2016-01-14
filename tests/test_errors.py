@@ -10,7 +10,7 @@ from tests.helpers import FaunaTestCase, mock_client
 class ErrorsTest(FaunaTestCase):
   def test_request_result(self):
     err = self.assert_raises(BadRequest, lambda: self.client.query({"foo": "bar"}))
-    assert err.request_result.request_content == {"foo": "bar"}
+    self.assertEqual(err.request_result.request_content, {"foo": "bar"})
 
   def test_invalid_response(self):
     # Response must be valid JSON
@@ -41,7 +41,7 @@ class ErrorsTest(FaunaTestCase):
     exception = self.assert_raises(
       PermissionDenied,
       lambda: client.query(query.paginate(Ref("databases"))))
-    assert_error(exception, "permission denied", ["paginate"])
+    self.assert_error(exception, "permission denied", ["paginate"])
 
   def test_not_found(self):
     self.assert_http_error(lambda: self.client.get("classes/not_found"), NotFound, "not found")
@@ -113,32 +113,35 @@ class ErrorsTest(FaunaTestCase):
 
   def _assert_invalid_data(self, class_name, data, code, field):
     exception = self.assert_raises(BadRequest, lambda: self.client.post(class_name, data))
-    assert_error(exception, "validation failed", [])
+    self.assert_error(exception, "validation failed", [])
     failures = exception.errors[0].failures
-    assert len(failures) == 1
+    self.assertEqual(len(failures), 1)
     failure = failures[0]
-    assert failure.code == code
-    assert failure.field == field
+    self.assertEqual(failure.code, code)
+    self.assertEqual(failure.field, field)
   #endregion
 
   def test_repr(self):
     err = ErrorData("code", "desc", None)
-    assert repr(err) == "ErrorData('code', 'desc', None)"
+    self.assertEqual(repr(err), "ErrorData('code', 'desc', None)")
 
     failure = Failure("code", "desc", ["a", "b"])
     vf = ValidationFailed("vf_desc", ["vf"], [failure])
-    assert repr(vf) == "ValidationFailed('vf_desc', ['vf'], [Failure('code', 'desc', ['a', 'b'])])"
+    self.assertEqual(
+      repr(vf),
+      "ValidationFailed('vf_desc', ['vf'], [Failure('code', 'desc', ['a', 'b'])])")
 
   def _assert_query_error(self, q, exception_class, code, position=None):
     position = position or []
-    assert_error(self.assert_raises(exception_class, lambda: self.client.query(q)), code, position)
+    self.assert_error(
+      self.assert_raises(exception_class, lambda: self.client.query(q)),
+      code, position)
 
   def assert_http_error(self, action, exception_cls, code):
-    assert_error(self.assert_raises(exception_cls, action), code)
+    self.assert_error(self.assert_raises(exception_cls, action), code)
 
-
-def assert_error(exception, code, position=None):
-  assert len(exception.errors) == 1
-  error = exception.errors[0]
-  assert error.code == code
-  assert error.position == position
+  def assert_error(self, exception, code, position=None):
+    self.assertEqual(len(exception.errors), 1)
+    error = exception.errors[0]
+    self.assertEqual(error.code, code)
+    self.assertEqual(error.position, position)

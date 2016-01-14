@@ -16,12 +16,12 @@ class ObjectsTest(FaunaTestCase):
     self.assertJson(self.ref, self.json_ref)
 
     keys = Ref("keys")
-    assert keys.to_class() == keys
+    self.assertEqual(keys.to_class(), keys)
     self.assertRaises(ValueError, keys.id)
 
     ref = Ref(keys, "123")
-    assert ref.to_class() == keys
-    assert ref.id() == "123"
+    self.assertEqual(ref.to_class(), keys)
+    self.assertEqual(ref.id(), "123")
 
   def test_set(self):
     index = Ref("indexes", "frogs_by_size")
@@ -33,7 +33,7 @@ class ObjectsTest(FaunaTestCase):
   def test_event(self):
     event = Event(self.ref, 123, "create")
     event_json = '{"action":"create","resource":{"@ref":"classes/frogs/123"},"ts":123}'
-    assert Event.from_raw(parse_json(event_json)) == event
+    self.assertEqual(Event.from_raw(parse_json(event_json)), event)
     self.assertToJson(event, event_json)
 
   def test_page(self):
@@ -59,23 +59,23 @@ class ObjectsTest(FaunaTestCase):
 
     gadgets_set = query.match(0, index_ref)
 
-    assert list(Page.set_iterator(self.client, gadgets_set, page_size=1)) == [a, b]
+    self.assertEqual(list(Page.set_iterator(self.client, gadgets_set, page_size=1)), [a, b])
 
     query_mapper = lambda a: query.select(['data', 'n'], query.get(a))
     query_mapped_iter = Page.set_iterator(self.client, gadgets_set, map_lambda=query_mapper)
-    assert list(query_mapped_iter) == [0, 0]
+    self.assertEqual(list(query_mapped_iter), [0, 0])
 
     mapped_iter = Page.set_iterator(self.client, gadgets_set, mapper=lambda x: [x])
-    assert list(mapped_iter) == [[a], [b]]
+    self.assertEqual(list(mapped_iter), [[a], [b]])
 
   def test_time_conversion(self):
     dt = datetime.now(iso8601.UTC)
-    assert FaunaTime(dt).to_datetime() == dt
+    self.assertEqual(FaunaTime(dt).to_datetime(), dt)
 
     dt = datetime.fromtimestamp(0, iso8601.UTC)
     ft = FaunaTime(dt)
-    assert ft == FaunaTime("1970-01-01T00:00:00Z")
-    assert ft.to_datetime() == dt
+    self.assertEqual(ft, FaunaTime("1970-01-01T00:00:00Z"))
+    self.assertEqual(ft.to_datetime(), dt)
 
   def test_time(self):
     test_ts = FaunaTime("1970-01-01T00:00:00.123456789Z")
