@@ -127,14 +127,14 @@ class QueryTest(FaunaTestCase):
         sleep(1)
         events.append(2)
         return a
-      self.assertDictEqual(
+      self.assertEqual(
         query.lambda_query(do_lambda),
         {"lambda": "auto0", "expr": {"var": "auto0"}})
 
     def do_b():
       # This happens while thread 'a' has incremented its auto name to auto1,
       # but that doesn't affect thread 'b'.
-      self.assertDictEqual(
+      self.assertEqual(
         query.lambda_query(lambda a: a),
         {"lambda": "auto0", "expr": {"var": "auto0"}})
       events.append(1)
@@ -147,7 +147,7 @@ class QueryTest(FaunaTestCase):
     t2.join()
 
     # Assert that events happened in the order expected.
-    self.assertListEqual(events, [0, 1, 2])
+    self.assertEqual(events, [0, 1, 2])
 
   #endregion
 
@@ -155,13 +155,13 @@ class QueryTest(FaunaTestCase):
 
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
-    self.assertListEqual(
+    self.assertEqual(
       self._q(query.map_expr(lambda a: query.multiply(2, a), [1, 2, 3])),
       [2, 4, 6])
 
     page = query.paginate(self._set_n(1))
     ns = query.map_expr(lambda a: query.select(["data", "n"], query.get(a)), page)
-    self.assertDictEqual(self._q(ns), {"data": [1, 1]})
+    self.assertEqual(self._q(ns), {"data": [1, 1]})
 
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
@@ -171,28 +171,28 @@ class QueryTest(FaunaTestCase):
 
   def test_filter(self):
     evens = query.filter_expr(lambda a: query.equals(query.modulo(a, 2), 0), [1, 2, 3, 4])
-    self.assertListEqual(self._q(evens), [2, 4])
+    self.assertEqual(self._q(evens), [2, 4])
 
     # Works on page too
     page = query.paginate(self._set_n(1))
     refs_with_m = query.filter_expr(lambda a: query.contains(["data", "m"], query.get(a)), page)
-    self.assertDictEqual(self._q(refs_with_m), {"data": [self.ref_n1m1]})
+    self.assertEqual(self._q(refs_with_m), {"data": [self.ref_n1m1]})
 
   def test_take(self):
-    self.assertListEqual(self._q(query.take(1, [1, 2])), [1])
-    self.assertListEqual(self._q(query.take(3, [1, 2])), [1, 2])
-    self.assertListEqual(self._q(query.take(-1, [1, 2])), [])
+    self.assertEqual(self._q(query.take(1, [1, 2])), [1])
+    self.assertEqual(self._q(query.take(3, [1, 2])), [1, 2])
+    self.assertEqual(self._q(query.take(-1, [1, 2])), [])
 
   def test_drop(self):
-    self.assertListEqual(self._q(query.drop(1, [1, 2])), [2])
-    self.assertListEqual(self._q(query.drop(3, [1, 2])), [])
-    self.assertListEqual(self._q(query.drop(-1, [1, 2])), [1, 2])
+    self.assertEqual(self._q(query.drop(1, [1, 2])), [2])
+    self.assertEqual(self._q(query.drop(3, [1, 2])), [])
+    self.assertEqual(self._q(query.drop(-1, [1, 2])), [1, 2])
 
   def test_prepend(self):
-    self.assertListEqual(self._q(query.prepend([1, 2, 3], [4, 5, 6])), [1, 2, 3, 4, 5, 6])
+    self.assertEqual(self._q(query.prepend([1, 2, 3], [4, 5, 6])), [1, 2, 3, 4, 5, 6])
 
   def test_append(self):
-    self.assertListEqual(self._q(query.append([4, 5, 6], [1, 2, 3])), [1, 2, 3, 4, 5, 6])
+    self.assertEqual(self._q(query.append([4, 5, 6], [1, 2, 3])), [1, 2, 3, 4, 5, 6])
 
   #endregion
 
@@ -205,16 +205,16 @@ class QueryTest(FaunaTestCase):
   def test_paginate(self):
     test_set = self._set_n(1)
     control = [self.ref_n1, self.ref_n1m1]
-    self.assertDictEqual(self._q(query.paginate(test_set)), {"data": control})
+    self.assertEqual(self._q(query.paginate(test_set)), {"data": control})
 
     data = []
     page1 = self._q(query.paginate(test_set, size=1))
     data.extend(page1["data"])
     page2 = self._q(query.paginate(test_set, size=1, after=page1["after"]))
     data.extend(page2["data"])
-    self.assertListEqual(data, control)
+    self.assertEqual(data, control)
 
-    self.assertDictEqual(self._q(query.paginate(test_set, sources=True)), {
+    self.assertEqual(self._q(query.paginate(test_set, sources=True)), {
       "data": [
         {"sources": [Set(test_set)], "value": self.ref_n1},
         {"sources": [Set(test_set)], "value": self.ref_n1m1}
@@ -247,12 +247,12 @@ class QueryTest(FaunaTestCase):
   def test_update(self):
     ref = self._create()["ref"]
     got = self._q(query.update(ref, query.quote({"data": {"m": 1}})))
-    self.assertDictEqual(got["data"], {"n": 0, "m": 1})
+    self.assertEqual(got["data"], {"n": 0, "m": 1})
 
   def test_replace(self):
     ref = self._create()["ref"]
     got = self._q(query.replace(ref, query.quote({"data": {"m": 1}})))
-    self.assertDictEqual(got["data"], {"m": 1})
+    self.assertEqual(got["data"], {"m": 1})
 
   def test_delete(self):
     ref = self._create()["ref"]
@@ -278,7 +278,7 @@ class QueryTest(FaunaTestCase):
 
     # Get version from previous event
     old = self._q(query.get(ref, ts=prev_ts))
-    self.assertDictEqual(old["data"], {"weight": 0})
+    self.assertEqual(old["data"], {"weight": 0})
 
   def test_remove(self):
     instance = self._create_thimble({"weight": 0})
@@ -299,30 +299,30 @@ class QueryTest(FaunaTestCase):
 
   def test_match(self):
     q = self._set_n(1)
-    self.assertListEqual(self._set_to_list(q), [self.ref_n1, self.ref_n1m1])
+    self.assertEqual(self._set_to_list(q), [self.ref_n1, self.ref_n1m1])
 
   def test_union(self):
     q = query.union(self._set_n(1), self._set_m(1))
-    self.assertListEqual(self._set_to_list(q), [self.ref_n1, self.ref_m1, self.ref_n1m1])
+    self.assertEqual(self._set_to_list(q), [self.ref_n1, self.ref_m1, self.ref_n1m1])
 
   def test_intersection(self):
     q = query.intersection(self._set_n(1), self._set_m(1))
-    self.assertListEqual(self._set_to_list(q), [self.ref_n1m1])
+    self.assertEqual(self._set_to_list(q), [self.ref_n1m1])
 
   def test_difference(self):
     q = query.difference(self._set_n(1), self._set_m(1))
-    self.assertListEqual(self._set_to_list(q), [self.ref_n1]) # but not self.ref_n1m1
+    self.assertEqual(self._set_to_list(q), [self.ref_n1]) # but not self.ref_n1m1
 
   def test_join(self):
     referenced = [self._create(n=12)["ref"], self._create(n=12)["ref"]]
     referencers = [self._create(m=referenced[0])["ref"], self._create(m=referenced[1])["ref"]]
 
     source = self._set_n(12)
-    self.assertListEqual(self._set_to_list(source), referenced)
+    self.assertEqual(self._set_to_list(source), referenced)
 
     # For each obj with n=12, get the set of elements whose data.m refers to it.
     joined = query.join(source, lambda a: query.match(a, self.m_index_ref))
-    self.assertListEqual(self._set_to_list(joined), referencers)
+    self.assertEqual(self._set_to_list(joined), referencers)
 
   #endregion
 
@@ -373,7 +373,7 @@ class QueryTest(FaunaTestCase):
 
   def test_select(self):
     obj = query.quote({"a": {"b": 1}})
-    self.assertDictEqual(self._q(query.select("a", obj)), {"b": 1})
+    self.assertEqual(self._q(query.select("a", obj)), {"b": 1})
     self.assertEqual(self._q(query.select(["a", "b"], obj)), 1)
     self.assertIsNone(self._q(query.select_with_default("c", obj, None)))
     self.assertRaises(NotFound, lambda: self._q(query.select("c", obj)))

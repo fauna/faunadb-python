@@ -10,7 +10,7 @@ from tests.helpers import FaunaTestCase, mock_client
 class ErrorsTest(FaunaTestCase):
   def test_request_result(self):
     err = self.assert_raises(BadRequest, lambda: self.client.query({"foo": "bar"}))
-    self.assertDictEqual(err.request_result.request_content, {"foo": "bar"})
+    self.assertEqual(err.request_result.request_content, {"foo": "bar"})
 
   def test_invalid_response(self):
     # Response must be valid JSON

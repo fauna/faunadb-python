@@ -7,9 +7,9 @@ from tests.helpers import FaunaTestCase
 
 class ClientTest(FaunaTestCase):
   def test_parse_secret(self):
-    self.assertTupleEqual(Client._parse_secret(("user", "pass")), ("user", "pass"))
-    self.assertTupleEqual(Client._parse_secret("user"), ("user", ""))
-    self.assertTupleEqual(Client._parse_secret("user:pass"), ("user", "pass"))
+    self.assertEqual(Client._parse_secret(("user", "pass")), ("user", "pass"))
+    self.assertEqual(Client._parse_secret("user"), ("user", ""))
+    self.assertEqual(Client._parse_secret("user:pass"), ("user", "pass"))
     self.assertRaises(ValueError, lambda: Client._parse_secret(("user", "pass", "potato")))
 
   def test_ping(self):
@@ -49,7 +49,7 @@ class ClientTest(FaunaTestCase):
     instance = self._create_instance()
     instance = self.client.patch(instance["ref"], {"data": {"a": 1}})
     instance = self.client.patch(instance["ref"], {"data": {"b": 2}})
-    self.assertDictEqual(instance["data"], {"a": 1, "b": 2})
+    self.assertEqual(instance["data"], {"a": 1, "b": 2})
 
   def test_delete(self):
     cls_ref = self._create_class()["ref"]

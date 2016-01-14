@@ -59,14 +59,14 @@ class ObjectsTest(FaunaTestCase):
 
     gadgets_set = query.match(0, index_ref)
 
-    self.assertListEqual(list(Page.set_iterator(self.client, gadgets_set, page_size=1)), [a, b])
+    self.assertEqual(list(Page.set_iterator(self.client, gadgets_set, page_size=1)), [a, b])
 
     query_mapper = lambda a: query.select(['data', 'n'], query.get(a))
     query_mapped_iter = Page.set_iterator(self.client, gadgets_set, map_lambda=query_mapper)
-    self.assertListEqual(list(query_mapped_iter), [0, 0])
+    self.assertEqual(list(query_mapped_iter), [0, 0])
 
     mapped_iter = Page.set_iterator(self.client, gadgets_set, mapper=lambda x: [x])
-    self.assertListEqual(list(mapped_iter), [[a], [b]])
+    self.assertEqual(list(mapped_iter), [[a], [b]])
 
   def test_time_conversion(self):
     dt = datetime.now(iso8601.UTC)
