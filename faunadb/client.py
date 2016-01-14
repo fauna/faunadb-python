@@ -22,9 +22,6 @@ class Client(object):
   Any :any:`Ref`, :any:`Set`, :any:`FaunaTime`, or :class:`datetime.date`
   values in it will also be parsed.
   (So instead of ``{ "@ref": "classes/frogs/123" }``, you will get ``Ref("classes/frogs", "123")``.)
-
-  There is no way to automatically convert to any other type, such as :any:`Event`,
-  from the response; you'll have to do that yourself manually.
   """
 
   # pylint: disable=too-many-arguments, too-many-instance-attributes

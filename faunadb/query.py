@@ -3,7 +3,7 @@ Constructors for creating queries to be passed into Client.query.
 For query documentation see the `docs <https://faunadb.com/documentation/queries>`_.
 
 When constructing queries, you must use these functions or
-the :any:`Ref`, :any:`Set`, :any:`FaunaTime`, :class:`datetime.date`, and :any:`Event` constructors.
+the :any:`Ref`, :any:`Set`, :any:`FaunaTime`, and :class:`datetime.date` constructors.
 To pass raw data to a query, use :any:`object` or :any:`quote`.
 """
 
@@ -199,19 +199,9 @@ def insert(ref, ts, action, params):
   return {"insert": ref, "ts": ts, "action": action, "params": params}
 
 
-def insert_event(event, params):
-  """:any:`insert` that takes an :any:`Event` object instead of separate parameters."""
-  return insert(event.resource, event.ts, event.action, params)
-
-
 def remove(ref, ts, action):
   """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
   return {"remove": ref, "ts": ts, "action": action}
-
-
-def remove_event(event):
-  """:any:`remove` that takes an :any:`Event` object instead of separate parameters."""
-  return remove(event.resource, event.ts, event.action)
 
 #endregion
 
