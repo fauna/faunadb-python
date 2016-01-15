@@ -19,9 +19,9 @@ class Page(object):
     Elements could be raw data; some methods (such as :any:`Model.page`) convert data.
     """
     self.before = before
-    """Optional :any:`Ref` for an instance that comes before this page."""
+    """Nullable cursor for the previous page."""
     self.after = after
-    """Optional :any:`Ref` for an instance that comes after this page."""
+    """Nullable cursor for the next page."""
 
   def map_data(self, func):
     """Return a new Page whose data has had ``func`` applied to each element."""
@@ -36,34 +36,43 @@ class Page(object):
       self.before == other.before and\
       self.after == other.after
 
+  def __ne__(self, other):
+    # pylint: disable=unneeded-not
+    return not self == other
+
   @staticmethod
-  def set_iterator(client, set_query, map_lambda=None, mapper=None, page_size=None):
-    """
-    Iterator that keeps getting new pages of a set.
-
-    :param map_lambda:
-      If present, a :any:`lambda_expr` for mapping set elements.
-    :param mapper:
-      Mapping Python function used on each page element.
-    :param page_size:
-      Number of instances to be fetched at a time.
-    :return:
-      Iterator through all elements in the set.
-    """
-
+  def page_iterator(client, set_query, mapper=None, page_size=None):
+    """Like :py:meth:`set_iterator` but iterates over pages rather than their content."""
     def get_page(**kwargs):
       queried = query.paginate(set_query, **kwargs)
-      if map_lambda is not None:
-        queried = query.map_expr(map_lambda, queried)
+      if mapper is not None:
+        queried = query.map_expr(mapper, queried)
       return Page.from_raw(client.query(queried))
 
     page = get_page(size=page_size)
-    for val in page.data:
-      yield val if mapper is None else mapper(val)
+    yield page
 
-    next_cursor = "after" if page.after is not None else "before"
+    next_cursor_kind = "after" if page.after is not None else "before"
 
-    while getattr(page, next_cursor) is not None:
-      page = get_page(**{"size": page_size, next_cursor: getattr(page, next_cursor)})
-      for val in page.data:
-        yield val if mapper is None else mapper(val)
+    next_cursor = getattr(page, next_cursor_kind)
+    while next_cursor is not None:
+      page = get_page(**{"size": page_size, next_cursor_kind: next_cursor})
+      yield page
+      next_cursor = getattr(page, next_cursor_kind)
+
+  @staticmethod
+  def set_iterator(client, set_query, mapper=None, page_size=None):
+    """
+    Iterator that keeps getting new values in a set through pagination.
+
+    :param client: A :any:`Client`.
+    :param set_query: Set query to paginate, e.g. :any:`match`.
+    :param mapper:
+      :any:`lambda_expr` for mapping set elements.
+    :param page_size:
+      Number of instances to be fetched at a time.
+    """
+    return [
+      element
+      for page in Page.page_iterator(client, set_query, mapper, page_size)
+      for element in page.data]
