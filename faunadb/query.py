@@ -313,6 +313,26 @@ def modulo(*numbers):
   return {"modulo": _varargs(numbers)}
 
 
+def lt(*values):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"lt": _varargs(values)}
+
+
+def lte(*values):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"lte": _varargs(values)}
+
+
+def gt(*values):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"gt": _varargs(values)}
+
+
+def gte(*values):
+  """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
+  return {"gte": _varargs(values)}
+
+
 def and_expr(*booleans):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
   return {"and": _varargs(booleans)}

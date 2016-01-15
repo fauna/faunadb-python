@@ -404,6 +404,18 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.modulo(1, 0))
     self._assert_bad_query(query.modulo())
 
+  def test_lt(self):
+    self.assertTrue(self._q(query.lt(1, 2)))
+
+  def test_lte(self):
+    self.assertTrue(self._q(query.lte(1, 1)))
+
+  def test_gt(self):
+    self.assertTrue(self._q(query.gt(2, 1)))
+
+  def test_gte(self):
+    self.assertTrue(self._q(query.gte(1, 1)))
+
   def test_and(self):
     self.assertFalse(self._q(query.and_expr(True, True, False)))
     assert self._q(query.and_expr(True, True, True)) is True
