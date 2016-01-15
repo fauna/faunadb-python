@@ -13,11 +13,7 @@ class ClientTest(FaunaTestCase):
     self.assertRaises(ValueError, lambda: Client._parse_secret(("user", "pass", "potato")))
 
   def test_ping(self):
-    self.assertEqual(self.client.ping(), "Scope Global is OK")
-    self.assertEqual(self.client.ping("global"), "Scope Global is OK")
-    self.assertEqual(self.client.ping("local"), "Scope Local is OK")
-    self.assertEqual(self.client.ping("node"), "Scope Node is OK")
-    self.assertEqual(self.client.ping("all"), "Scope All is OK")
+    self.assertEqual(self.client.ping("all"), "Scope all is OK")
 
   def test_get(self):
     self.assertIsInstance(self.client.get("classes")["data"], list)
@@ -73,7 +69,7 @@ class ClientTest(FaunaTestCase):
         self.assertEqual(line, "  }\n")
         break
     self.assertEqual(read_line(), "  Response JSON: {\n")
-    self.assertEqual(read_line(), '    "resource": "Scope Global is OK"\n')
+    self.assertEqual(read_line(), '    "resource": "Scope global is OK"\n')
     self.assertEqual(read_line(), "  }\n")
     self.assertRegexCompat(
       read_line(),
