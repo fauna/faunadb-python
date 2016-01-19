@@ -6,6 +6,9 @@ doc:
 test:
 	python -m unittest discover
 
+coverage:
+	coverage run -m unittest discover
+
 lint: lint_faunadb lint_tests
 
 lint_faunadb:

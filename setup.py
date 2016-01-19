@@ -16,6 +16,7 @@ requires = [
 
 extras_require = {
   "doc": ["sphinx", "sphinx_rtd_theme"],
+  "coverage": ["coverage"],
   "lint": ["pylint"],
 }
 
