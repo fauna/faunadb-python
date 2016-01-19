@@ -3,6 +3,7 @@
 .idea
 .Python
 .eggs/
+.coverage
 build
 dist
 docs/_build

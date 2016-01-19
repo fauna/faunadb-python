@@ -11,8 +11,12 @@ env:
   - FAUNA_DOMAIN=rest.faunadb.com
   - FAUNA_SCHEME=https
   - FAUNA_PORT=443
+install:
+- pip install coveralls
 script:
-- python setup.py test
+- coverage run setup.py test
+after_success:
+- coveralls
 notifications:
   email: false
   slack:
