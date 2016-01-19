@@ -7,6 +7,8 @@ from datetime import datetime
 from builtins import str, object
 from iso8601 import parse_date
 
+from faunadb.query import _Expr
+
 class Ref(object):
   """
   FaunaDB ref. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.
@@ -68,7 +70,10 @@ class Set(object):
   For query sets see :doc:`query`.
   """
   def __init__(self, set_query):
-    self.query = set_query
+    if isinstance(set_query, _Expr):
+      self.query = set_query.value
+    else:
+      self.query = set_query
 
   def to_fauna_json(self):
     return {"@set": self.query}

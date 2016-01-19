@@ -4,12 +4,13 @@ from faunadb import query
 from faunadb.errors import ErrorData, Failure, ValidationFailed, BadRequest, InternalError, \
   MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, UnavailableError, InvalidResponse
 from faunadb.objects import Ref
+from faunadb.query import add, create, get, _Expr, var
 
 from tests.helpers import FaunaTestCase, mock_client
 
 class ErrorsTest(FaunaTestCase):
   def test_request_result(self):
-    err = self.assert_raises(BadRequest, lambda: self.client.query({"foo": "bar"}))
+    err = self.assert_raises(BadRequest, lambda: self.client.query(_Expr({"foo": "bar"})))
     self.assertEqual(err.request_result.request_content, {"foo": "bar"})
 
   def test_invalid_response(self):
@@ -23,7 +24,7 @@ class ErrorsTest(FaunaTestCase):
 
   #region FaunaError
   def test_bad_request(self):
-    self.assertRaises(BadRequest, lambda: self.client.query({"foo": "bar"}))
+    self.assertRaises(BadRequest, lambda: self.client.query(_Expr({"foo": "bar"})))
     # Tests of HttpBadRequest.errors go in ErrorData section.
 
   def test_unauthorized(self):
@@ -35,7 +36,7 @@ class ErrorsTest(FaunaTestCase):
     # Create client with client key
     client = self.get_client(
       secret=self.root_client.query(
-        query.create(Ref("keys"), query.object(database=self.db_ref, role="client")))["secret"]
+        query.create(Ref("keys"), {"database": self.db_ref, "role": "client"}))["secret"]
     )
 
     exception = self.assert_raises(
@@ -66,29 +67,29 @@ class ErrorsTest(FaunaTestCase):
 
   #region ErrorData
   def test_invalid_expression(self):
-    self._assert_query_error({"foo": "bar"}, BadRequest, "invalid expression")
+    self._assert_query_error(_Expr({"foo": "bar"}), BadRequest, "invalid expression")
 
   def test_unbound_variable(self):
-    self._assert_query_error({"var": "x"}, BadRequest, "unbound variable")
+    self._assert_query_error(var("x"), BadRequest, "unbound variable")
 
   def test_invalid_argument(self):
-    self._assert_query_error({"add": [1, "two"]}, BadRequest, "invalid argument", ["add", 1])
+    self._assert_query_error(add([1, "two"]), BadRequest, "invalid argument", ["add", 1])
 
   def test_instance_not_found(self):
     # Must be a reference to a real class or else we get InvalidExpression
     self.client.post("classes", {"name": "foofaws"})
     self._assert_query_error(
-      {"get": {"@ref": "classes/foofaws/123"}},
+      get(Ref("classes/foofaws/123")),
       NotFound,
       "instance not found")
 
   def test_value_not_found(self):
-    self._assert_query_error({"select": ["a"], "from": {"object": {}}}, NotFound, "value not found")
+    self._assert_query_error(query.select("a", {}), NotFound, "value not found")
 
   def test_instance_already_exists(self):
     self.client.post("classes", {"name": "duplicates"})
     ref = self.client.post("classes/duplicates", {})["ref"]
-    self._assert_query_error({"create": ref}, BadRequest, "instance already exists", ["create"])
+    self._assert_query_error(create(ref, {}), BadRequest, "instance already exists", ["create"])
   #endregion
 
   #region InvalidData

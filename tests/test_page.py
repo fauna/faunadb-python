@@ -21,7 +21,7 @@ class PageTest(FaunaTestCase):
     })["ref"]
 
     def create(n):
-      q = query.create(class_ref, query.quote({"data": {"n": n}}))
+      q = query.create(class_ref, {"data": {"n": n}})
       return self.client.query(q)["ref"]
 
     a = create(0)

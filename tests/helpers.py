@@ -39,10 +39,10 @@ class FaunaTestCase(TestCase):
     except BadRequest:
       pass
 
-    self.root_client.query(query.create(Ref("databases"), query.object(name=db_name)))
+    self.root_client.query(query.create(Ref("databases"), {"name": db_name}))
 
     self.server_key = self.root_client.query(
-      query.create(Ref("keys"), query.object(database=self.db_ref, role="server")))["secret"]
+      query.create(Ref("keys"), {"database": self.db_ref, "role": "server"}))["secret"]
     self.client = self.get_client()
 
   def tearDown(self):
