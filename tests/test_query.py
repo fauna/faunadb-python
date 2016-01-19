@@ -63,36 +63,36 @@ class QueryTest(FaunaTestCase):
   #region Basic forms
 
   def test_let_var(self):
-    assert self._q(query.let({"x": 1}, query.var("x"))) == 1
+    self.assertEqual(self._q(query.let({"x": 1}, query.var("x"))), 1)
 
   def test_if(self):
-    assert self._q(query.if_expr(True, "t", "f")) == "t"
-    assert self._q(query.if_expr(False, "t", "f")) == "f"
+    self.assertEqual(self._q(query.if_expr(True, "t", "f")), "t")
+    self.assertEqual(self._q(query.if_expr(False, "t", "f")), "f")
 
   def test_do(self):
     ref = self._create()["ref"]
-    assert self._q(query.do(query.delete(ref), 1)) == 1
-    assert self._q(query.exists(ref)) is False
+    self.assertEqual(self._q(query.do(query.delete(ref), 1)), 1)
+    self.assertFalse(self._q(query.exists(ref)))
 
   def test_object(self):
     # Unlike query.quote, contents are evaluated.
-    assert self._q(query.object(x=query.let({"x": 1}, query.var("x")))) == {"x": 1}
+    self.assertEqual(self._q(query.object(x=query.let({"x": 1}, query.var("x")))), {"x": 1})
 
   def test_quote(self):
     quoted = query.let({"x": 1}, query.var("x"))
-    assert self._q(query.quote(quoted)) == quoted
+    self.assertEqual(self._q(query.quote(quoted)), quoted)
 
   def test_lambda_query(self):
-    assert query.lambda_query(lambda a: query.add(a, a)) == {
+    self.assertEqual(query.lambda_query(lambda a: query.add(a, a)), {
       "lambda": "auto0", "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
-    }
+    })
 
     # pylint: disable=undefined-variable
     expected = query.lambda_query(
       lambda a: query.lambda_query(
         lambda b: query.lambda_query(
           lambda c: [a, b, c])))
-    assert expected == {
+    self.assertEqual(expected, {
       "lambda": "auto0",
       "expr": {
         "lambda": "auto1",
@@ -101,21 +101,21 @@ class QueryTest(FaunaTestCase):
           "expr": [{"var": "auto0"}, {"var": "auto1"}, {"var": "auto2"}]
         }
       }
-    }
+    })
 
     # Error in lambda should not affect future queries.
     with self.assertRaises(Exception):
       def fail():
         raise Exception("foo")
       query.lambda_query(lambda a: fail())
-    assert query.lambda_query(lambda a: a) == {"lambda": "auto0", "expr": {"var": "auto0"}}
+    self.assertEqual(query.lambda_query(lambda a: a), {"lambda": "auto0", "expr": {"var": "auto0"}})
 
   def test_lambda_query_multiple_args(self):
     expected = query.lambda_query(lambda a, b: [b, a])
-    assert expected == {
+    self.assertEqual(expected, {
       "lambda": ["auto0", "auto1"],
       "expr": [{"var": "auto1"}, {"var": "auto0"}]
-    }
+    })
 
   def test_lambda_query_multithreaded(self):
     """Test that lambda_query works in simultaneous threads."""
@@ -439,8 +439,8 @@ class QueryTest(FaunaTestCase):
 
   def test_and(self):
     self.assertFalse(self._q(query.and_expr(True, True, False)))
-    assert self._q(query.and_expr(True, True, True)) is True
-    assert self._q(query.and_expr(True)) is True
+    self.assertTrue(self._q(query.and_expr(True, True, True)))
+    self.assertTrue(self._q(query.and_expr(True)))
     self.assertFalse(self._q(query.and_expr(False)))
     self._assert_bad_query(query.and_expr())
 
