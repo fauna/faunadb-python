@@ -25,7 +25,7 @@ class ObjectsTest(FaunaTestCase):
   def test_set(self):
     index = Ref("indexes", "frogs_by_size")
     json_index = '{"@ref":"indexes/frogs_by_size"}'
-    match = Set(query.match(self.ref, index))
+    match = Set(query.match(index, self.ref))
     json_match = '{"@set":{"match":%s,"terms":%s}}' % (json_index, self.json_ref)
     self.assertJson(match, json_match)
 

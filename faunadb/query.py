@@ -207,9 +207,9 @@ def remove(ref, ts, action):
 
 #region Sets
 
-def match(terms, index):
+def match(index, *terms):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"match": index, "terms": terms}
+  return {"match": index, "terms": _varargs(terms)}
 
 
 def union(*sets):

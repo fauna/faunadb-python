@@ -28,7 +28,7 @@ class PageTest(FaunaTestCase):
     create(1)
     b = create(0)
 
-    gadgets_set = query.match(0, index_ref)
+    gadgets_set = query.match(index_ref, 0)
 
     self.assertEqual(list(Page.set_iterator(self.client, gadgets_set, page_size=1)), [a, b])
 

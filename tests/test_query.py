@@ -37,10 +37,10 @@ class QueryTest(FaunaTestCase):
   #region Helpers
 
   def _set_n(self, n):
-    return query.match(n, self.n_index_ref)
+    return query.match(self.n_index_ref, n)
 
   def _set_m(self, m):
-    return query.match(m, self.m_index_ref)
+    return query.match(self.m_index_ref, m)
 
   def _create(self, n=0, m=None):
     data = {"n": n} if m is None else {"n": n, "m": m}
@@ -315,7 +315,7 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._set_to_list(source), referenced)
 
     # For each obj with n=12, get the set of elements whose data.m refers to it.
-    joined = query.join(source, lambda a: query.match(a, self.m_index_ref))
+    joined = query.join(source, lambda a: query.match(self.m_index_ref, a))
     self.assertEqual(self._set_to_list(joined), referencers)
 
   #endregion
