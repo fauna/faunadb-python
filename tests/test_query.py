@@ -4,7 +4,7 @@ from threading import Thread
 from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import FaunaTime, Ref, Set
+from faunadb.objects import FaunaTime, Ref, SetRef
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -216,8 +216,8 @@ class QueryTest(FaunaTestCase):
 
     self.assertEqual(self._q(query.paginate(test_set, sources=True)), {
       "data": [
-        {"sources": [Set(test_set)], "value": self.ref_n1},
-        {"sources": [Set(test_set)], "value": self.ref_n1m1}
+        {"sources": [SetRef(test_set)], "value": self.ref_n1},
+        {"sources": [SetRef(test_set)], "value": self.ref_n1m1}
       ]
     })
 

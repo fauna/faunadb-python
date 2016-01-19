@@ -3,13 +3,13 @@ from json import dumps, loads, JSONEncoder
 from iso8601 import parse_date
 
 from faunadb.errors import InvalidResponse
-from faunadb.objects import FaunaTime, Ref, Set
+from faunadb.objects import FaunaTime, Ref, SetRef
 
 
 def parse_json(json_string):
   """
   Parses a JSON string into python values.
-  Also parses :any:`Ref`, :any:`Set`, :any:`FaunaTime`, and :class:`date`.
+  Also parses :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, and :class:`date`.
   """
   try:
     return loads(json_string, object_hook=_parse_json_hook)
@@ -26,7 +26,7 @@ def _parse_json_hook(dct):
   if "@obj" in dct:
     return dct["@obj"]
   if "@set" in dct:
-    return Set(dct["@set"])
+    return SetRef(dct["@set"])
   if "@ts" in dct:
     return FaunaTime(dct["@ts"])
   if "@date" in dct:

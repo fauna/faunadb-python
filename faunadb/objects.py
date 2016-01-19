@@ -61,7 +61,7 @@ class Ref(object):
     return not self == other
 
 
-class Set(object):
+class SetRef(object):
   """
   FaunaDB Set.
   This represents a set returned as part of a response. This looks like ``{"@set": set_query}``.
@@ -74,10 +74,10 @@ class Set(object):
     return {"@set": self.query}
 
   def __repr__(self):
-    return "Set(%s)" % repr(self.query)
+    return "SetRef(%s)" % repr(self.query)
 
   def __eq__(self, other):
-    return isinstance(other, Set) and self.query == other.query
+    return isinstance(other, SetRef) and self.query == other.query
 
   def __ne__(self, other):
     # pylint: disable=unneeded-not
