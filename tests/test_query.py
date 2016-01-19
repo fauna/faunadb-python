@@ -4,7 +4,7 @@ from threading import Thread
 from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import FaunaTime, Set
+from faunadb.objects import FaunaTime, Ref, Set
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -317,6 +317,27 @@ class QueryTest(FaunaTestCase):
     # For each obj with n=12, get the set of elements whose data.m refers to it.
     joined = query.join(source, lambda a: query.match(self.m_index_ref, a))
     self.assertEqual(self._set_to_list(joined), referencers)
+
+  #endregion
+
+  #region Authentication
+
+  def test_login_logout(self):
+    instance_ref = self.client.query(
+      query.create(self.class_ref, query.quote({"credentials": {"password": "sekrit"}})))["ref"]
+    secret = self.client.query(
+      query.login(instance_ref, query.quote({"password": "sekrit"})))["secret"]
+    instance_client = self.get_client(secret=secret)
+
+    self.assertEqual(instance_client.query(
+      query.select("ref", query.get(Ref("classes/widgets/self")))), instance_ref)
+
+    self.assertTrue(instance_client.query(query.logout(True)))
+
+  def test_identify(self):
+    instance_ref = self.client.query(
+      query.create(self.class_ref, query.quote({"credentials": {"password": "sekrit"}})))["ref"]
+    self.assertTrue(self.client.query(query.identify(instance_ref, "sekrit")))
 
   #endregion
 

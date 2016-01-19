@@ -233,6 +233,24 @@ def join(source, target):
 
 #endregion
 
+#region Authentication
+
+def login(ref, params):
+  """See the `docs <https://faunadb.com/documentation/queries#auth_functions>`__."""
+  return {"login": ref, "params": params}
+
+
+def logout(delete_tokens):
+  """See the `docs <https://faunadb.com/documentation/queries#auth_functions>`__."""
+  return {"logout": delete_tokens}
+
+
+def identify(ref, password):
+  """See the `docs <https://faunadb.com/documentation/queries#auth_functions>`__."""
+  return {"identify": ref, "password": password}
+
+#endregion
+
 #region String functions
 
 def concat(strings, separator=None):
