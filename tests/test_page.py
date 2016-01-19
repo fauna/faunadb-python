@@ -1,5 +1,5 @@
 from faunadb.page import Page
-from faunadb import query
+from faunadb.query import create, get, match, select
 from tests.helpers import FaunaTestCase
 
 class PageTest(FaunaTestCase):
@@ -20,19 +20,19 @@ class PageTest(FaunaTestCase):
       "active": True
     })["ref"]
 
-    def create(n):
-      q = query.create(class_ref, {"data": {"n": n}})
+    def create_instance(n):
+      q = create(class_ref, {"data": {"n": n}})
       return self.client.query(q)["ref"]
 
-    a = create(0)
-    create(1)
-    b = create(0)
+    a = create_instance(0)
+    create_instance(1)
+    b = create_instance(0)
 
-    gadgets_set = query.match(index_ref, 0)
+    gadgets_set = match(index_ref, 0)
 
     self.assertEqual(list(Page.set_iterator(self.client, gadgets_set, page_size=1)), [a, b])
 
-    query_mapper = lambda a: query.select(['data', 'n'], query.get(a))
+    query_mapper = lambda a: select(['data', 'n'], get(a))
     query_mapped_iter = Page.set_iterator(self.client, gadgets_set, map_lambda=query_mapper)
     self.assertEqual(list(query_mapped_iter), [0, 0])
 

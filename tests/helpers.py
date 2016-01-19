@@ -13,7 +13,7 @@ from faunadb._json import to_json, parse_json
 from faunadb.client import Client
 from faunadb.errors import BadRequest
 from faunadb.objects import Ref
-from faunadb import query
+from faunadb.query import create, delete
 
 _FAUNA_ROOT_KEY = environ["FAUNA_ROOT_KEY"]
 # If None, these have defaults in Client.
@@ -35,18 +35,18 @@ class FaunaTestCase(TestCase):
     self.db_ref = Ref("databases", db_name)
     # TODO: See `core` issue #1975
     try:
-      self.root_client.query(query.delete(self.db_ref))
+      self.root_client.query(delete(self.db_ref))
     except BadRequest:
       pass
 
-    self.root_client.query(query.create(Ref("databases"), {"name": db_name}))
+    self.root_client.query(create(Ref("databases"), {"name": db_name}))
 
     self.server_key = self.root_client.query(
-      query.create(Ref("keys"), {"database": self.db_ref, "role": "server"}))["secret"]
+      create(Ref("keys"), {"database": self.db_ref, "role": "server"}))["secret"]
     self.client = self.get_client()
 
   def tearDown(self):
-    self.root_client.query(query.delete(self.db_ref))
+    self.root_client.query(delete(self.db_ref))
 
   def assertJson(self, obj, json):
     self.assertToJson(obj, json)

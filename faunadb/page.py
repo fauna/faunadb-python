@@ -1,4 +1,4 @@
-from faunadb import query
+from faunadb.query import map_expr, paginate
 
 class Page(object):
   """
@@ -52,9 +52,9 @@ class Page(object):
     """
 
     def get_page(**kwargs):
-      queried = query.paginate(set_query, **kwargs)
+      queried = paginate(set_query, **kwargs)
       if map_lambda is not None:
-        queried = query.map_expr(map_lambda, queried)
+        queried = map_expr(map_lambda, queried)
       return Page.from_raw(client.query(queried))
 
     page = get_page(size=page_size)

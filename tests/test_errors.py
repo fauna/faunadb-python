@@ -1,10 +1,9 @@
 from requests import codes
 
-from faunadb import query
 from faunadb.errors import ErrorData, Failure, ValidationFailed, BadRequest, InternalError, \
   MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, UnavailableError, InvalidResponse
 from faunadb.objects import Ref
-from faunadb.query import add, create, get, _Expr, var
+from faunadb.query import add, create, get, _Expr, paginate, select, var
 
 from tests.helpers import FaunaTestCase, mock_client
 
@@ -30,18 +29,18 @@ class ErrorsTest(FaunaTestCase):
   def test_unauthorized(self):
     client = self.get_client(secret="bad_key")
     self.assert_http_error(
-      lambda: client.query(query.get(self.db_ref)), Unauthorized, "unauthorized")
+      lambda: client.query(get(self.db_ref)), Unauthorized, "unauthorized")
 
   def test_permission_denied(self):
     # Create client with client key
     client = self.get_client(
       secret=self.root_client.query(
-        query.create(Ref("keys"), {"database": self.db_ref, "role": "client"}))["secret"]
+        create(Ref("keys"), {"database": self.db_ref, "role": "client"}))["secret"]
     )
 
     exception = self.assert_raises(
       PermissionDenied,
-      lambda: client.query(query.paginate(Ref("databases"))))
+      lambda: client.query(paginate(Ref("databases"))))
     self.assert_error(exception, "permission denied", ["paginate"])
 
   def test_not_found(self):
@@ -84,7 +83,7 @@ class ErrorsTest(FaunaTestCase):
       "instance not found")
 
   def test_value_not_found(self):
-    self._assert_query_error(query.select("a", {}), NotFound, "value not found")
+    self._assert_query_error(select("a", {}), NotFound, "value not found")
 
   def test_instance_already_exists(self):
     self.client.post("classes", {"name": "duplicates"})

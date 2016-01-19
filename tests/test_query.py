@@ -1,11 +1,11 @@
 from __future__ import division
-from datetime import date
+from datetime import date as dt_date
 from threading import Thread
 from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
 from faunadb.objects import FaunaTime, Ref, Set
-from faunadb import query
+from faunadb.query import *
 from tests.helpers import FaunaTestCase
 
 class QueryTest(FaunaTestCase):
@@ -37,23 +37,23 @@ class QueryTest(FaunaTestCase):
   #region Helpers
 
   def _set_n(self, n):
-    return query.match(self.n_index_ref, n)
+    return match(self.n_index_ref, n)
 
   def _set_m(self, m):
-    return query.match(self.m_index_ref, m)
+    return match(self.m_index_ref, m)
 
   def _create(self, n=0, m=None):
     data = {"n": n} if m is None else {"n": n, "m": m}
-    return self._q(query.create(self.class_ref, {"data": data}))
+    return self._q(create(self.class_ref, {"data": data}))
 
   def _create_thimble(self, data):
-    return self._q(query.create(self.thimble_class_ref, {"data": data}))
+    return self._q(create(self.thimble_class_ref, {"data": data}))
 
   def _q(self, query_json):
     return self.client.query(query_json)
 
   def _set_to_list(self, _set):
-    return self._q(query.paginate(_set, size=1000))["data"]
+    return self._q(paginate(_set, size=1000))["data"]
 
   def _assert_bad_query(self, q):
     self.assertRaises(BadRequest, lambda: self._q(q))
@@ -63,24 +63,24 @@ class QueryTest(FaunaTestCase):
   #region Basic forms
 
   def test_let_var(self):
-    assert self._q(query.let({"x": 1}, query.var("x"))) == 1
+    assert self._q(let({"x": 1}, var("x"))) == 1
 
   def test_if(self):
-    assert self._q(query.if_expr(True, "t", "f")) == "t"
-    assert self._q(query.if_expr(False, "t", "f")) == "f"
+    assert self._q(if_expr(True, "t", "f")) == "t"
+    assert self._q(if_expr(False, "t", "f")) == "f"
 
   def test_do(self):
     ref = self._create()["ref"]
-    assert self._q(query.do(query.delete(ref), 1)) == 1
-    assert self._q(query.exists(ref)) is False
+    assert self._q(do(delete(ref), 1)) == 1
+    assert self._q(exists(ref)) is False
 
   def test_lambda_query(self):
-    assert query.to_query(lambda a: query.add(a, a)) == {
+    assert to_query(lambda a: add(a, a)) == {
       "lambda": "auto0", "expr": {"add": [{"var": "auto0"}, {"var": "auto0"}]}
     }
 
     # pylint: disable=undefined-variable
-    expected = query.to_query(lambda a: lambda b: lambda c: [a, b, c])
+    expected = to_query(lambda a: lambda b: lambda c: [a, b, c])
     assert expected == {
       "lambda": "auto0",
       "expr": {
@@ -96,11 +96,11 @@ class QueryTest(FaunaTestCase):
     with self.assertRaises(Exception):
       def fail():
         raise Exception("foo")
-      query.to_query(lambda a: fail())
-    assert query.to_query(lambda a: a) == {"lambda": "auto0", "expr": {"var": "auto0"}}
+      to_query(lambda a: fail())
+    assert to_query(lambda a: a) == {"lambda": "auto0", "expr": {"var": "auto0"}}
 
   def test_lambda_query_multiple_args(self):
-    expected = query.to_query(lambda a, b: [b, a])
+    expected = to_query(lambda a, b: [b, a])
     assert expected == {
       "lambda": ["auto0", "auto1"],
       "expr": [{"var": "auto1"}, {"var": "auto0"}]
@@ -117,14 +117,14 @@ class QueryTest(FaunaTestCase):
         events.append(2)
         return a
       self.assertEqual(
-        query.to_query(do_lambda),
+        to_query(do_lambda),
         {"lambda": "auto0", "expr": {"var": "auto0"}})
 
     def do_b():
       # This happens while thread 'a' has incremented its auto name to auto1,
       # but that doesn't affect thread 'b'.
       self.assertEqual(
-        query.to_query(lambda a: a),
+        to_query(lambda a: a),
         {"lambda": "auto0", "expr": {"var": "auto0"}})
       events.append(1)
 
@@ -145,43 +145,43 @@ class QueryTest(FaunaTestCase):
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
     self.assertEqual(
-      self._q(query.map_expr(lambda a: query.multiply(2, a), [1, 2, 3])),
+      self._q(map_expr(lambda a: multiply(2, a), [1, 2, 3])),
       [2, 4, 6])
 
-    page = query.paginate(self._set_n(1))
-    ns = query.map_expr(lambda a: query.select(["data", "n"], query.get(a)), page)
+    page = paginate(self._set_n(1))
+    ns = map_expr(lambda a: select(["data", "n"], get(a)), page)
     self.assertEqual(self._q(ns), {"data": [1, 1]})
 
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
-    self._q(query.foreach(query.delete, refs))
+    self._q(foreach(delete, refs))
     for ref in refs:
-      self.assertFalse(self._q(query.exists(ref)))
+      self.assertFalse(self._q(exists(ref)))
 
   def test_filter(self):
-    evens = query.filter_expr(lambda a: query.equals(query.modulo(a, 2), 0), [1, 2, 3, 4])
+    evens = filter_expr(lambda a: equals(modulo(a, 2), 0), [1, 2, 3, 4])
     self.assertEqual(self._q(evens), [2, 4])
 
     # Works on page too
-    page = query.paginate(self._set_n(1))
-    refs_with_m = query.filter_expr(lambda a: query.contains(["data", "m"], query.get(a)), page)
+    page = paginate(self._set_n(1))
+    refs_with_m = filter_expr(lambda a: contains(["data", "m"], get(a)), page)
     self.assertEqual(self._q(refs_with_m), {"data": [self.ref_n1m1]})
 
   def test_take(self):
-    self.assertEqual(self._q(query.take(1, [1, 2])), [1])
-    self.assertEqual(self._q(query.take(3, [1, 2])), [1, 2])
-    self.assertEqual(self._q(query.take(-1, [1, 2])), [])
+    self.assertEqual(self._q(take(1, [1, 2])), [1])
+    self.assertEqual(self._q(take(3, [1, 2])), [1, 2])
+    self.assertEqual(self._q(take(-1, [1, 2])), [])
 
   def test_drop(self):
-    self.assertEqual(self._q(query.drop(1, [1, 2])), [2])
-    self.assertEqual(self._q(query.drop(3, [1, 2])), [])
-    self.assertEqual(self._q(query.drop(-1, [1, 2])), [1, 2])
+    self.assertEqual(self._q(drop(1, [1, 2])), [2])
+    self.assertEqual(self._q(drop(3, [1, 2])), [])
+    self.assertEqual(self._q(drop(-1, [1, 2])), [1, 2])
 
   def test_prepend(self):
-    self.assertEqual(self._q(query.prepend([1, 2, 3], [4, 5, 6])), [1, 2, 3, 4, 5, 6])
+    self.assertEqual(self._q(prepend([1, 2, 3], [4, 5, 6])), [1, 2, 3, 4, 5, 6])
 
   def test_append(self):
-    self.assertEqual(self._q(query.append([4, 5, 6], [1, 2, 3])), [1, 2, 3, 4, 5, 6])
+    self.assertEqual(self._q(append([4, 5, 6], [1, 2, 3])), [1, 2, 3, 4, 5, 6])
 
   #endregion
 
@@ -189,21 +189,21 @@ class QueryTest(FaunaTestCase):
 
   def test_get(self):
     instance = self._create()
-    self.assertEqual(self._q(query.get(instance["ref"])), instance)
+    self.assertEqual(self._q(get(instance["ref"])), instance)
 
   def test_paginate(self):
     test_set = self._set_n(1)
     control = [self.ref_n1, self.ref_n1m1]
-    self.assertEqual(self._q(query.paginate(test_set)), {"data": control})
+    self.assertEqual(self._q(paginate(test_set)), {"data": control})
 
     data = []
-    page1 = self._q(query.paginate(test_set, size=1))
+    page1 = self._q(paginate(test_set, size=1))
     data.extend(page1["data"])
-    page2 = self._q(query.paginate(test_set, size=1, after=page1["after"]))
+    page2 = self._q(paginate(test_set, size=1, after=page1["after"]))
     data.extend(page2["data"])
     self.assertEqual(data, control)
 
-    self.assertEqual(self._q(query.paginate(test_set, sources=True)), {
+    self.assertEqual(self._q(paginate(test_set, sources=True)), {
       "data": [
         {"sources": [Set(test_set)], "value": self.ref_n1},
         {"sources": [Set(test_set)], "value": self.ref_n1m1}
@@ -212,16 +212,16 @@ class QueryTest(FaunaTestCase):
 
   def test_exists(self):
     ref = self._create()["ref"]
-    self.assertTrue(self._q(query.exists(ref)))
-    self._q(query.delete(ref))
-    self.assertFalse(self._q(query.exists(ref)))
+    self.assertTrue(self._q(exists(ref)))
+    self._q(delete(ref))
+    self.assertFalse(self._q(exists(ref)))
 
   def test_count(self):
     self._create(123)
     self._create(123)
     instances = self._set_n(123)
     # `count` is currently only approximate. Should be 2.
-    self.assertIsInstance(self._q(query.count(instances)), int)
+    self.assertIsInstance(self._q(count(instances)), int)
 
   #endregion
 
@@ -235,18 +235,18 @@ class QueryTest(FaunaTestCase):
 
   def test_update(self):
     ref = self._create()["ref"]
-    got = self._q(query.update(ref, {"data": {"m": 1}}))
+    got = self._q(update(ref, {"data": {"m": 1}}))
     self.assertEqual(got["data"], {"n": 0, "m": 1})
 
   def test_replace(self):
     ref = self._create()["ref"]
-    got = self._q(query.replace(ref, {"data": {"m": 1}}))
+    got = self._q(replace(ref, {"data": {"m": 1}}))
     self.assertEqual(got["data"], {"m": 1})
 
   def test_delete(self):
     ref = self._create()["ref"]
-    self._q(query.delete(ref))
-    self.assertFalse(self._q(query.exists(ref)))
+    self._q(delete(ref))
+    self.assertFalse(self._q(exists(ref)))
 
   #endregion
 
@@ -260,10 +260,10 @@ class QueryTest(FaunaTestCase):
 
     # Add previous event
     inserted = {"data": {"weight": 0}}
-    self._q(query.insert(ref, prev_ts, "create", inserted))
+    self._q(insert(ref, prev_ts, "create", inserted))
 
     # Get version from previous event
-    old = self._q(query.get(ref, ts=prev_ts))
+    old = self._q(get(ref, ts=prev_ts))
     self.assertEqual(old["data"], {"weight": 0})
 
   def test_remove(self):
@@ -271,29 +271,29 @@ class QueryTest(FaunaTestCase):
     ref = instance["ref"]
 
     # Change it
-    new_instance = self._q(query.replace(ref, {"data": {"weight": 1}}))
-    self.assertEqual(self._q(query.get(ref)), new_instance)
+    new_instance = self._q(replace(ref, {"data": {"weight": 1}}))
+    self.assertEqual(self._q(get(ref)), new_instance)
 
     # Delete that event
-    self._q(query.remove(ref, new_instance["ts"], "create"))
+    self._q(remove(ref, new_instance["ts"], "create"))
 
     # Assert that it was undone
-    self.assertEqual(self._q(query.get(ref)), instance)
+    self.assertEqual(self._q(get(ref)), instance)
 
   def test_match(self):
     q = self._set_n(1)
     self.assertEqual(self._set_to_list(q), [self.ref_n1, self.ref_n1m1])
 
   def test_union(self):
-    q = query.union(self._set_n(1), self._set_m(1))
+    q = union(self._set_n(1), self._set_m(1))
     self.assertEqual(self._set_to_list(q), [self.ref_n1, self.ref_m1, self.ref_n1m1])
 
   def test_intersection(self):
-    q = query.intersection(self._set_n(1), self._set_m(1))
+    q = intersection(self._set_n(1), self._set_m(1))
     self.assertEqual(self._set_to_list(q), [self.ref_n1m1])
 
   def test_difference(self):
-    q = query.difference(self._set_n(1), self._set_m(1))
+    q = difference(self._set_n(1), self._set_m(1))
     self.assertEqual(self._set_to_list(q), [self.ref_n1]) # but not self.ref_n1m1
 
   def test_join(self):
@@ -304,7 +304,7 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._set_to_list(source), referenced)
 
     # For each obj with n=12, get the set of elements whose data.m refers to it.
-    joined = query.join(source, lambda a: query.match(self.m_index_ref, a))
+    joined = join(source, lambda a: match(self.m_index_ref, a))
     self.assertEqual(self._set_to_list(joined), referencers)
 
   #endregion
@@ -313,148 +313,148 @@ class QueryTest(FaunaTestCase):
 
   def test_login_logout(self):
     instance_ref = self.client.query(
-      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
+      create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     secret = self.client.query(
-      query.login(instance_ref, {"password": "sekrit"}))["secret"]
+      login(instance_ref, {"password": "sekrit"}))["secret"]
     instance_client = self.get_client(secret=secret)
 
     self.assertEqual(instance_client.query(
-      query.select("ref", query.get(Ref("classes/widgets/self")))), instance_ref)
+      select("ref", get(Ref("classes/widgets/self")))), instance_ref)
 
-    self.assertTrue(instance_client.query(query.logout(True)))
+    self.assertTrue(instance_client.query(logout(True)))
 
   def test_identify(self):
     instance_ref = self.client.query(
-      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
-    self.assertTrue(self.client.query(query.identify(instance_ref, "sekrit")))
+      create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
+    self.assertTrue(self.client.query(identify(instance_ref, "sekrit")))
 
   #endregion
 
   #region String functions
 
   def test_concat(self):
-    self.assertEqual(self._q(query.concat(["a", "b", "c"])), "abc")
-    self.assertEqual(self._q(query.concat([])), "")
-    self.assertEqual(self._q(query.concat(["a", "b", "c"], ".")), "a.b.c")
+    self.assertEqual(self._q(concat(["a", "b", "c"])), "abc")
+    self.assertEqual(self._q(concat([])), "")
+    self.assertEqual(self._q(concat(["a", "b", "c"], ".")), "a.b.c")
 
   def test_casefold(self):
-    self.assertEqual(self._q(query.casefold("Hen Wen")), "hen wen")
+    self.assertEqual(self._q(casefold("Hen Wen")), "hen wen")
 
   #endregion
 
   #region Time and date functions
 
   def test_time(self):
-    time = "1970-01-01T00:00:00.123456789Z"
-    self.assertEqual(self._q(query.time(time)), FaunaTime(time))
+    time_str = "1970-01-01T00:00:00.123456789Z"
+    self.assertEqual(self._q(time(time_str)), FaunaTime(time_str))
 
     # "now" refers to the current time.
-    self.assertIsInstance(self._q(query.time("now")), FaunaTime)
+    self.assertIsInstance(self._q(time("now")), FaunaTime)
 
   def test_epoch(self):
-    self.assertEqual(self._q(query.epoch(12, "second")), FaunaTime("1970-01-01T00:00:12Z"))
+    self.assertEqual(self._q(epoch(12, "second")), FaunaTime("1970-01-01T00:00:12Z"))
     nano_time = FaunaTime("1970-01-01T00:00:00.123456789Z")
-    self.assertEqual(self._q(query.epoch(123456789, "nanosecond")), nano_time)
+    self.assertEqual(self._q(epoch(123456789, "nanosecond")), nano_time)
 
   def test_date(self):
-    self.assertEqual(self._q(query.date("1970-01-01")), date(1970, 1, 1))
+    self.assertEqual(self._q(date("1970-01-01")), dt_date(1970, 1, 1))
 
   #endregion
 
   #region Miscellaneous functions
 
   def test_equals(self):
-    self.assertTrue(self._q(query.equals(1, 1, 1)))
-    self.assertFalse(self._q(query.equals(1, 1, 2)))
-    self.assertTrue(self._q(query.equals(1)))
-    self._assert_bad_query(query.equals())
+    self.assertTrue(self._q(equals(1, 1, 1)))
+    self.assertFalse(self._q(equals(1, 1, 2)))
+    self.assertTrue(self._q(equals(1)))
+    self._assert_bad_query(equals())
 
   def test_contains(self):
     obj = {"a": {"b": 1}}
-    self.assertTrue(self._q(query.contains(["a", "b"], obj)))
-    self.assertTrue(self._q(query.contains("a", obj)))
-    self.assertFalse(self._q(query.contains(["a", "c"], obj)))
+    self.assertTrue(self._q(contains(["a", "b"], obj)))
+    self.assertTrue(self._q(contains("a", obj)))
+    self.assertFalse(self._q(contains(["a", "c"], obj)))
 
   def test_select(self):
     obj = {"a": {"b": 1}}
-    self.assertEqual(self._q(query.select("a", obj)), {"b": 1})
-    self.assertEqual(self._q(query.select(["a", "b"], obj)), 1)
-    self.assertIsNone(self._q(query.select_with_default("c", obj, None)))
-    self.assertRaises(NotFound, lambda: self._q(query.select("c", obj)))
+    self.assertEqual(self._q(select("a", obj)), {"b": 1})
+    self.assertEqual(self._q(select(["a", "b"], obj)), 1)
+    self.assertIsNone(self._q(select_with_default("c", obj, None)))
+    self.assertRaises(NotFound, lambda: self._q(select("c", obj)))
 
   def test_select_array(self):
     arr = [1, 2, 3]
-    self.assertEqual(self._q(query.select(2, arr)), 3)
-    self.assertRaises(NotFound, lambda: self._q(query.select(3, arr)))
+    self.assertEqual(self._q(select(2, arr)), 3)
+    self.assertRaises(NotFound, lambda: self._q(select(3, arr)))
 
   def test_add(self):
-    self.assertEqual(self._q(query.add(2, 3, 5)), 10)
-    self._assert_bad_query(query.add())
+    self.assertEqual(self._q(add(2, 3, 5)), 10)
+    self._assert_bad_query(add())
 
   def test_multiply(self):
-    self.assertEqual(self._q(query.multiply(2, 3, 5)), 30)
-    self._assert_bad_query(query.multiply())
+    self.assertEqual(self._q(multiply(2, 3, 5)), 30)
+    self._assert_bad_query(multiply())
 
   def test_subtract(self):
-    self.assertEqual(self._q(query.subtract(2, 3, 5)), -6)
-    self.assertEqual(self._q(query.subtract(2)), 2)
-    self._assert_bad_query(query.subtract())
+    self.assertEqual(self._q(subtract(2, 3, 5)), -6)
+    self.assertEqual(self._q(subtract(2)), 2)
+    self._assert_bad_query(subtract())
 
   def test_divide(self):
-    self.assertEqual(self._q(query.divide(2.0, 3, 5)), 2 / 15)
-    self.assertEqual(self._q(query.divide(2)), 2)
-    self._assert_bad_query(query.divide(1, 0))
-    self._assert_bad_query(query.divide())
+    self.assertEqual(self._q(divide(2.0, 3, 5)), 2 / 15)
+    self.assertEqual(self._q(divide(2)), 2)
+    self._assert_bad_query(divide(1, 0))
+    self._assert_bad_query(divide())
 
   def test_modulo(self):
-    self.assertEqual(self._q(query.modulo(5, 2)), 1)
+    self.assertEqual(self._q(modulo(5, 2)), 1)
     # This is (15 % 10) % 2
-    self.assertEqual(self._q(query.modulo(15, 10, 2)), 1)
-    self.assertEqual(self._q(query.modulo(2)), 2)
-    self._assert_bad_query(query.modulo(1, 0))
-    self._assert_bad_query(query.modulo())
+    self.assertEqual(self._q(modulo(15, 10, 2)), 1)
+    self.assertEqual(self._q(modulo(2)), 2)
+    self._assert_bad_query(modulo(1, 0))
+    self._assert_bad_query(modulo())
 
   def test_lt(self):
-    self.assertTrue(self._q(query.lt(1, 2)))
+    self.assertTrue(self._q(lt(1, 2)))
 
   def test_lte(self):
-    self.assertTrue(self._q(query.lte(1, 1)))
+    self.assertTrue(self._q(lte(1, 1)))
 
   def test_gt(self):
-    self.assertTrue(self._q(query.gt(2, 1)))
+    self.assertTrue(self._q(gt(2, 1)))
 
   def test_gte(self):
-    self.assertTrue(self._q(query.gte(1, 1)))
+    self.assertTrue(self._q(gte(1, 1)))
 
   def test_and(self):
-    self.assertFalse(self._q(query.and_expr(True, True, False)))
-    assert self._q(query.and_expr(True, True, True)) is True
-    assert self._q(query.and_expr(True)) is True
-    self.assertFalse(self._q(query.and_expr(False)))
-    self._assert_bad_query(query.and_expr())
+    self.assertFalse(self._q(and_expr(True, True, False)))
+    assert self._q(and_expr(True, True, True)) is True
+    assert self._q(and_expr(True)) is True
+    self.assertFalse(self._q(and_expr(False)))
+    self._assert_bad_query(and_expr())
 
   def test_or(self):
-    self.assertTrue(self._q(query.or_expr(False, False, True)))
-    self.assertFalse(self._q(query.or_expr(False, False, False)))
-    self.assertTrue(self._q(query.or_expr(True)))
-    self.assertFalse(self._q(query.or_expr(False)))
-    self._assert_bad_query(query.or_expr())
+    self.assertTrue(self._q(or_expr(False, False, True)))
+    self.assertFalse(self._q(or_expr(False, False, False)))
+    self.assertTrue(self._q(or_expr(True)))
+    self.assertFalse(self._q(or_expr(False)))
+    self._assert_bad_query(or_expr())
 
   def test_not(self):
-    self.assertFalse(self._q(query.not_expr(True)))
-    self.assertTrue(self._q(query.not_expr(False)))
+    self.assertFalse(self._q(not_expr(True)))
+    self.assertTrue(self._q(not_expr(False)))
 
   #endregion
 
   #region Helpers tests
 
   def test_object(self):
-    assert self._q({"x": query.let({"x": 1}, query.var("x"))}) == {"x": 1}
+    assert self._q({"x": let({"x": 1}, var("x"))}) == {"x": 1}
 
   def test_varargs(self):
     # Works for lists too
-    self.assertEqual(self._q(query.add([2, 3, 5])), 10)
+    self.assertEqual(self._q(add([2, 3, 5])), 10)
     # Works for a variable equal to a list
-    self.assertEqual(self._q(query.let({"x": [2, 3, 5]}, query.add(query.var("x")))), 10)
+    self.assertEqual(self._q(let({"x": [2, 3, 5]}, add(var("x")))), 10)
 
   #endregion
