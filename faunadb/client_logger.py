@@ -6,6 +6,13 @@ def logger(logger_func):
   Function that can be the ``observer`` for a :any:`Client`.
   Will call ``logger_func`` on a string representation of each :any:`RequestResult`.
 
+  Use it like::
+
+    def log(logged):
+      print logged
+    client = Client(observer=logger(log), ...)
+    client.ping() # Calls `log`
+
   :param logger_func: Callback taking a string to be logged.
   """
   return lambda request_result: logger_func(show_request_result(request_result))
