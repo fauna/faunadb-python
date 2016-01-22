@@ -19,7 +19,7 @@ class Client(object):
 
   All methods return a converted JSON response.
   This is a dict containing lists, ints, floats, strings, and other dicts.
-  Any :any:`Ref`, :any:`Set`, :any:`FaunaTime`, or :class:`datetime.date`
+  Any :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, or :class:`datetime.date`
   values in it will also be parsed.
   (So instead of ``{ "@ref": "classes/frogs/123" }``, you will get ``Ref("classes/frogs", "123")``.)
   """

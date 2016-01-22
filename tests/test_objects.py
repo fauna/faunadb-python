@@ -1,7 +1,7 @@
 from datetime import date, datetime
 import iso8601
 
-from faunadb.objects import FaunaTime, Ref, Set
+from faunadb.objects import FaunaTime, Ref, SetRef
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -25,7 +25,7 @@ class ObjectsTest(FaunaTestCase):
   def test_set(self):
     index = Ref("indexes", "frogs_by_size")
     json_index = '{"@ref":"indexes/frogs_by_size"}'
-    match = Set(query.match(index, self.ref))
+    match = SetRef(query.match(index, self.ref))
     json_match = '{"@set":{"match":%s,"terms":%s}}' % (json_index, self.json_ref)
     self.assertJson(match, json_match)
 

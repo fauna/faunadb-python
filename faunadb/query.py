@@ -3,7 +3,7 @@ Constructors for creating queries to be passed into Client.query.
 For query documentation see the `docs <https://faunadb.com/documentation/queries>`_.
 
 When constructing queries, you must use these functions or
-the :any:`Ref`, :any:`Set`, :any:`FaunaTime`, and :class:`datetime.date` constructors.
+the :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, and :class:`datetime.date` constructors.
 To pass raw data to a query, use :any:`object` or :any:`quote`.
 """
 
