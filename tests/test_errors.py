@@ -74,7 +74,21 @@ class ErrorsTest(FaunaTestCase):
   def test_query_error(self):
     self._assert_query_error({"add": [1, "two"]}, BadRequest, "invalid argument", ["add", 1])
 
-  def test_invalid_data(self):
+  def test_error_data_equality(self):
+    e1 = ErrorData("code", "desc", ["pos"], [Failure("fc", "fd", ["ff"])])
+    e2 = ErrorData("code", "desc", ["pos"], [Failure("fc", "fd", ["ff"])])
+    self.assertEqual(e1, e2)
+    self.assertNotEqual(e1, ErrorData("code", "desc", ["pos"], [Failure("fc", "fd", [])]))
+
+  def test_failure_equality(self):
+    f1 = Failure("code", "desc", ["pos"])
+    f2 = Failure("code", "desc", ["pos"])
+    self.assertEqual(f1, f2)
+    self.assertNotEqual(f1, Failure("code", "desc", ["pos", "more"]))
+  #endregion
+
+  #region InvalidData
+  def test_invalid_type(self):
     self._assert_invalid_data("classes", {"name": 123}, "invalid type", ["name"])
 
   def test_repr(self):

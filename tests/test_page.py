@@ -38,3 +38,8 @@ class PageTest(FaunaTestCase):
 
     mapped_iter = Page.set_iterator(self.client, gadgets_set, mapper=lambda x: [x])
     self.assertEqual(list(mapped_iter), [[a], [b]])
+
+  def test_repr(self):
+    self.assertEqual(
+      repr(Page([1, 2, 3], ["before"])),
+      "Page(data=[1, 2, 3], before=['before'], after=None)")

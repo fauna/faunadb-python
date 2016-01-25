@@ -83,6 +83,8 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.quote(quoted)), quoted)
 
   def test_lambda_query(self):
+    self.assertRaises(ValueError, lambda: query.lambda_query(lambda: 0))
+
     self.assertEqual(query.lambda_query(lambda a: query.add(a, a)), {
       "lambda": "auto0", "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
     })
@@ -148,6 +150,11 @@ class QueryTest(FaunaTestCase):
 
     # Assert that events happened in the order expected.
     self.assertEqual(events, [0, 1, 2])
+
+  def test_to_lambda(self):
+    l = {"lambda": "auto0", "expr": {"var": "auto0"}}
+    self.assertEqual(query._to_lambda(lambda a: a), l)
+    self.assertEqual(query._to_lambda(query.lambda_expr("auto0", query.var("auto0"))), l)
 
   #endregion
 

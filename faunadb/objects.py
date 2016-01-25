@@ -98,7 +98,7 @@ class FaunaTime(object):
       Must include an offset.
     """
     if isinstance(value, datetime):
-      if datetime.utcoffset is None:
+      if value.utcoffset() is None:
         raise ValueError("FaunaTime requires offset-aware datetimes")
       value = value.isoformat()
 
