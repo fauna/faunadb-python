@@ -66,6 +66,14 @@ Then run ``make test``.
 To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTest.test_ping``.
 
 
+Coverage
+~~~~~~~~
+
+To run the tests with coverage, install the coverage dependencies with ``pip install .[coverage]``,
+and then run ``make coverage``. A summary will be displayed to the terminal, and a detailed coverage report
+will be available at ``htmlcov/index.html``.
+
+
 Documenting
 ~~~~~~~~~~~
 
