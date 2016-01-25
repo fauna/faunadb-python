@@ -8,6 +8,8 @@ test:
 
 coverage:
 	coverage run -m unittest discover
+	coverage report -m
+	coverage html
 
 lint: lint_faunadb lint_tests
 
