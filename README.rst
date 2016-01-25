@@ -77,7 +77,7 @@ will be available at ``htmlcov/index.html``.
 Documenting
 ~~~~~~~~~~~
 
-Run ``pip install sphinx sphinx_rtd_theme`` to install the needed packages to generate the docs.
+Run ``pip install .[doc]`` to install the needed packages to generate the docs.
 Then run ``make doc``, then open ``docs/_build/html/index.html`` in a web browser.
 
 
