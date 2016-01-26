@@ -102,22 +102,28 @@ class ErrorData(object):
     code = get_or_invalid(dct, "code")
     description = get_or_invalid(dct, "description")
     position = dct.get("position")
-    if code == "validation failed":
+    if "failures" in dct:
       failures = [Failure.from_dict(failure) for failure in get_or_invalid(dct, "failures")]
-      return ValidationFailed(description, position, failures)
     else:
-      return ErrorData(code, description, position)
+      failures = None
+    return ErrorData(code, description, position, failures)
 
-  def __init__(self, code, description, position):
+  def __init__(self, code, description, position, failures):
     self.code = code
     """Error code. See all error codes `here <https://faunadb.com/documentation#errors>`__."""
     self.description = description
     """Error description."""
     self.position = position
     """Position of the error in a query. May be None."""
+    self.failures = failures
+    """
+    List of all :py:class:`Failure` objects returned by the server.
+    None unless code == "validation failed".
+    """
 
   def __repr__(self):
-    return "ErrorData(%s, %s, %s)" % (repr(self.code), repr(self.description), repr(self.position))
+    return "ErrorData(%s, %s, %s, %s)" % \
+           (repr(self.code), repr(self.description), repr(self.position), repr(self.failures))
 
   def __eq__(self, other):
     return self.__class__ == other.__class__ and \
@@ -125,22 +131,9 @@ class ErrorData(object):
       self.position == other.position
 
 
-class ValidationFailed(ErrorData):
-  """An ErrorData that also stores Failure information."""
-
-  def __init__(self, description, position, failures):
-    super(ValidationFailed, self).__init__("validation failed", description, position)
-    self.failures = failures
-    """List of all :py:class:`Failure` objects returned by the server."""
-
-  def __repr__(self):
-    return "ValidationFailed(%s, %s, %s)" % \
-      (repr(self.description), repr(self.position), repr(self.failures))
-
-
 class Failure(object):
   """
-  Part of a :py:class:`ValidationFailed`.
+  Part of the ``failures`` of an :py:class:`ErrorData`.
   See the ``Invalid Data`` section of the `docs <https://faunadb.com/documentation#errors>`__.
   """
 
