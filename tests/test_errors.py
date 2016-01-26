@@ -1,7 +1,7 @@
 from requests import codes
 
 from faunadb import query
-from faunadb.errors import ErrorData, Failure, ValidationFailed, BadRequest, InternalError, \
+from faunadb.errors import ErrorData, Failure, BadRequest, InternalError, \
   MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, UnavailableError, InvalidResponse
 from faunadb.objects import Ref
 
@@ -122,14 +122,14 @@ class ErrorsTest(FaunaTestCase):
   #endregion
 
   def test_repr(self):
-    err = ErrorData("code", "desc", None)
-    self.assertEqual(repr(err), "ErrorData('code', 'desc', None)")
+    err = ErrorData("code", "desc", None, None)
+    self.assertEqual(repr(err), "ErrorData('code', 'desc', None, None)")
 
     failure = Failure("code", "desc", ["a", "b"])
-    vf = ValidationFailed("vf_desc", ["vf"], [failure])
+    err = ErrorData("code", "desc", ["pos"], [failure])
     self.assertEqual(
-      repr(vf),
-      "ValidationFailed('vf_desc', ['vf'], [Failure('code', 'desc', ['a', 'b'])])")
+      repr(err),
+      "ErrorData('code', 'desc', ['pos'], [Failure('code', 'desc', ['a', 'b'])])")
 
   def _assert_query_error(self, q, exception_class, code, position=None):
     position = position or []
