@@ -1,5 +1,5 @@
 from ..objects import Ref
-from .. import query
+from ..query import get, match
 from .codec import RefCodec
 from .field import Field
 from .model import Model, _ModelMetaClass
@@ -107,7 +107,7 @@ class Index(Builtin):
     # Make query slightly neater by only using an array if necessary.
     if len(matched_values) == 1:
       matched_values = matched_values[0]
-    return query.match(matched_values, self.ref)
+    return match(self.ref, matched_values)
 
   def get_single(self, *matched_values):
     """
@@ -118,7 +118,7 @@ class Index(Builtin):
     :param matched_values: Same as for :any:`match`.
     :return: Raw data for an instance.
     """
-    return self.client.query(query.get(self.match(*matched_values)))
+    return self.client.query(get(self.match(*matched_values)))
 
 
 class ClassIndex(Index):
@@ -151,4 +151,4 @@ class ClassIndex(Index):
   def match(self):
     """Query set of all instances of the class."""
     # pylint: disable=arguments-differ
-    return query.match(self.get_encoded("source"), self.ref)
+    return match(self.ref, self.get_encoded("source"))

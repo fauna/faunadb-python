@@ -1,6 +1,6 @@
 from ..objects import Ref
 from ..page import Page
-from .. import query
+from ..query import create, delete, get, map_expr, paginate, replace, update, quote, select
 from .field import Field
 from ._util import dict_dup, get_path, set_path, calculate_diff
 
@@ -128,10 +128,11 @@ class Model(object):
     """Query that deletes this instance."""
     if self.is_new_instance():
       raise ValueError("Instance does not exist in the database.")
-    return query.delete(self.ref)
+    return delete(self.ref)
 
   def save(self, replace=False):
     """Executes :any:`save_query`."""
+    # pylint: disable=redefined-outer-name
     self._init_from_resource(self.client.query(self.save_query(replace)))
 
   def save_query(self, replace=False):
@@ -145,6 +146,7 @@ class Model(object):
       using :any:`replace_query` instead of :any:`update_query`.
       See the `docs <https://faunadb.com/documentation/queries#write_functions>`_.
     """
+    # pylint: disable=redefined-outer-name
     if self.is_new_instance():
       return self.create_query()
     elif replace:
@@ -156,19 +158,19 @@ class Model(object):
     """Query to create a new instance."""
     if not self.is_new_instance():
       raise ValueError("Trying to create instance that has already been created.")
-    return query.create(self.__class__.class_ref, query.quote(self._current))
+    return create(self.__class__.class_ref, quote(self._current))
 
   def replace_query(self):
     """Query to replace this instance's data."""
     if self.is_new_instance():
       raise ValueError("Instance has not yet been created.")
-    return query.replace(self.ref, query.quote(self._current))
+    return replace(self.ref, quote(self._current))
 
   def update_query(self):
     """Query to update this instance's data."""
     if self.is_new_instance():
       raise ValueError("Instance has not yet been created.")
-    return query.update(self.ref, query.quote(self._diff()))
+    return update(self.ref, quote(self._diff()))
   #endregion
 
   #region Standard methods
@@ -235,7 +237,7 @@ class Model(object):
     """
     # pylint: disable=unnecessary-lambda
     return cls._map_page(
-      client, instance_set, lambda ref: query.get(ref),
+      client, instance_set, lambda ref: get(ref),
       page_size=page_size, before=before, after=after)
 
   @classmethod
@@ -249,7 +251,7 @@ class Model(object):
     # pylint: disable=unnecessary-lambda
     return Page.set_iterator(
       client, instance_set,
-      page_size=page_size, map_lambda=lambda ref: query.get(ref), mapper=mapper)
+      page_size=page_size, map_lambda=lambda ref: get(ref), mapper=mapper)
 
   @classmethod
   def page_index(cls, index, matched_values, page_size=None, before=None, after=None):
@@ -281,10 +283,11 @@ class Model(object):
     client = index.client
     match_set = index.match(*matched_values)
 
-    get = Model._index_ref_getter(index)
+    getter = Model._index_ref_getter(index)
     def mapper(instance):
       return cls.get_from_resource(client, instance)
-    return Page.set_iterator(client, match_set, page_size=page_size, map_lambda=get, mapper=mapper)
+    return Page.set_iterator(
+      client, match_set, page_size=page_size, map_lambda=getter, mapper=mapper)
 
   @classmethod
   def get_from_index(cls, index, *matched_values):
@@ -326,9 +329,9 @@ class Model(object):
       lastIndex = len(index.values) - 1
       if index.values[lastIndex]["path"] != "ref":
         raise AssertionError("Can only get model from index if last of index.values is a Ref.")
-      return lambda arr: query.get(query.select(lastIndex, arr))
+      return lambda arr: get(select(lastIndex, arr))
     else:
-      return lambda ref: query.get(ref)
+      return lambda ref: get(ref)
 
   @classmethod
   def _map_page(cls, client, instance_set, page_lambda, page_size=None, before=None, after=None):
@@ -336,8 +339,8 @@ class Model(object):
     Creates a query to call `page_lambda` on page data, which should fetch instance data.
     Then maps the result page to create Model instances out of that instance data.
     """
-    page_query = query.paginate(instance_set, size=page_size, before=before, after=after)
-    map_query = query.map_expr(page_lambda, page_query)
+    page_query = paginate(instance_set, size=page_size, before=before, after=after)
+    map_query = map_expr(page_lambda, page_query)
     page = Page.from_raw(client.query(map_query))
     return page.map_data(lambda resource: cls.get_from_resource(client, resource))
 
