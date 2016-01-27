@@ -9,7 +9,7 @@ class RequestResult(object):
   def __init__(
       self, client,
       method, path, query, request_content,
-      response_content, status_code, response_headers,
+      response_raw, response_content, status_code, response_headers,
       start_time, end_time):
     self.client = client
     """The :any:`Client`."""
@@ -21,10 +21,13 @@ class RequestResult(object):
     """URL query. ``None`` unless ``method == GET``. *Not* related to :any:`Client.query`."""
     self.request_content = request_content
     """Request data."""
+    self.response_raw = response_raw
+    """String value returned by the server."""
     self.response_content = response_content
     """
-    Value returned by the response.
+    Parsed value returned by the server.
     Includes "resource" wrapper dict, or may be an "errors" dict instead.
+    In the case of a JSON parse error, this will be nil.
     """
     self.status_code = status_code
     """HTTP status code."""
