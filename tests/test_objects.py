@@ -15,12 +15,12 @@ class ObjectsTest(FaunaTestCase):
     self.assertJson(self.ref, self.json_ref)
 
     keys = Ref("keys")
-    self.assertEqual(keys.to_class(), keys)
+    self.assertEqual(keys.to_class, keys)
     self.assertRaises(ValueError, keys.id)
 
     ref = Ref(keys, "123")
-    self.assertEqual(ref.to_class(), keys)
-    self.assertEqual(ref.id(), "123")
+    self.assertEqual(ref.to_class, keys)
+    self.assertEqual(ref.id, "123")
 
   def test_set(self):
     index = Ref("indexes", "frogs_by_size")

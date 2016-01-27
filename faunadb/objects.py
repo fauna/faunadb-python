@@ -22,6 +22,7 @@ class Ref(object):
     """
     self.value = "/".join(str(part) for part in parts)
 
+  @property
   def to_class(self):
     """
     Gets the class part out of the Ref.
@@ -34,6 +35,7 @@ class Ref(object):
     else:
       return Ref(*parts[:-1])
 
+  @property
   def id(self):
     """
     Removes the class part of the Ref, leaving only the id.
