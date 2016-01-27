@@ -1,5 +1,7 @@
 """:any:`Codec` and subclasses."""
 
+from abc import abstractmethod
+
 from ..objects import Ref
 
 class Codec(object):
@@ -17,20 +19,22 @@ class Codec(object):
   :any:`Model` instances cache the results of conversions.
   """
 
+  @abstractmethod
   def decode(self, raw):
     """
     Converts a value from the database into a python object.
 
     (The value taken from the database will already have :any:`Ref` or :any:`Set` values converted.)
     """
-    raise NotImplementedError
+    pass # pragma: no cover
 
+  @abstractmethod
   def encode(self, value):
     """
     Converts a value to prepare for storage in the database.
     The encoded value may contain objects with `to_fauna` implemented.
     """
-    raise NotImplementedError
+    pass # pragma: no cover
 
 
 class _RefCodecClass(Codec):

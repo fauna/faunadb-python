@@ -94,10 +94,17 @@ class Model(object):
       raise ValueError("Instance has not been saved to the database, so no ref exists.")
     return self._current["ref"]
 
+  def ref_or_none(self):
+    return self._current.get("ref")
+
   @property
   def id(self):
     """The id portion of this instance's :any:`Ref`. Fails if any:`is_new_instance`."""
     return self.ref.id()
+
+  def id_or_none(self):
+    ref = self.ref_or_none()
+    return None if ref is None else ref.id()
 
   @property
   def ts(self):
@@ -105,6 +112,9 @@ class Model(object):
     if self.is_new_instance():
       raise ValueError("Instance has not been saved to the database, so no ts exists.")
     return self._current["ts"]
+
+  def ts_or_none(self):
+    return self._current.get("ts")
   #endregion
 
   def get_encoded(self, field_name):
@@ -184,7 +194,8 @@ class Model(object):
 
   def __repr__(self):
     fields = [field + "=" + str(getattr(self, field)) for field in self.__class__.fields]
-    return "%s(ref=%s, ts=%s, %s)" % (self.__class__.__name__, self.ref, self.ts, ', '.join(fields))
+    return "%s(ref=%s, ts=%s, %s)" % \
+      (self.__class__.__name__, self.ref_or_none(), self.ts_or_none(), ', '.join(fields))
   #endregion
 
   #region Class methods

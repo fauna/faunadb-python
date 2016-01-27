@@ -56,6 +56,10 @@ class CodecTest(FaunaTestCase):
     assert it.codec_field == "doub"
     assert it.get_encoded("codec_field") == "doubdoub"
 
+    # Test cache
+    assert self.instance._cache == {"codec_field": "doub"}
+    assert self.instance.codec_field == "doub"
+
   def test_ref_codec(self):
     it = self.MyModel(self.client)
     assert it.ref_field is None
@@ -66,6 +70,9 @@ class CodecTest(FaunaTestCase):
 
     it.ref_field = ref
     assert it.ref_field == ref
+
+    it.ref_field = None
+    assert it.ref_field is None
 
     # Fails for any other input
     def setBadValue():

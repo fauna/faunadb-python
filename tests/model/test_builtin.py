@@ -123,6 +123,10 @@ class BuiltinTest(FaunaTestCase):
     assert E.page_index(idx, 0).data == expected
     assert list(E.iter_index(idx, 0)) == expected
 
+    # Fails if {"path": "ref"} is not at the end.
+    idx2 = Index.create_for_model(self.client, E, "bad_index", "x", values=[{"path": "data.y"}])
+    self.assertRaises(AssertionError, lambda: E.page_index(idx2, 0))
+
   def test_unique_index(self):
     class F(Model):
       __fauna_class_name__ = "fs"

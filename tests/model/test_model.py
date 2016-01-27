@@ -24,6 +24,28 @@ class ModelTest(FaunaTestCase):
     assert isinstance(it.ts, int)
     assert it.id == it.ref.id()
 
+  def test_forbidden_field_name(self):
+    with self.assertRaises(RuntimeError):
+      # pylint: disable=unused-variable
+      class MyOtherModel(Model):
+        __fauna_class_name__ = "my_other_models"
+        ref = Field()
+
+  def test_get_from_resource(self):
+    ref = Ref("my_models", 123)
+    it = self.MyModel.get_from_resource(self.client, {
+      "class": Ref("classes", "my_models"),
+      "ref": ref,
+      "ts": 456,
+      "data": {"number": 1}
+    })
+    assert it.ref == ref
+    assert it.ts == 456
+    assert it.number == 1
+    self.assertRaises(
+      AssertionError,
+      lambda: self.MyModel.get_from_resource(self.client, {"class": Ref("classes", "wrong_class")}))
+
   def test_persistence(self):
     it = self.MyModel(self.client, number=1, letter="a")
 
@@ -32,9 +54,17 @@ class ModelTest(FaunaTestCase):
 
     assert it.is_new_instance()
 
+    # Can't replace/update/delete value that doesn't exist yet.
+    self.assertRaises(ValueError, it.replace_query)
+    self.assertRaises(ValueError, it.update_query)
+    self.assertRaises(ValueError, it.delete_query)
+
     it.save()
     assert not it.is_new_instance()
     assert get() == it
+
+    # Can't create twice.
+    self.assertRaises(ValueError, it.create_query)
 
     it.number = 2
     assert it._diff() == {"data": {"number": 2}}
@@ -100,9 +130,15 @@ class ModelTest(FaunaTestCase):
     self.assertRaises(ValueError, lambda: it.id)
     self.assertRaises(ValueError, lambda: it.ts)
 
+    assert it.ref_or_none() is None
+    assert it.id_or_none() is None
+    assert it.ts_or_none() is None
+
     it.save()
     assert it.ref is not None and it.ts is not None
+    assert it.ref_or_none() == it.ref
     assert it.id == it.ref.id()
+    assert it.id_or_none() == it.id
     ref1 = it.ref
     ts1 = it.ts
 
@@ -110,6 +146,7 @@ class ModelTest(FaunaTestCase):
     it.save()
     assert it.ref == ref1
     assert it.ts is not None and it.ts != ts1
+    assert it.ts_or_none() == it.ts
 
   def test_update(self):
     it = self.MyModel(self.client, number={"a": {"b": 1, "c": 2}})
@@ -121,3 +158,12 @@ class ModelTest(FaunaTestCase):
 
     it.save()
     assert self.MyModel.get(self.client, it.ref) == it
+
+  def test_equality(self):
+    it = self.MyModel(self.client, number=1)
+    assert it == self.MyModel(self.client, number=1)
+    assert it != self.MyModel(self.client, number=2)
+
+  def test_repr(self):
+    it = self.MyModel(self.client, number=1)
+    assert repr(it) == "MyModel(ref=None, ts=None, number=1, letter=None)"
