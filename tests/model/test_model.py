@@ -20,9 +20,9 @@ class ModelTest(FaunaTestCase):
 
   def test_common_fields(self):
     it = self.MyModel.create(self.client)
-    assert isinstance(it.ref, Ref)
-    assert isinstance(it.ts, int)
-    assert it.id == it.ref.id()
+    self.assertIsInstance(it.ref, Ref)
+    self.assertIsInstance(it.ts, int)
+    self.assertEqual(it.id, it.ref.id())
 
   def test_forbidden_field_name(self):
     with self.assertRaises(RuntimeError):
@@ -39,9 +39,9 @@ class ModelTest(FaunaTestCase):
       "ts": 456,
       "data": {"number": 1}
     })
-    assert it.ref == ref
-    assert it.ts == 456
-    assert it.number == 1
+    self.assertEqual(it.ref, ref)
+    self.assertEqual(it.ts, 456)
+    self.assertEqual(it.number, 1)
     self.assertRaises(
       AssertionError,
       lambda: self.MyModel.get_from_resource(self.client, {"class": Ref("classes", "wrong_class")}))
@@ -52,7 +52,7 @@ class ModelTest(FaunaTestCase):
     def get():
       return self.MyModel.get(self.client, it.ref)
 
-    assert it.is_new_instance()
+    self.assertTrue(it.is_new_instance())
 
     # Can't replace/update/delete value that doesn't exist yet.
     self.assertRaises(ValueError, it.replace_query)
@@ -60,17 +60,17 @@ class ModelTest(FaunaTestCase):
     self.assertRaises(ValueError, it.delete_query)
 
     it.save()
-    assert not it.is_new_instance()
-    assert get() == it
+    self.assertFalse(it.is_new_instance())
+    self.assertEqual(get(), it)
 
     # Can't create twice.
     self.assertRaises(ValueError, it.create_query)
 
     it.number = 2
-    assert it._diff() == {"data": {"number": 2}}
+    self.assertEqual(it._diff(), {"data": {"number": 2}})
     it.save()
-    assert it._diff() == {}
-    assert get() == it
+    self.assertEqual(it._diff(), {})
+    self.assertEqual(get(), it)
 
     it.delete()
 
@@ -93,8 +93,8 @@ class ModelTest(FaunaTestCase):
     # This will only update the "letter" property.
     it.save()
 
-    assert get().number == 2
-    assert get().letter == "b"
+    self.assertEqual(get().number, 2)
+    self.assertEqual(get().letter, "b")
 
     copy.number = 3
     copy.save()
@@ -102,7 +102,7 @@ class ModelTest(FaunaTestCase):
     it.letter = "c"
     it.save(replace=True)
 
-    assert get() == it
+    self.assertEqual(get(), it)
 
   def test_replace_with_new_fields(self):
     class GrowModel(Model):
@@ -119,9 +119,9 @@ class ModelTest(FaunaTestCase):
     g.letter = "a"
     g.save(True)
 
-    assert g.number == 1
-    assert g.letter == "a"
-    assert GrowModel.get(self.client, g.ref) == g
+    self.assertEqual(g.number, 1)
+    self.assertEqual(g.letter, "a")
+    self.assertEqual(GrowModel.get(self.client, g.ref), g)
 
   def test_ref_ts(self):
     it = self.MyModel(self.client, number=1, letter="a")
@@ -130,23 +130,25 @@ class ModelTest(FaunaTestCase):
     self.assertRaises(ValueError, lambda: it.id)
     self.assertRaises(ValueError, lambda: it.ts)
 
-    assert it.ref_or_none() is None
-    assert it.id_or_none() is None
-    assert it.ts_or_none() is None
+    self.assertIsNone(it.ref_or_none())
+    self.assertIsNone(it.id_or_none())
+    self.assertIsNone(it.ts_or_none())
 
     it.save()
-    assert it.ref is not None and it.ts is not None
-    assert it.ref_or_none() == it.ref
-    assert it.id == it.ref.id()
-    assert it.id_or_none() == it.id
+    self.assertIsNotNone(it.ref)
+    self.assertIsNotNone(it.ts)
+    self.assertEqual(it.ref_or_none(), it.ref)
+    self.assertEqual(it.id, it.ref.id())
+    self.assertEqual(it.id_or_none(), it.id)
     ref1 = it.ref
     ts1 = it.ts
 
     it.number = 2
     it.save()
-    assert it.ref == ref1
-    assert it.ts is not None and it.ts != ts1
-    assert it.ts_or_none() == it.ts
+    self.assertEqual(it.ref, ref1)
+    self.assertIsNotNone(it.ts)
+    self.assertNotEqual(it.ts, ts1)
+    self.assertEqual(it.ts_or_none(), it.ts)
 
   def test_update(self):
     it = self.MyModel(self.client, number={"a": {"b": 1, "c": 2}})
@@ -154,16 +156,16 @@ class ModelTest(FaunaTestCase):
 
     it.number["a"]["b"] = -1
     it.number["a"]["d"] = {"e": 3}
-    assert it._diff() == {"data": {"number": {"a": {"b": -1, "d": {"e": 3}}}}}
+    self.assertEqual(it._diff(), {"data": {"number": {"a": {"b": -1, "d": {"e": 3}}}}})
 
     it.save()
-    assert self.MyModel.get(self.client, it.ref) == it
+    self.assertEqual(self.MyModel.get(self.client, it.ref), it)
 
   def test_equality(self):
     it = self.MyModel(self.client, number=1)
-    assert it == self.MyModel(self.client, number=1)
-    assert it != self.MyModel(self.client, number=2)
+    self.assertEqual(it, self.MyModel(self.client, number=1))
+    self.assertNotEqual(it, self.MyModel(self.client, number=2))
 
   def test_repr(self):
     it = self.MyModel(self.client, number=1)
-    assert repr(it) == "MyModel(ref=None, ts=None, number=1, letter=None)"
+    self.assertEqual(repr(it), "MyModel(ref=None, ts=None, number=1, letter=None)")

@@ -10,6 +10,8 @@ class CodecTest(FaunaTestCase):
   def setUp(self):
     super(CodecTest, self).setUp()
 
+    outer_self = self
+
     class DoubleCodec(Codec):
       # pylint: disable=no-self-use
 
@@ -18,7 +20,7 @@ class CodecTest(FaunaTestCase):
 
       def decode(self, raw):
         half = len(raw) / 2
-        assert raw[:half] == raw[half:]
+        outer_self.assertEqual(raw[:half], raw[half:])
         return raw[:half]
 
     class MyModel(Model):
@@ -39,40 +41,40 @@ class CodecTest(FaunaTestCase):
     rf = Field(RefCodec)
     MyModel.ref_field = rf
 
-    assert set(MyModel.fields.iterkeys()) == {"plain_field", "ref_field"}
-    assert MyModel.fields["plain_field"] is pf
-    assert MyModel.fields["ref_field"] is rf
+    self.assertEqual(set(MyModel.fields.iterkeys()), {"plain_field", "ref_field"})
+    self.assertIs(MyModel.fields["plain_field"], pf)
+    self.assertIs(MyModel.fields["ref_field"], rf)
 
   def test_no_codec(self):
-    assert self.instance.plain_field == 1
+    self.assertEqual(self.instance.plain_field, 1)
     self.instance.plain_field = 2
-    assert self.instance.plain_field == 2
+    self.assertEqual(self.instance.plain_field, 2)
 
   def test_custom_codec(self):
     it = self.instance
-    assert it.codec_field == "doubleme"
-    assert it.get_encoded("codec_field") == "doublemedoubleme"
+    self.assertEqual(it.codec_field, "doubleme")
+    self.assertEqual(it.get_encoded("codec_field"), "doublemedoubleme")
     it.codec_field = "doub"
-    assert it.codec_field == "doub"
-    assert it.get_encoded("codec_field") == "doubdoub"
+    self.assertEqual(it.codec_field, "doub")
+    self.assertEqual(it.get_encoded("codec_field"), "doubdoub")
 
     # Test cache
-    assert self.instance._cache == {"codec_field": "doub"}
-    assert self.instance.codec_field == "doub"
+    self.assertEqual(self.instance._cache, {"codec_field": "doub"})
+    self.assertEqual(self.instance.codec_field, "doub")
 
   def test_ref_codec(self):
     it = self.MyModel(self.client)
-    assert it.ref_field is None
+    self.assertIsNone(it.ref_field)
 
     ref = Ref('frogs', 123)
     it.ref_field = 'frogs/123'
-    assert it.ref_field == ref
+    self.assertEqual(it.ref_field, ref)
 
     it.ref_field = ref
-    assert it.ref_field == ref
+    self.assertEqual(it.ref_field, ref)
 
     it.ref_field = None
-    assert it.ref_field is None
+    self.assertIsNone(it.ref_field)
 
     # Fails for any other input
     def setBadValue():
