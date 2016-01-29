@@ -132,8 +132,12 @@ class ErrorData(object):
   def __eq__(self, other):
     return self.__class__ == other.__class__ and \
       self.description == other.description and \
-      self.position == other.position
+      self.position == other.position and \
+      self.failures == other.failures
 
+  def __ne__(self, other):
+    # pylint: disable=unneeded-not
+    return not self == other
 
 class Failure(object):
   """
@@ -158,3 +162,12 @@ class Failure(object):
 
   def __repr__(self):
     return "Failure(%s, %s, %s)" % (repr(self.code), repr(self.description), repr(self.field))
+
+  def __eq__(self, other):
+    return self.code == other.code and \
+      self.description == other.description and \
+      self.field == other.field
+
+  def __ne__(self, other):
+    # pylint: disable=unneeded-not
+    return not self == other

@@ -1,7 +1,4 @@
-from io import StringIO
-
 from faunadb.client import Client
-from faunadb.client_logger import logger
 from faunadb.errors import NotFound
 from tests.helpers import FaunaTestCase
 
@@ -51,26 +48,3 @@ class ClientTest(FaunaTestCase):
     cls_ref = self._create_class()["ref"]
     self.client.delete(cls_ref)
     self.assertRaises(NotFound, lambda: self.client.get(cls_ref))
-
-  def test_logging(self):
-    logged_box = []
-    client = self.get_client(observer=logger(logged_box.append))
-    client.ping()
-    logged = logged_box[0]
-
-    read_line = StringIO(logged).readline
-    self.assertEqual(read_line(), "Fauna GET /ping\n")
-    self.assertRegexCompat(read_line(), r"^  Credentials:")
-    self.assertEqual(read_line(), "  Response headers: {\n")
-    # Skip through headers
-    while True:
-      line = read_line()
-      if not line.startswith("    "):
-        self.assertEqual(line, "  }\n")
-        break
-    self.assertEqual(read_line(), "  Response JSON: {\n")
-    self.assertEqual(read_line(), '    "resource": "Scope global is OK"\n')
-    self.assertEqual(read_line(), "  }\n")
-    self.assertRegexCompat(
-      read_line(),
-      r"^  Response \(200\): Network latency \d+ms\n$")
