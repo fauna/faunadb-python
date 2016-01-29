@@ -2,7 +2,7 @@ from requests import codes
 
 from faunadb import query
 from faunadb.errors import ErrorData, Failure, BadRequest, InternalError, \
-  MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, UnavailableError, InvalidResponse
+  MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, UnavailableError, UnexpectedError
 from faunadb.objects import Ref
 
 from tests.helpers import FaunaTestCase, mock_client
@@ -12,14 +12,21 @@ class ErrorsTest(FaunaTestCase):
     err = self.assert_raises(BadRequest, lambda: self.client.query({"foo": "bar"}))
     self.assertEqual(err.request_result.request_content, {"foo": "bar"})
 
-  def test_invalid_response(self):
+  #region UnexpectedError
+  def test_json_error(self):
     # Response must be valid JSON
-    self.assertRaises(InvalidResponse, lambda: mock_client('I like fine wine').get(''))
+    err = self.assert_raises(UnexpectedError, lambda: mock_client("I like fine wine").get(''))
+    rr = err.request_result
+    self.assertIsNone(rr.response_content)
+    self.assertEqual(rr.response_raw, "I like fine wine")
+
+  def test_resource_error(self):
     # Response must have "resource"
-    self.assertRaises(InvalidResponse, lambda: mock_client('{"resoars": 1}').get(''))
-    # Error response must have valid "code"
-    code_client = mock_client('{"errors": [{"code": "foo"}]}', codes.bad_request)
-    self.assertRaises(InvalidResponse, lambda: code_client.get(''))
+    self.assertRaises(UnexpectedError, lambda: mock_client('{"resoars": 1}').get(''))
+
+  def test_unexpected_error_code(self):
+    self.assertRaises(UnexpectedError, lambda: mock_client('{"errors": []}', 1337).get(''))
+  #endregion
 
   #region FaunaError
   def test_bad_request(self):
