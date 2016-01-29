@@ -73,4 +73,4 @@ class ClientTest(FaunaTestCase):
     self.assertEqual(read_line(), "  }\n")
     self.assertRegexCompat(
       read_line(),
-      r"^  Response \(200\): API processing \d+ms, network latency \d+ms\n$")
+      r"^  Response \(200\): Network latency \d+ms\n$")

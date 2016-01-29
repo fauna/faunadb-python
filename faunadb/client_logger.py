@@ -40,9 +40,6 @@ def show_request_result(request_result):
     log("  Request JSON: %s\n" % _indent(to_json(rr.request_content, pretty=True)))
   log("  Response headers: %s\n" % _indent(to_json(dict(rr.response_headers), pretty=True)))
   log("  Response JSON: %s\n" % _indent(to_json(rr.response_content, pretty=True)))
-  log("  Response (%i): API processing %sms, network latency %ims\n" % (
-    rr.status_code,
-    rr.response_headers.get("X-HTTP-Request-Processing-Time", "N/A"),
-    int(rr.time_taken * 1000)))
+  log("  Response (%i): Network latency %ims\n" % (rr.status_code, int(rr.time_taken * 1000)))
 
   return "".join(parts)
