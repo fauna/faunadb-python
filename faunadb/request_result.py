@@ -27,7 +27,7 @@ class RequestResult(object):
     """
     Parsed value returned by the server.
     Includes "resource" wrapper dict, or may be an "errors" dict instead.
-    In the case of a JSON parse error, this will be nil.
+    In the case of a JSON parse error, this will be None.
     """
     self.status_code = status_code
     """HTTP status code."""
