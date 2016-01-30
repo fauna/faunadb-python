@@ -266,10 +266,6 @@ class QueryTest(FaunaTestCase):
     self._q(query.delete(ref))
     self.assertFalse(self._q(query.exists(ref)))
 
-  #endregion
-
-  #region Sets
-
   def test_insert(self):
     instance = self._create_thimble({"weight": 1})
     ref = instance["ref"]
@@ -297,6 +293,10 @@ class QueryTest(FaunaTestCase):
 
     # Assert that it was undone
     self.assertEqual(self._q(query.get(ref)), instance)
+
+  #endregion
+
+  #region Sets
 
   def test_match(self):
     q = self._set_n(1)
