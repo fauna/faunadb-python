@@ -47,7 +47,6 @@ class ClientLoggerTest(FaunaTestCase):
       logged.split('\n')[0],
       "Fauna GET /%s?ts=%s" % (instance["ref"], instance["ts"]))
 
-
   def get_logged(self, client_action):
     logged_box = []
     client = self.get_client(observer=logger(logged_box.append))
