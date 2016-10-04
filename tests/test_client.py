@@ -23,13 +23,6 @@ class ClientTest(FaunaTestCase):
   def _create_instance(self):
     return self.client.query(create(Ref("classes/my_class"), quote({})))
 
-  def test_patch(self):
-    self._create_class()
-    instance = self._create_instance()
-    instance = self.client.patch(instance["ref"], {"data": {"a": 1}})
-    instance = self.client.patch(instance["ref"], {"data": {"b": 2}})
-    self.assertEqual(instance["data"], {"a": 1, "b": 2})
-
   def test_delete(self):
     cls_ref = self._create_class()["ref"]
     self.client.delete(cls_ref)
