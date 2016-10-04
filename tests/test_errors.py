@@ -4,6 +4,7 @@ from faunadb import query
 from faunadb.errors import ErrorData, Failure, BadRequest, InternalError, \
   MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, UnavailableError, UnexpectedError
 from faunadb.objects import Ref
+from faunadb.query import create, quote
 
 from tests.helpers import FaunaTestCase, mock_client
 
@@ -110,7 +111,7 @@ class ErrorsTest(FaunaTestCase):
       code, position)
 
   def _assert_invalid_data(self, class_name, data, code, field):
-    exception = self.assert_raises(BadRequest, lambda: self.client.post(class_name, data))
+    exception = self.assert_raises(BadRequest, lambda: self.client.query(create(Ref(class_name), quote(data))))
     self._assert_error(exception, "validation failed", [])
     failures = exception.errors[0].failures
     self.assertEqual(len(failures), 1)

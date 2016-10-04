@@ -1,5 +1,7 @@
 from faunadb.client import Client
 from faunadb.errors import NotFound
+from faunadb.objects import Ref
+from faunadb.query import create, quote
 from tests.helpers import FaunaTestCase
 
 class ClientTest(FaunaTestCase):
@@ -16,14 +18,10 @@ class ClientTest(FaunaTestCase):
     self.assertIsInstance(self.client.get("classes")["data"], list)
 
   def _create_class(self):
-    return self.client.post("classes", {"name": "my_class"})
+    return self.client.query(create(Ref("classes"), quote({"name": "my_class"})))
 
   def _create_instance(self):
-    return self.client.post("classes/my_class", {})
-
-  def test_post(self):
-    cls = self._create_class()
-    self.assertEqual(self.client.get(cls["ref"]), cls)
+    return self.client.query(create(Ref("classes/my_class"), quote({})))
 
   def test_put(self):
     self._create_class()

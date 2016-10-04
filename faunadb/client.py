@@ -85,19 +85,6 @@ class Client(object):
     """
     return self._execute("GET", path, query=query)
 
-  def post(self, path, data=None):
-    """
-    HTTP ``POST``.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-
-    :param path: Path relative to ``self.domain``. May be a Ref.
-    :param data:
-      Dict to be converted to request JSON.
-      Values in this will have ``to_fauna_json`` called, recursively.
-    :return: Converted JSON response.
-    """
-    return self._execute("POST", path, data)
-
   def put(self, path, data=None):
     """
     Like :any:`post`, but a ``PUT`` request.
