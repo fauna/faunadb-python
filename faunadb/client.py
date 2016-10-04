@@ -74,17 +74,6 @@ class Client(object):
     except:
       pass
 
-  def get(self, path, query=None):
-    """
-    HTTP ``GET``.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-
-    :param path: Path relative to ``self.domain``. May be a Ref.
-    :param query: Dict to be converted to URL parameters.
-    :return: Converted JSON response.
-    """
-    return self._execute("GET", path, query=query)
-
   def query(self, expression):
     """
     Use the FaunaDB query API.
@@ -100,7 +89,7 @@ class Client(object):
     Ping FaunaDB.
     See the `docs <https://faunadb.com/documentation/rest#other>`__.
     """
-    return self.get("ping", {"scope": scope, "timeout": timeout})
+    return self._execute("GET", "ping", query={"scope": scope, "timeout": timeout})
 
   def _execute(self, action, path, data=None, query=None):
     """Performs an HTTP action, logs it, and looks for errors."""

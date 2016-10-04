@@ -16,17 +16,17 @@ class ErrorsTest(FaunaTestCase):
   #region UnexpectedError
   def test_json_error(self):
     # Response must be valid JSON
-    err = self.assert_raises(UnexpectedError, lambda: mock_client("I like fine wine").get(''))
+    err = self.assert_raises(UnexpectedError, lambda: mock_client("I like fine wine").query(''))
     rr = err.request_result
     self.assertIsNone(rr.response_content)
     self.assertEqual(rr.response_raw, "I like fine wine")
 
   def test_resource_error(self):
     # Response must have "resource"
-    self.assertRaises(UnexpectedError, lambda: mock_client('{"resoars": 1}').get(''))
+    self.assertRaises(UnexpectedError, lambda: mock_client('{"resoars": 1}').query(''))
 
   def test_unexpected_error_code(self):
-    self.assertRaises(UnexpectedError, lambda: mock_client('{"errors": []}', 1337).get(''))
+    self.assertRaises(UnexpectedError, lambda: mock_client('{"errors": []}', 1337).query(''))
   #endregion
 
   #region FaunaError
@@ -51,21 +51,18 @@ class ErrorsTest(FaunaTestCase):
       lambda: client.query(query.paginate(Ref("databases"))))
     self._assert_error(exception, "permission denied", ["paginate"])
 
-  def test_not_found(self):
-    self._assert_http_error(lambda: self.client.get("classes/not_found"), NotFound, "not found")
-
   def test_internal_error(self):
     # pylint: disable=line-too-long
     code_client = mock_client(
       '{"errors": [{"code": "internal server error", "description": "sample text", "stacktrace": []}]}',
       codes.internal_server_error)
-    self._assert_http_error(lambda: code_client.get("error"), InternalError, "internal server error")
+    self._assert_http_error(lambda: code_client.query("error"), InternalError, "internal server error")
 
   def test_unavailable_error(self):
     client = mock_client(
       '{"errors": [{"code": "unavailable", "description": "on vacation"}]}',
       codes.unavailable)
-    self._assert_http_error(lambda: client.get(''), UnavailableError, "unavailable")
+    self._assert_http_error(lambda: client.query(''), UnavailableError, "unavailable")
   #endregion
 
   def test_query_error(self):

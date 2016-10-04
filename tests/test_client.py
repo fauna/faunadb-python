@@ -14,9 +14,6 @@ class ClientTest(FaunaTestCase):
   def test_ping(self):
     self.assertEqual(self.client.ping("all"), "Scope all is OK")
 
-  def test_get(self):
-    self.assertIsInstance(self.client.get("classes")["data"], list)
-
   def _create_class(self):
     return self.client.query(create(Ref("classes"), quote({"name": "my_class"})))
 
