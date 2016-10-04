@@ -85,13 +85,6 @@ class Client(object):
     """
     return self._execute("GET", path, query=query)
 
-  def put(self, path, data=None):
-    """
-    Like :any:`post`, but a ``PUT`` request.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-    """
-    return self._execute("PUT", path, data)
-
   def patch(self, path, data=None):
     """
     Like :any:`post`, but a ``PATCH`` request.

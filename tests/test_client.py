@@ -23,18 +23,6 @@ class ClientTest(FaunaTestCase):
   def _create_instance(self):
     return self.client.query(create(Ref("classes/my_class"), quote({})))
 
-  def test_put(self):
-    self._create_class()
-    instance = self._create_instance()
-    instance = self.client.put(instance["ref"], {"data": {"a": 2}})
-
-    self.assertEqual(instance["data"]["a"], 2)
-
-    instance = self.client.put(instance["ref"], {"data": {"b": 3}})
-
-    self.assertNotIn("a", instance["data"])
-    self.assertEqual(instance["data"]["b"], 3)
-
   def test_patch(self):
     self._create_class()
     instance = self._create_instance()
