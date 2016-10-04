@@ -85,13 +85,6 @@ class Client(object):
     """
     return self._execute("GET", path, query=query)
 
-  def delete(self, path):
-    """
-    Like :any:`post`, but a ``DELETE`` request.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-    """
-    return self._execute("DELETE", path)
-
   def query(self, expression):
     """
     Use the FaunaDB query API.

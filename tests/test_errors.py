@@ -54,10 +54,6 @@ class ErrorsTest(FaunaTestCase):
   def test_not_found(self):
     self._assert_http_error(lambda: self.client.get("classes/not_found"), NotFound, "not found")
 
-  def test_method_not_allowed(self):
-    self._assert_http_error(
-      lambda: self.client.delete("classes"), MethodNotAllowed, "method not allowed")
-
   def test_internal_error(self):
     # pylint: disable=line-too-long
     code_client = mock_client(

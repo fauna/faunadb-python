@@ -22,8 +22,3 @@ class ClientTest(FaunaTestCase):
 
   def _create_instance(self):
     return self.client.query(create(Ref("classes/my_class"), quote({})))
-
-  def test_delete(self):
-    cls_ref = self._create_class()["ref"]
-    self.client.delete(cls_ref)
-    self.assertRaises(NotFound, lambda: self.client.get(cls_ref))
