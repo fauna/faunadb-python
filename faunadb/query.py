@@ -16,10 +16,7 @@ For example: ``select("a", {"a": Ref("widgets", 123)})``.
 
 # pylint: disable=invalid-name, redefined-builtin
 
-from contextlib import contextmanager
-from threading import local
 from types import FunctionType
-_thread_local = local()
 
 #region Basic forms
 
@@ -46,12 +43,12 @@ def do(*expressions):
 def lambda_query(func):
   """
   See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__.
-  This form generates the names of lambda parameters for you, and is called like::
+  This form generates :any:`var` objects for you, and is called like::
 
       query.lambda_query(lambda a: query.add(a, a))
       # Produces: {
-      #  "lambda": "auto0",
-      #  "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
+      #  "lambda": "a",
+      #  "expr": {"add": ({"var": "a"}, {"var": "a"})}
       # }
 
   You usually don't need to call this directly as lambdas in queries will be converted for you.
@@ -65,15 +62,16 @@ def lambda_query(func):
     (To destructure single-element arrays use :any:`lambda_expr`.)
   """
 
-  n_args = func.__code__.co_argcount
+  vars = func.__code__.co_varnames
+  n_args = len(vars)
+
   if n_args == 0:
     raise ValueError("Function must take at least 1 argument.")
-
-  with _auto_vars(n_args) as vars:
-    if n_args == 1:
-      return lambda_expr(vars[0], func(var(vars[0])))
-    else:
-      return lambda_expr(vars, func(*[var(v) for v in vars]))
+  elif n_args == 1:
+    v = vars[0]
+    return lambda_expr(v, func(var(v)))
+  else:
+    return lambda_expr(vars, func(*[var(v) for v in vars]))
 
 
 def lambda_expr(var_name_or_pattern, expr):
@@ -392,22 +390,6 @@ def _wrap_values(dct):
 
 def _fn(dct):
   return _Expr(_wrap_values(dct))
-
-
-@contextmanager
-def _auto_vars(n_vars):
-  if not hasattr(_thread_local, "fauna_lambda_var_number"):
-    _thread_local.fauna_lambda_var_number = 0
-
-  low_var_number = _thread_local.fauna_lambda_var_number
-  next_var_number = low_var_number + n_vars
-
-  _thread_local.fauna_lambda_var_number = next_var_number
-
-  try:
-    yield ["auto%i" % i for i in range(low_var_number, next_var_number)]
-  finally:
-    _thread_local.fauna_lambda_var_number = low_var_number
 
 
 def _params(main_params, optional_params):
