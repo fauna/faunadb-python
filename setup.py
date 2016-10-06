@@ -27,7 +27,7 @@ setup(
   long_description=long_description,
   url="https://github.com/faunadb/faunadb-python",
   author=pkg_author,
-  author_email="priority@faunadb.com",
+  author_email="priority@fauna.com",
   license=pkg_license,
   classifiers=[
     "Development Status :: 4 - Beta",

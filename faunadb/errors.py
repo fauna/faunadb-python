@@ -23,7 +23,7 @@ class UnexpectedError(Exception):
 class FaunaError(Exception):
   """
   Error returned by the FaunaDB server.
-  For documentation of error types, see the `docs <https://faunadb.com/documentation#errors>`__.
+  For documentation of error types, see the `docs <https://fauna.com/documentation#errors>`__.
   """
 
   @staticmethod
@@ -114,7 +114,7 @@ class ErrorData(object):
 
   def __init__(self, code, description, position, failures):
     self.code = code
-    """Error code. See all error codes `here <https://faunadb.com/documentation#errors>`__."""
+    """Error code. See all error codes `here <https://fauna.com/documentation#errors>`__."""
     self.description = description
     """Error description."""
     self.position = position
@@ -142,7 +142,7 @@ class ErrorData(object):
 class Failure(object):
   """
   Part of the ``failures`` of an :py:class:`ErrorData`.
-  See the ``Invalid Data`` section of the `docs <https://faunadb.com/documentation#errors>`__.
+  See the ``Invalid Data`` section of the `docs <https://fauna.com/documentation#errors>`__.
   """
 
   @staticmethod

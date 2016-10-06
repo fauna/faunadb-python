@@ -87,7 +87,7 @@ class Client(object):
   def ping(self, scope=None, timeout=None):
     """
     Ping FaunaDB.
-    See the `docs <https://faunadb.com/documentation/rest#other>`__.
+    See the `docs <https://fauna.com/documentation/rest#other>`__.
     """
     return self._execute("GET", "ping", query={"scope": scope, "timeout": timeout})
 
