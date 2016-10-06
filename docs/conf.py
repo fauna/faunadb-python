@@ -275,7 +275,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   (master_doc, 'FaunaDB', u'FaunaDB Documentation',
-   author, 'FaunaDB', 'One line description of project.',
+   author, 'FaunaDB', 'Python driver for FaunaDB.',
    'Miscellaneous'),
 ]
 

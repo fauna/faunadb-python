@@ -23,7 +23,7 @@ extras_require = {
 setup(
   name="faunadb",
   version=pkg_version,
-  description="FaunaDB Python client",
+  description="FaunaDB Python driver",
   long_description=long_description,
   url="https://github.com/faunadb/faunadb-python",
   author=pkg_author,
