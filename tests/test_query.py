@@ -12,25 +12,25 @@ class QueryTest(FaunaTestCase):
   def setUp(self):
     super(QueryTest, self).setUp()
 
-    self.class_ref = self.client.query(query.create(Ref("classes"), query.quote({"name": "widgets"})))["ref"]
+    self.class_ref = self.client.query(query.create(Ref("classes"), {"name": "widgets"}))["ref"]
 
-    self.n_index_ref = self.client.query(query.create(Ref("indexes"), query.quote({
+    self.n_index_ref = self.client.query(query.create(Ref("indexes"), {
       "name": "widgets_by_n",
       "source": self.class_ref,
       "terms": [{"field": ["data", "n"]}]
-    })))["ref"]
+    }))["ref"]
 
-    self.m_index_ref = self.client.query(query.create(Ref("indexes"), query.quote({
+    self.m_index_ref = self.client.query(query.create(Ref("indexes"), {
       "name": "widgets_by_m",
       "source": self.class_ref,
       "terms": [{"field": ["data", "m"]}]
-    })))["ref"]
+    }))["ref"]
 
     self.ref_n1 = self._create(n=1)["ref"]
     self.ref_m1 = self._create(m=1)["ref"]
     self.ref_n1m1 = self._create(n=1, m=1)["ref"]
 
-    self.thimble_class_ref = self.client.query(query.create(Ref("classes"), query.quote({"name": "thimbles"})))["ref"]
+    self.thimble_class_ref = self.client.query(query.create(Ref("classes"), {"name": "thimbles"}))["ref"]
 
   #region Helpers
 
@@ -42,10 +42,10 @@ class QueryTest(FaunaTestCase):
 
   def _create(self, n=0, m=None):
     data = {"n": n} if m is None else {"n": n, "m": m}
-    return self._q(query.create(self.class_ref, query.quote({"data": data})))
+    return self._q(query.create(self.class_ref, {"data": data}))
 
   def _create_thimble(self, data):
-    return self._q(query.create(self.thimble_class_ref, query.quote({"data": data})))
+    return self._q(query.create(self.thimble_class_ref, {"data": data}))
 
   def _q(self, query_json):
     return self.client.query(query_json)
@@ -72,33 +72,21 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.do(query.delete(ref), 1)), 1)
     self.assertFalse(self._q(query.exists(ref)))
 
-  def test_object(self):
-    # Unlike query.quote, contents are evaluated.
-    self.assertEqual(self._q(query.object(x=query.let({"x": 1}, query.var("x")))), {"x": 1})
-
-  def test_quote(self):
-    quoted = query.let({"x": 1}, query.var("x"))
-    self.assertEqual(self._q(query.quote(quoted)), quoted)
 
   def test_lambda_query(self):
-    self.assertRaises(ValueError, lambda: query.lambda_query(lambda: 0))
-
     self.assertEqual(query.lambda_query(lambda a: query.add(a, a)), {
-      "lambda": "auto0", "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
+      "lambda": "auto0", "expr": query.add([query.var("auto0"), query.var("auto0")])
     })
 
     # pylint: disable=undefined-variable
-    expected = query.lambda_query(
-      lambda a: query.lambda_query(
-        lambda b: query.lambda_query(
-          lambda c: [a, b, c])))
+    expected = query.lambda_query(lambda a: lambda b: lambda c: [a, b, c])
     self.assertEqual(expected, {
       "lambda": "auto0",
       "expr": {
         "lambda": "auto1",
         "expr": {
           "lambda": "auto2",
-          "expr": [{"var": "auto0"}, {"var": "auto1"}, {"var": "auto2"}]
+          "expr": [query.var("auto0"), query.var("auto1"), query.var("auto2")]
         }
       }
     })
@@ -108,13 +96,12 @@ class QueryTest(FaunaTestCase):
       def fail():
         raise Exception("foo")
       query.lambda_query(lambda a: fail())
-    self.assertEqual(query.lambda_query(lambda a: a), {"lambda": "auto0", "expr": {"var": "auto0"}})
+    self.assertEqual(query.lambda_query(lambda a: a), {"lambda": "auto0", "expr": query.var("auto0")})
 
   def test_lambda_query_multiple_args(self):
     expected = query.lambda_query(lambda a, b: [b, a])
     self.assertEqual(expected, {
-      "lambda": ["auto0", "auto1"],
-      "expr": [{"var": "auto1"}, {"var": "auto0"}]
+      "lambda": ["auto0", "auto1"], "expr": [query.var("auto1"), query.var("auto0")]
     })
 
   def test_lambda_query_multithreaded(self):
@@ -129,14 +116,14 @@ class QueryTest(FaunaTestCase):
         return a
       self.assertEqual(
         query.lambda_query(do_lambda),
-        {"lambda": "auto0", "expr": {"var": "auto0"}})
+        {"lambda": "auto0", "expr": query.var("auto0")})
 
     def do_b():
       # This happens while thread 'a' has incremented its auto name to auto1,
       # but that doesn't affect thread 'b'.
       self.assertEqual(
         query.lambda_query(lambda a: a),
-        {"lambda": "auto0", "expr": {"var": "auto0"}})
+        {"lambda": "auto0", "expr": query.var("auto0")})
       events.append(1)
 
     t = Thread(name="a", target=do_a)
@@ -150,9 +137,9 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(events, [0, 1, 2])
 
   def test_to_lambda(self):
-    l = {"lambda": "auto0", "expr": {"var": "auto0"}}
-    self.assertEqual(query._to_lambda(lambda a: a), l)
-    self.assertEqual(query._to_lambda(query.lambda_expr("auto0", query.var("auto0"))), l)
+    expr = {"lambda": "auto0", "expr": query.var("auto0")}
+    self.assertEqual(query.lambda_query(lambda a: a), expr)
+    self.assertEqual(query.lambda_expr("auto0", query.var("auto0")), expr)
 
   #endregion
 
@@ -251,12 +238,12 @@ class QueryTest(FaunaTestCase):
 
   def test_update(self):
     ref = self._create()["ref"]
-    got = self._q(query.update(ref, query.quote({"data": {"m": 1}})))
+    got = self._q(query.update(ref, {"data": {"m": 1}}))
     self.assertEqual(got["data"], {"n": 0, "m": 1})
 
   def test_replace(self):
     ref = self._create()["ref"]
-    got = self._q(query.replace(ref, query.quote({"data": {"m": 1}})))
+    got = self._q(query.replace(ref, {"data": {"m": 1}}))
     self.assertEqual(got["data"], {"m": 1})
 
   def test_delete(self):
@@ -271,7 +258,7 @@ class QueryTest(FaunaTestCase):
     prev_ts = ts - 1
 
     # Add previous event
-    inserted = query.quote({"data": {"weight": 0}})
+    inserted = {"data": {"weight": 0}}
     self._q(query.insert(ref, prev_ts, "create", inserted))
 
     # Get version from previous event
@@ -283,7 +270,7 @@ class QueryTest(FaunaTestCase):
     ref = instance["ref"]
 
     # Change it
-    new_instance = self._q(query.replace(ref, query.quote({"data": {"weight": 1}})))
+    new_instance = self._q(query.replace(ref, {"data": {"weight": 1}}))
     self.assertEqual(self._q(query.get(ref)), new_instance)
 
     # Delete that event
@@ -329,9 +316,9 @@ class QueryTest(FaunaTestCase):
 
   def test_login_logout(self):
     instance_ref = self.client.query(
-      query.create(self.class_ref, query.quote({"credentials": {"password": "sekrit"}})))["ref"]
+      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     secret = self.client.query(
-      query.login(instance_ref, query.quote({"password": "sekrit"})))["secret"]
+      query.login(instance_ref, {"password": "sekrit"}))["secret"]
     instance_client = self.get_client(secret=secret)
 
     self.assertEqual(instance_client.query(
@@ -341,7 +328,7 @@ class QueryTest(FaunaTestCase):
 
   def test_identify(self):
     instance_ref = self.client.query(
-      query.create(self.class_ref, query.quote({"credentials": {"password": "sekrit"}})))["ref"]
+      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     self.assertTrue(self.client.query(query.identify(instance_ref, "sekrit")))
 
   #endregion
@@ -386,13 +373,13 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.equals())
 
   def test_contains(self):
-    obj = query.quote({"a": {"b": 1}})
+    obj = {"a": {"b": 1}}
     self.assertTrue(self._q(query.contains(["a", "b"], obj)))
     self.assertTrue(self._q(query.contains("a", obj)))
     self.assertFalse(self._q(query.contains(["a", "c"], obj)))
 
   def test_select(self):
-    obj = query.quote({"a": {"b": 1}})
+    obj = {"a": {"b": 1}}
     self.assertEqual(self._q(query.select("a", obj)), {"b": 1})
     self.assertEqual(self._q(query.select(["a", "b"], obj)), 1)
     self.assertIsNone(self._q(query.select_with_default("c", obj, None)))
@@ -462,8 +449,15 @@ class QueryTest(FaunaTestCase):
 
   #endregion
 
+  #region Helpers tests
+
+  def test_object(self):
+    self.assertEqual(self._q({"x": query.let({"x": 1}, query.var("x"))}), {"x": 1})
+
   def test_varargs(self):
     # Works for lists too
     self.assertEqual(self._q(query.add([2, 3, 5])), 10)
     # Works for a variable equal to a list
     self.assertEqual(self._q(query.let({"x": [2, 3, 5]}, query.add(query.var("x")))), 10)
+
+  #endregion

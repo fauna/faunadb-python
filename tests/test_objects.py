@@ -36,8 +36,6 @@ class ObjectsTest(FaunaTestCase):
     json_match = '{"@set":{"match":%s,"terms":%s}}' % (json_index, self.json_ref)
     self.assertJson(match, json_match)
 
-    self.assertEqual(repr(match), "SetRef(%s)" % repr(query.match(index, self.ref)))
-
     self.assertNotEqual(match, SetRef(query.match(index, Ref("classes", "frogs", "456"))))
 
   def test_time_conversion(self):

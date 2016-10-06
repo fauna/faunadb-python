@@ -1,10 +1,17 @@
 """
-Constructors for creating queries to be passed into Client.query.
-For query documentation see the `docs <https://faunadb.com/documentation/queries>`_.
+This module contains functions that generate query objects,
+suitable to be passed into :any:`Client.query`.
 
-When constructing queries, you must use these functions or
-the :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, and :class:`datetime.date` constructors.
-To pass raw data to a query, use :any:`object` or :any:`quote`.
+In addition to these functions, queries may contain:
+
+* ``None``
+* Numbers (``1, 2.5``)
+* Strings (``"foo"``)
+* Lists (``[1, "foo"]``)
+* Dicts (``{"foo": "bar"}``)
+* A :any:`Ref`, :any:`Set`, :any:`FaunaTime`, or :class:`datetime.date`.
+
+For example: ``select("a", {"a": Ref("widgets", 123)})``.
 """
 
 # pylint: disable=invalid-name, redefined-builtin
@@ -12,39 +19,28 @@ To pass raw data to a query, use :any:`object` or :any:`quote`.
 from contextlib import contextmanager
 from threading import local
 from types import FunctionType
-from builtins import range
 _thread_local = local()
 
 #region Basic forms
 
 def let(vars, in_expr):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"let": vars, "in": in_expr}
+  return _fn({"let": _fn(vars), "in": in_expr})
 
 
 def var(var_name):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"var": var_name}
+  return _fn({"var": var_name})
 
 
 def if_expr(condition, then, else_):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"if": condition, "then": then, "else": else_}
+  return _fn({"if": condition, "then": then, "else": else_})
 
 
 def do(*expressions):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"do": _varargs(expressions)}
-
-
-def object(**fields):
-  """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"object": fields}
-
-
-def quote(expr):
-  """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"quote": expr}
+  return _fn({"do": _varargs(expressions)})
 
 
 def lambda_query(func):
@@ -58,8 +54,7 @@ def lambda_query(func):
       #  "expr": {"add": ({"var": "auto0"}, {"var": "auto0"})}
       # }
 
-  Query functions requiring lambdas can be passed Python lambdas
-  without explicitly calling :any:`lambda_query`.
+  You usually don't need to call this directly as lambdas in queries will be converted for you.
   For example: ``query.map(lambda a: query.add(a, 1), collection)``.
 
   You can also use :any:`lambda_expr` directly.
@@ -81,58 +76,47 @@ def lambda_query(func):
       return lambda_expr(vars, func(*[var(v) for v in vars]))
 
 
-def _to_lambda(value):
-  """ If ``value`` is a lambda, converts it to a query using :any:`lambda_query`."""
-  if isinstance(value, FunctionType):
-    return lambda_query(value)
-  else:
-    return value
-
-
 def lambda_expr(var_name_or_pattern, expr):
   """See the `docs <https://faunadb.com/documentation/queries#basic_forms>`__."""
-  return {"lambda": var_name_or_pattern, "expr": expr}
+  return _fn({"lambda": var_name_or_pattern, "expr": expr})
 
 #endregion
 
 #region Collection functions
 
-def map_expr(lambda_expr, collection):
+def map_expr(expr, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  # pylint: disable=redefined-outer-name
-  return {"map": _to_lambda(lambda_expr), "collection": collection}
+  return _fn({"map": expr, "collection": collection})
 
 
-def foreach(lambda_expr, collection):
+def foreach(expr, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  # pylint: disable=redefined-outer-name
-  return {"foreach": _to_lambda(lambda_expr), "collection": collection}
+  return _fn({"foreach": expr, "collection": collection})
 
 
-def filter_expr(lambda_expr, collection):
+def filter_expr(expr, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  # pylint: disable=redefined-outer-name
-  return {"filter": _to_lambda(lambda_expr), "collection": collection}
+  return _fn({"filter": expr, "collection": collection})
 
 
 def take(number, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  return {"take": number, "collection": collection}
+  return _fn({"take": number, "collection": collection})
 
 
 def drop(number, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  return {"drop": number, "collection": collection}
+  return _fn({"drop": number, "collection": collection})
 
 
 def prepend(elements, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  return {"prepend": elements, "collection": collection}
+  return _fn({"prepend": elements, "collection": collection})
 
 
 def append(elements, collection):
   """See the `docs <https://faunadb.com/documentation/queries#collection_functions>`__."""
-  return {"append": elements, "collection": collection}
+  return _fn({"append": elements, "collection": collection})
 
 #endregion
 
@@ -176,32 +160,32 @@ def count(set, events=None):
 
 def create(class_ref, params):
   """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
-  return {"create": class_ref, "params": params}
+  return _fn({"create": class_ref, "params": params})
 
 
 def update(ref, params):
   """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
-  return {"update": ref, "params": params}
+  return _fn({"update": ref, "params": params})
 
 
 def replace(ref, params):
   """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
-  return {"replace": ref, "params": params}
+  return _fn({"replace": ref, "params": params})
 
 
 def delete(ref):
   """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
-  return {"delete": ref}
+  return _fn({"delete": ref})
 
 
 def insert(ref, ts, action, params):
   """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
-  return {"insert": ref, "ts": ts, "action": action, "params": params}
+  return _fn({"insert": ref, "ts": ts, "action": action, "params": params})
 
 
 def remove(ref, ts, action):
   """See the `docs <https://faunadb.com/documentation/queries#write_functions>`__."""
-  return {"remove": ref, "ts": ts, "action": action}
+  return _fn({"remove": ref, "ts": ts, "action": action})
 
 #endregion
 
@@ -209,27 +193,27 @@ def remove(ref, ts, action):
 
 def match(index, *terms):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"match": index, "terms": _varargs(terms)}
+  return _fn({"match": index, "terms": _varargs(terms)})
 
 
 def union(*sets):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"union": _varargs(sets)}
+  return _fn({"union": _varargs(sets)})
 
 
 def intersection(*sets):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"intersection": _varargs(sets)}
+  return _fn({"intersection": _varargs(sets)})
 
 
 def difference(*sets):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"difference": _varargs(sets)}
+  return _fn({"difference": _varargs(sets)})
 
 
 def join(source, target):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return {"join": source, "with": _to_lambda(target)}
+  return _fn({"join": source, "with": target})
 
 #endregion
 
@@ -237,17 +221,17 @@ def join(source, target):
 
 def login(ref, params):
   """See the `docs <https://faunadb.com/documentation/queries#auth_functions>`__."""
-  return {"login": ref, "params": params}
+  return _fn({"login": ref, "params": params})
 
 
 def logout(delete_tokens):
   """See the `docs <https://faunadb.com/documentation/queries#auth_functions>`__."""
-  return {"logout": delete_tokens}
+  return _fn({"logout": delete_tokens})
 
 
 def identify(ref, password):
   """See the `docs <https://faunadb.com/documentation/queries#auth_functions>`__."""
-  return {"identify": ref, "password": password}
+  return _fn({"identify": ref, "password": password})
 
 #endregion
 
@@ -260,7 +244,7 @@ def concat(strings, separator=None):
 
 def casefold(string):
   """See the `docs <https://faunadb.com/documentation/queries#string_functions>`__."""
-  return {"casefold": string}
+  return _fn({"casefold": string})
 
 #endregion
 
@@ -268,17 +252,17 @@ def casefold(string):
 
 def time(string):
   """See the `docs <https://faunadb.com/documentation/queries#time_functions>`__."""
-  return {"time": string}
+  return _fn({"time": string})
 
 
 def epoch(number, unit):
   """See the `docs <https://faunadb.com/documentation/queries#time_functions>`__."""
-  return {"epoch": number, "unit": unit}
+  return _fn({"epoch": number, "unit": unit})
 
 
 def date(string):
   """See the `docs <https://faunadb.com/documentation/queries#time_functions>`__."""
-  return {"date": string}
+  return _fn({"date": string})
 
 #endregion
 
@@ -286,88 +270,129 @@ def date(string):
 
 def equals(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"equals": _varargs(values)}
+  return _fn({"equals": _varargs(values)})
 
 
 def contains(path, in_):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"contains": path, "in": in_}
+  return _fn({"contains": path, "in": in_})
 
 
 def select(path, from_):
   """
   See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__.
   See also :py:func:`select_with_default`."""
-  return {"select": path, "from": from_}
+  return _fn({"select": path, "from": from_})
 
 
 def select_with_default(path, from_, default):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"select": path, "from": from_, "default": default}
+  return _fn({"select": path, "from": from_, "default": default})
 
 
 def add(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"add": _varargs(numbers)}
+  return _fn({"add": _varargs(numbers)})
 
 
 def multiply(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"multiply": _varargs(numbers)}
+  return _fn({"multiply": _varargs(numbers)})
 
 
 def subtract(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"subtract": _varargs(numbers)}
+  return _fn({"subtract": _varargs(numbers)})
 
 
 def divide(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"divide": _varargs(numbers)}
+  return _fn({"divide": _varargs(numbers)})
 
 
 def modulo(*numbers):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"modulo": _varargs(numbers)}
+  return _fn({"modulo": _varargs(numbers)})
 
 
 def lt(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"lt": _varargs(values)}
+  return _fn({"lt": _varargs(values)})
 
 
 def lte(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"lte": _varargs(values)}
+  return _fn({"lte": _varargs(values)})
 
 
 def gt(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"gt": _varargs(values)}
+  return _fn({"gt": _varargs(values)})
 
 
 def gte(*values):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"gte": _varargs(values)}
+  return _fn({"gte": _varargs(values)})
 
 
 def and_expr(*booleans):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"and": _varargs(booleans)}
+  return _fn({"and": _varargs(booleans)})
 
 
 def or_expr(*booleans):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"or": _varargs(booleans)}
+  return _fn({"or": _varargs(booleans)})
 
 
 def not_expr(boolean):
   """See the `docs <https://faunadb.com/documentation/queries#misc_functions>`__."""
-  return {"not": boolean}
+  return _fn({"not": boolean})
 
 #endregion
 
 #region Helpers
+
+class _Expr(object):
+  """
+  Used to mark values that have been wrapped.
+  """
+
+  def __init__(self, value):
+    self.value = value
+
+  def to_fauna_json(self):
+    return self.value
+
+  def __repr__(self):
+    return "Expr(%s)" % repr(self.value)
+
+  def __eq__(self, other):
+    if isinstance(other, _Expr):
+      return self.value == other.value
+    return self.value == other
+
+
+def _wrap(value):
+  if isinstance(value, _Expr):
+    return value
+  elif isinstance(value, FunctionType):
+    return lambda_query(value)
+  elif isinstance(value, dict):
+    return _Expr({"object": _wrap_values(value)})
+  elif isinstance(value, list) or isinstance(value, tuple):
+    return _Expr([_wrap(sub_value) for sub_value in value])
+  else:
+    return value
+
+
+def _wrap_values(dct):
+  return {key: _wrap(val) for key, val in dct.items()}
+
+
+def _fn(dct):
+  return _Expr(_wrap_values(dct))
+
 
 @contextmanager
 def _auto_vars(n_vars):
@@ -390,7 +415,7 @@ def _params(main_params, optional_params):
   for key, val in optional_params.items():
     if val is not None:
       main_params[key] = val
-  return main_params
+  return _fn(main_params)
 
 
 def _varargs(values):

@@ -11,7 +11,6 @@ from requests import codes
 
 from faunadb._json import to_json, parse_json
 from faunadb.client import Client
-from faunadb.errors import BadRequest
 from faunadb.objects import Ref
 from faunadb import query
 
@@ -33,16 +32,14 @@ class FaunaTestCase(TestCase):
     rnd = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
     db_name = "faunadb-python-test" + rnd
     self.db_ref = Ref("databases", db_name)
-    # TODO: See `core` issue #1975
-    try:
-      self.root_client.query(query.delete(self.db_ref))
-    except BadRequest:
-      pass
 
-    self.root_client.query(query.create(Ref("databases"), query.object(name=db_name)))
+    if self.root_client.query(query.exists(self.db_ref)):
+      self.root_client.query(query.delete(self.db_ref))
+
+    self.root_client.query(query.create(Ref("databases"), {"name": db_name}))
 
     self.server_key = self.root_client.query(
-      query.create(Ref("keys"), query.object(database=self.db_ref, role="server")))["secret"]
+      query.create(Ref("keys"), {"database": self.db_ref, "role": "server"}))["secret"]
     self.client = self.get_client()
 
   def tearDown(self):

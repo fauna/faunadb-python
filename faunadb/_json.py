@@ -3,6 +3,7 @@ from json import dumps, loads, JSONEncoder
 from iso8601 import parse_date
 
 from faunadb.objects import FaunaTime, Ref, SetRef
+from faunadb.query import _Expr
 
 
 def parse_json(json_string):
@@ -53,20 +54,11 @@ class _FaunaJSONEncoder(JSONEncoder):
   """Converts values with :any:`to_fauna_json` to JSON."""
   # pylint: disable=method-hidden
   def default(self, obj):
-    if hasattr(obj, "to_fauna_json"):
-      return self._to_fauna_json_recursive(obj)
+    if isinstance(obj, _Expr):
+      return obj.to_fauna_json()
     elif isinstance(obj, datetime):
       return FaunaTime(obj).to_fauna_json()
     elif isinstance(obj, date):
       return {"@date": obj.isoformat()}
     else:
       return obj
-
-  def _to_fauna_json_recursive(self, obj):
-    """
-    Calls to_fauna on obj if possible.
-    Recursively calls .to_fauna() on the results of that too.
-    This ensures that values implementing to_fauna don't need to call it recursively themselves.
-    """
-    dct = obj.to_fauna_json()
-    return {k: self.default(v) for k, v in dct.items()}
