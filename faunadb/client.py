@@ -96,6 +96,7 @@ class Client(object):
     # pylint: disable=raising-bad-type
     if isinstance(path, Ref):
       path = path.value
+
     if query is not None:
       query = {k: v for k, v in query.items() if v is not None}
 

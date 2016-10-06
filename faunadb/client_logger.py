@@ -30,7 +30,7 @@ def show_request_result(request_result):
     return ("\n" + indent_str).join(s.split("\n"))
 
   if rr.query:
-    query_string = "?" + "&".join(("%s=%s" % (k, v) for k, v in rr.query.items()))
+    query_string = "?" + "&".join(("%s=%s" % (k, v) for k, v in sorted(rr.query.items())))
   else:
     query_string = ""
 
