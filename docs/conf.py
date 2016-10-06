@@ -231,7 +231,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   (master_doc, 'FaunaDB.tex', u'FaunaDB Documentation',
-   u'FaunaDB, Inc.', 'manual'),
+   u'Fauna, Inc.', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
