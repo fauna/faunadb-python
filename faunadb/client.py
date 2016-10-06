@@ -74,51 +74,6 @@ class Client(object):
     except:
       pass
 
-  def get(self, path, query=None):
-    """
-    HTTP ``GET``.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-
-    :param path: Path relative to ``self.domain``. May be a Ref.
-    :param query: Dict to be converted to URL parameters.
-    :return: Converted JSON response.
-    """
-    return self._execute("GET", path, query=query)
-
-  def post(self, path, data=None):
-    """
-    HTTP ``POST``.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-
-    :param path: Path relative to ``self.domain``. May be a Ref.
-    :param data:
-      Dict to be converted to request JSON.
-      Values in this will have ``to_fauna_json`` called, recursively.
-    :return: Converted JSON response.
-    """
-    return self._execute("POST", path, data)
-
-  def put(self, path, data=None):
-    """
-    Like :any:`post`, but a ``PUT`` request.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-    """
-    return self._execute("PUT", path, data)
-
-  def patch(self, path, data=None):
-    """
-    Like :any:`post`, but a ``PATCH`` request.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-    """
-    return self._execute("PATCH", path, data)
-
-  def delete(self, path):
-    """
-    Like :any:`post`, but a ``DELETE`` request.
-    See the `docs <https://faunadb.com/documentation/rest>`__.
-    """
-    return self._execute("DELETE", path)
-
   def query(self, expression):
     """
     Use the FaunaDB query API.
@@ -134,7 +89,7 @@ class Client(object):
     Ping FaunaDB.
     See the `docs <https://faunadb.com/documentation/rest#other>`__.
     """
-    return self.get("ping", {"scope": scope, "timeout": timeout})
+    return self._execute("GET", "ping", query={"scope": scope, "timeout": timeout})
 
   def _execute(self, action, path, data=None, query=None):
     """Performs an HTTP action, logs it, and looks for errors."""

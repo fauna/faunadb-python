@@ -12,27 +12,25 @@ class QueryTest(FaunaTestCase):
   def setUp(self):
     super(QueryTest, self).setUp()
 
-    self.class_ref = self.client.post("classes", {"name": "widgets"})["ref"]
+    self.class_ref = self.client.query(query.create(Ref("classes"), query.quote({"name": "widgets"})))["ref"]
 
-    self.n_index_ref = self.client.post("indexes", {
+    self.n_index_ref = self.client.query(query.create(Ref("indexes"), query.quote({
       "name": "widgets_by_n",
       "source": self.class_ref,
-      "path": "data.n",
-      "active": True
-    })["ref"]
+      "terms": [{"field": ["data", "n"]}]
+    })))["ref"]
 
-    self.m_index_ref = self.client.post("indexes", {
+    self.m_index_ref = self.client.query(query.create(Ref("indexes"), query.quote({
       "name": "widgets_by_m",
       "source": self.class_ref,
-      "path": "data.m",
-      "active": True
-    })["ref"]
+      "terms": [{"field": ["data", "m"]}]
+    })))["ref"]
 
     self.ref_n1 = self._create(n=1)["ref"]
     self.ref_m1 = self._create(m=1)["ref"]
     self.ref_n1m1 = self._create(n=1, m=1)["ref"]
 
-    self.thimble_class_ref = self.client.post("classes", {"name": "thimbles"})["ref"]
+    self.thimble_class_ref = self.client.query(query.create(Ref("classes"), query.quote({"name": "thimbles"})))["ref"]
 
   #region Helpers
 
