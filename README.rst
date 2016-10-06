@@ -1,7 +1,12 @@
 FaunaDB Python
 ==============
 
-Python client for `FaunaDB <https://faunadb.com>`_.
+.. image:: https://img.shields.io/travis/faunadb/faunadb-python/master.svg?maxAge=21600 :target: https://travis-ci.org/faunadb/faunadb-python
+.. image:: https://img.shields.io/coveralls/faunadb/faunadb-python/master.svg?maxAge=21600 :target: https://coveralls.io/github/faunadb/faunadb-python?branch=master
+.. image:: https://img.shields.io/pypi/v/faunadb.svg?maxAge=21600 :target: https://pypi.python.org/pypi/faunadb
+.. image:: https://img.shields.io/badge/license-MPL_2.0-blue.svg?maxAge=2592000 :target: https://raw.githubusercontent.com/faunadb/faunadb-python/master/LICENSE
+
+Python driver for `FaunaDB <https://fauna.com>`_.
 
 
 Installation
@@ -26,9 +31,9 @@ The following versions of Python are supported:
 Documentation
 -------------
 
-Client documentation is available at https://faunadb.readthedocs.org/en/latest/.
+Driver documentation is available at https://faunadb.readthedocs.org/en/latest/.
 
-See the `FaunaDB Documentation <https://faunadb.com/documentation>`_ for a complete API reference, or look in `tests`_
+See the `FaunaDB Documentation <https://fauna.com/documentation>`_ for a complete API reference, or look in `tests`_
 for more examples.
 
 
@@ -90,7 +95,7 @@ GitHub pull requests are very welcome.
 License
 -------
 
-Copyright 2016 `Fauna, Inc. <https://faunadb.com>`_
+Copyright 2016 `Fauna, Inc. <https://fauna.com>`_
 
 Licensed under the Mozilla Public License, Version 2.0 (the
 "License"); you may not use this software except in compliance with
