@@ -4,10 +4,11 @@ See the `docs <https://faunadb.com/documentation/queries#values>`__.
 """
 from datetime import datetime
 # pylint: disable=redefined-builtin
-from builtins import str, object
+from builtins import str
 from iso8601 import parse_date
+from faunadb.query import _Expr
 
-class Ref(object):
+class Ref(_Expr):
   """
   FaunaDB ref. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.
 
@@ -20,7 +21,9 @@ class Ref(object):
     Create a Ref from a string, such as ``Ref("databases/prydain")``.
     Can also call ``Ref("databases", "prydain")`` or ``Ref(Ref("databases"), "prydain")``.
     """
-    self.value = "/".join(str(part) for part in parts)
+    parts_str = "/".join(str(part) for part in parts)
+
+    super(Ref, self).__init__(parts_str)
 
   def to_class(self):
     """
@@ -61,30 +64,28 @@ class Ref(object):
     return not self == other
 
 
-class SetRef(object):
+class SetRef(_Expr):
   """
   FaunaDB Set.
-  This represents a set returned as part of a response. This looks like ``{"@set": set_query}``.
+  This represents a set returned as part of a response.
   For query sets see :doc:`query`.
   """
-  def __init__(self, set_query):
-    self.query = set_query
 
   def to_fauna_json(self):
-    return {"@set": self.query}
+    return {"@set": self.value}
 
   def __repr__(self):
-    return "SetRef(%s)" % repr(self.query)
+    return "SetRef(%s)" % repr(self.value)
 
   def __eq__(self, other):
-    return isinstance(other, SetRef) and self.query == other.query
+    return isinstance(other, SetRef) and self.value == other.value
 
   def __ne__(self, other):
     # pylint: disable=unneeded-not
     return not self == other
 
 
-class FaunaTime(object):
+class FaunaTime(_Expr):
   """
   FaunaDB time. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.
 
@@ -104,7 +105,7 @@ class FaunaTime(object):
 
     # Convert +00:00 offset to zulu for comparison equality
     # We don't check for +0000 or +00 as they are not valid in FaunaDB
-    self.value = value.replace("+00:00", "Z")
+    super(FaunaTime, self).__init__(value.replace("+00:00", "Z"))
     """ISO8601 time string"""
 
   def to_datetime(self):

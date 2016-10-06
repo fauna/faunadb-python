@@ -1,7 +1,6 @@
 from faunadb.client import Client
-from faunadb.errors import NotFound
 from faunadb.objects import Ref
-from faunadb.query import create, quote
+from faunadb.query import create
 from tests.helpers import FaunaTestCase
 
 class ClientTest(FaunaTestCase):
@@ -15,7 +14,7 @@ class ClientTest(FaunaTestCase):
     self.assertEqual(self.client.ping("all"), "Scope all is OK")
 
   def _create_class(self):
-    return self.client.query(create(Ref("classes"), quote({"name": "my_class"})))
+    return self.client.query(create(Ref("classes"), {"name": "my_class"}))
 
   def _create_instance(self):
-    return self.client.query(create(Ref("classes/my_class"), quote({})))
+    return self.client.query(create(Ref("classes/my_class"), {}))

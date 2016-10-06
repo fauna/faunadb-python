@@ -2,13 +2,13 @@ from io import StringIO
 
 from faunadb.client_logger import logger
 from faunadb.objects import Ref
-from faunadb.query import create, quote
+from faunadb.query import create
 from tests.helpers import FaunaTestCase
 
 class ClientLoggerTest(FaunaTestCase):
   def setUp(self):
     super(ClientLoggerTest, self).setUp()
-    self.class_ref = self.client.query(create(Ref("classes"), quote({"name": "logging_tests"})))["ref"]
+    self.class_ref = self.client.query(create(Ref("classes"), {"name": "logging_tests"}))["ref"]
 
   def test_logging(self):
     logged = self.get_logged(lambda client: client.ping())
@@ -31,18 +31,20 @@ class ClientLoggerTest(FaunaTestCase):
       r"^  Response \(200\): Network latency \d+ms\n$")
 
   def test_request_content(self):
-    logged = self.get_logged(lambda client: client.query(create(self.class_ref, quote({"data": {}}))))
+    logged = self.get_logged(lambda client: client.query(create(self.class_ref, {"data": {}})))
 
     read_line = StringIO(logged).readline
     self.assertEqual(read_line(), "Fauna POST /\n")
     self.assertRegexCompat(read_line(), r"^  Credentials:")
     self.assertEqual(read_line(), "  Request JSON: {\n")
-    self.assertEqual(read_line(), '    "create": {\n');
+    self.assertEqual(read_line(), '    "create": {\n')
     self.assertEqual(read_line(), '      "@ref": "classes/logging_tests"\n')
     self.assertEqual(read_line(), '    }, \n')
     self.assertEqual(read_line(), '    "params": {\n')
-    self.assertEqual(read_line(), '      "quote": {\n')
-    self.assertEqual(read_line(), '        "data": {}\n')
+    self.assertEqual(read_line(), '      "object": {\n')
+    self.assertEqual(read_line(), '        "data": {\n')
+    self.assertEqual(read_line(), '          "object": {}\n')
+    self.assertEqual(read_line(), '        }\n')
     self.assertEqual(read_line(), '      }\n')
     self.assertEqual(read_line(), '    }\n')
     self.assertEqual(read_line(), '  }\n')

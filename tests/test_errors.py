@@ -2,16 +2,13 @@ from requests import codes
 
 from faunadb import query
 from faunadb.errors import ErrorData, Failure, BadRequest, InternalError, \
-  MethodNotAllowed, NotFound, PermissionDenied, Unauthorized, UnavailableError, UnexpectedError
+  NotFound, PermissionDenied, Unauthorized, UnavailableError, UnexpectedError
 from faunadb.objects import Ref
-from faunadb.query import create, quote
+from faunadb.query import create, add, get, var, _Expr
 
 from tests.helpers import FaunaTestCase, mock_client
 
 class ErrorsTest(FaunaTestCase):
-  def test_request_result(self):
-    err = self.assert_raises(BadRequest, lambda: self.client.query({"foo": "bar"}))
-    self.assertEqual(err.request_result.request_content, {"foo": "bar"})
 
   #region UnexpectedError
   def test_json_error(self):
@@ -30,20 +27,16 @@ class ErrorsTest(FaunaTestCase):
   #endregion
 
   #region FaunaError
-  def test_bad_request(self):
-    self.assertRaises(BadRequest, lambda: self.client.query({"foo": "bar"}))
-    # Tests of HttpBadRequest.errors go in ErrorData section.
-
   def test_unauthorized(self):
     client = self.get_client(secret="bad_key")
     self._assert_http_error(
-      lambda: client.query(query.get(self.db_ref)), Unauthorized, "unauthorized")
+      lambda: client.query(get(self.db_ref)), Unauthorized, "unauthorized")
 
   def test_permission_denied(self):
     # Create client with client key
     client = self.get_client(
       secret=self.root_client.query(
-        query.create(Ref("keys"), query.object(database=self.db_ref, role="client")))["secret"]
+        create(Ref("keys"), {"database": self.db_ref, "role": "client"}))["secret"]
     )
 
     exception = self.assert_raises(
@@ -66,7 +59,7 @@ class ErrorsTest(FaunaTestCase):
   #endregion
 
   def test_query_error(self):
-    self._assert_query_error({"add": [1, "two"]}, BadRequest, "invalid argument", ["add", 1])
+    self._assert_query_error(add(1, "two"), BadRequest, "invalid argument", ["add", 1])
 
   def test_error_data_equality(self):
     e1 = ErrorData("code", "desc", ["pos"], [Failure("fc", "fd", ["ff"])])
@@ -79,6 +72,32 @@ class ErrorsTest(FaunaTestCase):
     f2 = Failure("code", "desc", ["pos"])
     self.assertEqual(f1, f2)
     self.assertNotEqual(f1, Failure("code", "desc", ["pos", "more"]))
+
+  #region ErrorData
+  def test_invalid_expression(self):
+    self._assert_query_error(_Expr({"foo": "bar"}), BadRequest, "invalid expression")
+
+  def test_unbound_variable(self):
+    self._assert_query_error(var("x"), BadRequest, "unbound variable")
+
+  def test_invalid_argument(self):
+    self._assert_query_error(add([1, "two"]), BadRequest, "invalid argument", ["add", 1])
+
+  def test_instance_not_found(self):
+    # Must be a reference to a real class or else we get InvalidExpression
+    self.client.query(create(Ref("classes"), {"name": "foofaws"}))
+    self._assert_query_error(
+      get(Ref("classes/foofaws/123")),
+      NotFound,
+      "instance not found")
+
+  def test_value_not_found(self):
+    self._assert_query_error(query.select("a", {}), NotFound, "value not found")
+
+  def test_instance_already_exists(self):
+    self.client.query(create(Ref("classes"), {"name": "duplicates"}))
+    ref = self.client.query(create(Ref("classes/duplicates"), {}))["ref"]
+    self._assert_query_error(create(ref, {}), BadRequest, "instance already exists", ["create"])
   #endregion
 
   #region InvalidData
@@ -104,7 +123,7 @@ class ErrorsTest(FaunaTestCase):
       code, position)
 
   def _assert_invalid_data(self, class_name, data, code, field):
-    exception = self.assert_raises(BadRequest, lambda: self.client.query(create(Ref(class_name), quote(data))))
+    exception = self.assert_raises(BadRequest, lambda: self.client.query(create(Ref(class_name), data)))
     self._assert_error(exception, "validation failed", [])
     failures = exception.errors[0].failures
     self.assertEqual(len(failures), 1)
