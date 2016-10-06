@@ -89,7 +89,7 @@ class Client(object):
     Ping FaunaDB.
     See the `docs <https://faunadb.com/documentation/rest#other>`__.
     """
-    return self._execute("GET", "ping", query=(("scope", scope), ("timeout", timeout)))
+    return self._execute("GET", "ping", query={"scope": scope, "timeout": timeout})
 
   def _execute(self, action, path, data=None, query=None):
     """Performs an HTTP action, logs it, and looks for errors."""
@@ -98,7 +98,7 @@ class Client(object):
       path = path.value
 
     if query is not None:
-      query = tuple((k, v) for k, v in query if v is not None)
+      query = {k: v for k, v in query.items() if v is not None}
 
     start_time = time()
     response = self._perform_request(action, path, data, query)
