@@ -1,7 +1,5 @@
 from __future__ import division
 from datetime import date
-from threading import Thread
-from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
 from faunadb.objects import FaunaTime, Ref, SetRef
@@ -75,71 +73,32 @@ class QueryTest(FaunaTestCase):
 
   def test_lambda_query(self):
     self.assertEqual(query.lambda_query(lambda a: query.add(a, a)), {
-      "lambda": "auto0", "expr": query.add([query.var("auto0"), query.var("auto0")])
+      "lambda": "a", "expr": {"add": [{"var": "a"}, {"var": "a"}]}
     })
 
     # pylint: disable=undefined-variable
     expected = query.lambda_query(lambda a: lambda b: lambda c: [a, b, c])
     self.assertEqual(expected, {
-      "lambda": "auto0",
+      "lambda": "a",
       "expr": {
-        "lambda": "auto1",
+        "lambda": "b",
         "expr": {
-          "lambda": "auto2",
-          "expr": [query.var("auto0"), query.var("auto1"), query.var("auto2")]
+          "lambda": "c",
+          "expr": [{"var": "a"}, {"var": "b"}, {"var": "c"}]
         }
       }
     })
 
-    # Error in lambda should not affect future queries.
-    with self.assertRaises(Exception):
-      def fail():
-        raise Exception("foo")
-      query.lambda_query(lambda a: fail())
-    self.assertEqual(query.lambda_query(lambda a: a), {"lambda": "auto0", "expr": query.var("auto0")})
-
   def test_lambda_query_multiple_args(self):
     expected = query.lambda_query(lambda a, b: [b, a])
     self.assertEqual(expected, {
-      "lambda": ["auto0", "auto1"], "expr": [query.var("auto1"), query.var("auto0")]
+      "lambda": ["a", "b"], "expr": [{"var": "b"}, {"var": "a"}]
     })
 
-  def test_lambda_query_multithreaded(self):
-    """Test that lambda_query works in simultaneous threads."""
-    events = []
-
-    def do_a():
-      def do_lambda(a):
-        events.append(0)
-        sleep(1)
-        events.append(2)
-        return a
-      self.assertEqual(
-        query.lambda_query(do_lambda),
-        {"lambda": "auto0", "expr": query.var("auto0")})
-
-    def do_b():
-      # This happens while thread 'a' has incremented its auto name to auto1,
-      # but that doesn't affect thread 'b'.
-      self.assertEqual(
-        query.lambda_query(lambda a: a),
-        {"lambda": "auto0", "expr": query.var("auto0")})
-      events.append(1)
-
-    t = Thread(name="a", target=do_a)
-    t2 = Thread(name="b", target=do_b)
-    t.start()
-    t2.start()
-    t.join()
-    t2.join()
-
-    # Assert that events happened in the order expected.
-    self.assertEqual(events, [0, 1, 2])
-
   def test_to_lambda(self):
-    expr = {"lambda": "auto0", "expr": query.var("auto0")}
+    expr = {"lambda": "a", "expr": {"var": "a"}}
     self.assertEqual(query.lambda_query(lambda a: a), expr)
-    self.assertEqual(query.lambda_expr("auto0", query.var("auto0")), expr)
+    self.assertEqual(query.lambda_expr("a", query.var("a")), expr)
 
   #endregion
 
