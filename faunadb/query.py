@@ -191,7 +191,12 @@ def remove(ref, ts, action):
 
 def match(index, *terms):
   """See the `docs <https://faunadb.com/documentation/queries#sets>`__."""
-  return _fn({"match": index, "terms": _varargs(terms)})
+  m = {"match": index}
+
+  if len(terms) >= 1:
+    m["terms"] = _varargs(terms)
+
+  return _fn(m)
 
 
 def union(*sets):

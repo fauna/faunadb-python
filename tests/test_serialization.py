@@ -138,5 +138,38 @@ class SerializationTest(TestCase):
 
   #endregion
 
+  #region Sets
+
+  def test_match(self):
+    self.assertJson(query.match(Ref("indexes/widget")), '{"match":{"@ref":"indexes/widget"}}')
+    self.assertJson(query.match(Ref("indexes/widget"), "Laptop"),
+                    '{"match":{"@ref":"indexes/widget"},"terms":"Laptop"}')
+
+  def test_union(self):
+    self.assertJson(query.union(), '{"union":[]}')
+    self.assertJson(query.union(Ref("indexes/widget")), '{"union":{"@ref":"indexes/widget"}}')
+    self.assertJson(query.union(Ref("indexes/widget"), Ref("indexes/things")),
+                    '{"union":[{"@ref":"indexes/widget"},{"@ref":"indexes/things"}]}')
+
+  def test_intersection(self):
+    self.assertJson(query.intersection(), '{"intersection":[]}')
+    self.assertJson(query.intersection(Ref("indexes/widget")),
+                    '{"intersection":{"@ref":"indexes/widget"}}')
+    self.assertJson(query.intersection(Ref("indexes/widget"), Ref("indexes/things")),
+                    '{"intersection":[{"@ref":"indexes/widget"},{"@ref":"indexes/things"}]}')
+
+  def test_difference(self):
+    self.assertJson(query.difference(), '{"difference":[]}')
+    self.assertJson(query.difference(Ref("indexes/widget")),
+                    '{"difference":{"@ref":"indexes/widget"}}')
+    self.assertJson(query.difference(Ref("indexes/widget"), Ref("indexes/things")),
+                    '{"difference":[{"@ref":"indexes/widget"},{"@ref":"indexes/things"}]}')
+
+  def test_join(self):
+    self.assertJson(query.join(query.match(Ref("indexes/widget")), Ref("indexes/things")),
+                    '{"join":{"match":{"@ref":"indexes/widget"}},"with":{"@ref":"indexes/things"}}')
+
+  #endregion
+
   def assertJson(self, obj, expected):
     self.assertEqual(to_json(obj, sort_keys=True), expected)
