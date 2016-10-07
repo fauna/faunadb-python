@@ -103,5 +103,40 @@ class SerializationTest(TestCase):
 
   #endregion
 
+  #region Write functions
+
+  def test_create(self):
+    json = '{"create":{"@ref":"classes/widget"},"params":{"object":{"data":{"object":{"name":"Laptop"}}}}}'
+    self.assertJson(query.create(Ref("classes/widget"), {
+      "data": {"name": "Laptop"}
+    }), json)
+
+  def test_update(self):
+    json = '{"params":{"object":{"data":{"object":{"name":"Laptop"}}}},"update":{"@ref":"classes/widget"}}'
+    self.assertJson(query.update(Ref("classes/widget"), {
+      "data": {"name": "Laptop"}
+    }), json)
+
+  def test_replace(self):
+    json = '{"params":{"object":{"data":{"object":{"name":"Laptop"}}}},"replace":{"@ref":"classes/widget"}}'
+    self.assertJson(query.replace(Ref("classes/widget"), {
+      "data": {"name": "Laptop"}
+    }), json)
+
+  def test_delete(self):
+    self.assertJson(query.delete(Ref("classes/widget")), '{"delete":{"@ref":"classes/widget"}}')
+
+  def test_insert(self):
+    json = '{"action":"create","insert":{"@ref":"classes/widget"},"params":{"object":{"data":{"object":{"name":"Laptop"}}}},"ts":123}'
+    self.assertJson(query.insert(Ref("classes/widget"), ts=123, action="create", params={
+      "data": {"name": "Laptop"}
+    }), json)
+
+  def test_remove(self):
+    self.assertJson(query.remove(Ref("classes/widget"), ts=123, action="create"),
+                    '{"action":"create","remove":{"@ref":"classes/widget"},"ts":123}')
+
+  #endregion
+
   def assertJson(self, obj, expected):
     self.assertEqual(to_json(obj, sort_keys=True), expected)
