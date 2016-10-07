@@ -73,5 +73,35 @@ class SerializationTest(TestCase):
 
   #endregion
 
+  #region Read functions
+
+  def test_get(self):
+    self.assertJson(query.get(Ref("classes/widget")), '{"get":{"@ref":"classes/widget"}}')
+    self.assertJson(query.get(Ref("classes/widget"), ts=123),
+                    '{"get":{"@ref":"classes/widget"},"ts":123}')
+
+  def test_paginate(self):
+    self.assertJson(query.paginate(Ref("classes/widget")), '{"paginate":{"@ref":"classes/widget"}}')
+    self.assertJson(query.paginate(Ref("classes/widget"),
+                                   size=1,
+                                   ts=123,
+                                   after=Ref("classes/widget/1"),
+                                   before=Ref("classes/widget/10"),
+                                   events=True,
+                                   sources=True),
+                    '{"after":{"@ref":"classes/widget/1"},"before":{"@ref":"classes/widget/10"},"events":true,"paginate":{"@ref":"classes/widget"},"size":1,"sources":true,"ts":123}')
+
+  def test_exists(self):
+    self.assertJson(query.exists(Ref("classes/widget")), '{"exists":{"@ref":"classes/widget"}}')
+    self.assertJson(query.exists(Ref("classes/widget"), ts=123),
+                    '{"exists":{"@ref":"classes/widget"},"ts":123}')
+
+  def test_count(self):
+    self.assertJson(query.count(Ref("classes/widget")), '{"count":{"@ref":"classes/widget"}}')
+    self.assertJson(query.count(Ref("classes/widget"), events=True),
+                    '{"count":{"@ref":"classes/widget"},"events":true}')
+
+  #endregion
+
   def assertJson(self, obj, expected):
     self.assertEqual(to_json(obj, sort_keys=True), expected)
