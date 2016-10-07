@@ -45,5 +45,33 @@ class SerializationTest(TestCase):
 
   #endregion
 
+  #region Collection functions
+
+  def test_map_expr(self):
+    self.assertJson(query.map_expr(lambda a: a, [1,2,3]),
+                    '{"collection":[1,2,3],"map":{"expr":{"var":"a"},"lambda":"a"}}')
+
+  def test_foreach(self):
+    self.assertJson(query.foreach(lambda a: a, [1,2,3]),
+                    '{"collection":[1,2,3],"foreach":{"expr":{"var":"a"},"lambda":"a"}}')
+
+  def test_filter_expr(self):
+    self.assertJson(query.filter_expr(lambda a: a, [True,False,True]),
+                    '{"collection":[true,false,true],"filter":{"expr":{"var":"a"},"lambda":"a"}}')
+
+  def test_take(self):
+    self.assertJson(query.take(2, [1,2,3]), '{"collection":[1,2,3],"take":2}')
+
+  def test_drop(self):
+    self.assertJson(query.drop(2, [1,2,3]), '{"collection":[1,2,3],"drop":2}')
+
+  def test_prepend(self):
+    self.assertJson(query.prepend([1,2], [3,4]), '{"collection":[3,4],"prepend":[1,2]}')
+
+  def test_append(self):
+    self.assertJson(query.append([1,2], [3,4]), '{"append":[1,2],"collection":[3,4]}')
+
+  #endregion
+
   def assertJson(self, obj, expected):
     self.assertEqual(to_json(obj, sort_keys=True), expected)
