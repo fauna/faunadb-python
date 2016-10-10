@@ -186,5 +186,16 @@ class SerializationTest(TestCase):
 
   #endregion
 
+  #region String functions
+
+  def test_concat(self):
+    self.assertJson(query.concat(["a", "b"]), '{"concat":["a","b"]}')
+    self.assertJson(query.concat(["a", "b"], "/"), '{"concat":["a","b"],"separator":"/"}')
+
+  def test_casefoldt(self):
+    self.assertJson(query.casefold("a string"), '{"casefold":"a string"}')
+
+  #endregion
+
   def assertJson(self, obj, expected):
     self.assertEqual(to_json(obj, sort_keys=True), expected)
