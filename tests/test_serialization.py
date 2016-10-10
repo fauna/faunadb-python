@@ -213,5 +213,84 @@ class SerializationTest(TestCase):
 
   #endregion
 
+  #region Miscellaneous functions
+
+  def test_equals(self):
+    self.assertJson(query.equals(1), '{"equals":1}')
+    self.assertJson(query.equals(1, 2), '{"equals":[1,2]}')
+    self.assertJson(query.equals([1, 2]), '{"equals":[1,2]}')
+
+  def test_contains(self):
+    json = '{"contains":["favorites","foods"],"in":{"object":{"favorites":{"object":{"foods":["steak"]}}}}}'
+    self.assertJson(query.contains(["favorites", "foods"], {"favorites": {"foods": ["steak"]}}), json)
+
+  def test_select(self):
+    json = '{"from":{"object":{"favorites":{"object":{"foods":["steak"]}}}},"select":["favorites","foods",0]}'
+    self.assertJson(query.select(["favorites", "foods", 0], {"favorites": {"foods": ["steak"]}}), json)
+
+  def test_select_with_default(self):
+    json = '{"default":"no food","from":{"object":{"favorites":{"object":{"foods":["steak"]}}}},"select":["favorites","foods",0]}'
+    self.assertJson(query.select_with_default(["favorites", "foods", 0], {"favorites": {"foods": ["steak"]}}, "no food"), json)
+
+  def test_add(self):
+    self.assertJson(query.add(1), '{"add":1}')
+    self.assertJson(query.add(1, 2, 3), '{"add":[1,2,3]}')
+    self.assertJson(query.add([1, 2, 3]), '{"add":[1,2,3]}')
+
+  def test_multiply(self):
+    self.assertJson(query.multiply(1), '{"multiply":1}')
+    self.assertJson(query.multiply(1, 2, 3), '{"multiply":[1,2,3]}')
+    self.assertJson(query.multiply([1, 2, 3]), '{"multiply":[1,2,3]}')
+
+  def test_subtract(self):
+    self.assertJson(query.subtract(1), '{"subtract":1}')
+    self.assertJson(query.subtract(1, 2, 3), '{"subtract":[1,2,3]}')
+    self.assertJson(query.subtract([1, 2, 3]), '{"subtract":[1,2,3]}')
+
+  def test_divide(self):
+    self.assertJson(query.divide(1), '{"divide":1}')
+    self.assertJson(query.divide(1, 2, 3), '{"divide":[1,2,3]}')
+    self.assertJson(query.divide([1, 2, 3]), '{"divide":[1,2,3]}')
+
+  def test_modulo(self):
+    self.assertJson(query.modulo(1), '{"modulo":1}')
+    self.assertJson(query.modulo(1, 2, 3), '{"modulo":[1,2,3]}')
+    self.assertJson(query.modulo([1, 2, 3]), '{"modulo":[1,2,3]}')
+
+  def test_lt(self):
+    self.assertJson(query.lt(1), '{"lt":1}')
+    self.assertJson(query.lt(1, 2, 3), '{"lt":[1,2,3]}')
+    self.assertJson(query.lt([1, 2, 3]), '{"lt":[1,2,3]}')
+
+  def test_lte(self):
+    self.assertJson(query.lte(1), '{"lte":1}')
+    self.assertJson(query.lte(1, 2, 3), '{"lte":[1,2,3]}')
+    self.assertJson(query.lte([1, 2, 3]), '{"lte":[1,2,3]}')
+
+  def test_gt(self):
+    self.assertJson(query.gt(1), '{"gt":1}')
+    self.assertJson(query.gt(1, 2, 3), '{"gt":[1,2,3]}')
+    self.assertJson(query.gt([1, 2, 3]), '{"gt":[1,2,3]}')
+
+  def test_gte(self):
+    self.assertJson(query.gte(1), '{"gte":1}')
+    self.assertJson(query.gte(1, 2, 3), '{"gte":[1,2,3]}')
+    self.assertJson(query.gte([1, 2, 3]), '{"gte":[1,2,3]}')
+
+  def test_and_expr(self):
+    self.assertJson(query.and_expr(True), '{"and":true}')
+    self.assertJson(query.and_expr(True, False, False), '{"and":[true,false,false]}')
+    self.assertJson(query.and_expr([True, False, False]), '{"and":[true,false,false]}')
+
+  def test_or_expr(self):
+    self.assertJson(query.or_expr(False), '{"or":false}')
+    self.assertJson(query.or_expr(False, True, True), '{"or":[false,true,true]}')
+    self.assertJson(query.or_expr([False, True, True]), '{"or":[false,true,true]}')
+
+  def test_not_expr(self):
+    self.assertJson(query.not_expr(False), '{"not":false}')
+
+  #endregion
+
   def assertJson(self, obj, expected):
     self.assertEqual(to_json(obj, sort_keys=True), expected)
