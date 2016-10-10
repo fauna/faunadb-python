@@ -197,5 +197,21 @@ class SerializationTest(TestCase):
 
   #endregion
 
+  #region Time and date functions
+
+  def test_time(self):
+    self.assertJson(query.time("1970-01-01T00:00:00+00:00"), '{"time":"1970-01-01T00:00:00+00:00"}')
+
+  def test_epoch(self):
+    self.assertJson(query.epoch(1, "second"), '{"epoch":1,"unit":"second"}')
+    self.assertJson(query.epoch(1, "milisecond"), '{"epoch":1,"unit":"milisecond"}')
+    self.assertJson(query.epoch(1, "microsecond"), '{"epoch":1,"unit":"microsecond"}')
+    self.assertJson(query.epoch(1, "nanosecond"), '{"epoch":1,"unit":"nanosecond"}')
+
+  def test_date(self):
+    self.assertJson(query.date("1970-01-01"), '{"date":"1970-01-01"}')
+
+  #endregion
+
   def assertJson(self, obj, expected):
     self.assertEqual(to_json(obj, sort_keys=True), expected)
