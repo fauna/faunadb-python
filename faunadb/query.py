@@ -371,9 +371,7 @@ class _Expr(object):
     return "Expr(%s)" % repr(self.value)
 
   def __eq__(self, other):
-    if isinstance(other, _Expr):
-      return self.value == other.value
-    return self.value == other
+    return isinstance(other, _Expr) and self.value == other.value
 
 
 def _wrap(value):

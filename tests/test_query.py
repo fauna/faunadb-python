@@ -72,33 +72,12 @@ class QueryTest(FaunaTestCase):
 
 
   def test_lambda_query(self):
-    self.assertEqual(query.lambda_query(lambda a: query.add(a, a)), {
-      "lambda": "a", "expr": {"add": [{"var": "a"}, {"var": "a"}]}
-    })
-
-    # pylint: disable=undefined-variable
-    expected = query.lambda_query(lambda a: lambda b: lambda c: [a, b, c])
-    self.assertEqual(expected, {
-      "lambda": "a",
-      "expr": {
-        "lambda": "b",
-        "expr": {
-          "lambda": "c",
-          "expr": [{"var": "a"}, {"var": "b"}, {"var": "c"}]
-        }
-      }
-    })
+    self.assertEqual(self._q(query.map_expr(query.lambda_query(lambda a: query.add(a, 1)), [1,2,3])),
+                     [2, 3, 4])
 
   def test_lambda_query_multiple_args(self):
-    expected = query.lambda_query(lambda a, b: [b, a])
-    self.assertEqual(expected, {
-      "lambda": ["a", "b"], "expr": [{"var": "b"}, {"var": "a"}]
-    })
-
-  def test_to_lambda(self):
-    expr = {"lambda": "a", "expr": {"var": "a"}}
-    self.assertEqual(query.lambda_query(lambda a: a), expr)
-    self.assertEqual(query.lambda_expr("a", query.var("a")), expr)
+    self.assertEqual(self._q(query.map_expr(query.lambda_query(lambda a,b: query.add(a, b)),
+                                            [[1,1],[2,2],[3,3]])), [2, 4, 6])
 
   #endregion
 
