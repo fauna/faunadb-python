@@ -171,5 +171,20 @@ class SerializationTest(TestCase):
 
   #endregion
 
+  #region Authentication
+
+  def test_login(self):
+    json = '{"login":{"@ref":"classes/widget/1"},"params":{"object":{"password":"abracadabra"}}}'
+    self.assertJson(query.login(Ref("classes/widget/1"), {"password": "abracadabra"}), json)
+
+  def test_logout(self):
+    self.assertJson(query.logout(True), '{"logout":true}')
+
+  def test_identify(self):
+    self.assertJson(query.identify(Ref("classes/widget/1"), "abracadabra"),
+                    '{"identify":{"@ref":"classes/widget/1"},"password":"abracadabra"}')
+
+  #endregion
+
   def assertJson(self, obj, expected):
     self.assertEqual(to_json(obj, sort_keys=True), expected)
