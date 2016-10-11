@@ -3,7 +3,7 @@ from faunadb import query
 class Page(object):
   """
   Represents a single pagination result.
-  See ``paginate`` in the `docs <https://faunadb.com/documentation/queries#read_functions>`__.
+  See ``paginate`` in the `docs <https://fauna.com/documentation/queries#read_functions>`__.
   You must convert to Page yourself using :py:meth:`from_raw`.
   """
 

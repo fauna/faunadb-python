@@ -1,6 +1,6 @@
 """
 Types used in queries and responses.
-See the `docs <https://faunadb.com/documentation/queries#values>`__.
+See the `docs <https://fauna.com/documentation/queries#values>`__.
 """
 from datetime import datetime
 # pylint: disable=redefined-builtin
@@ -10,7 +10,7 @@ from faunadb.query import _Expr
 
 class Ref(_Expr):
   """
-  FaunaDB ref. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.
+  FaunaDB ref. See the `docs <https://fauna.com/documentation/queries#values-special_types>`__.
 
   A simple wrapper around a string which can be extracted using ``ref.value``.
   Queries that require a Ref will not work if you just pass in a string.
@@ -95,7 +95,7 @@ class SetRef(_Expr):
 
 class FaunaTime(_Expr):
   """
-  FaunaDB time. See the `docs <https://faunadb.com/documentation/queries#values-special_types>`__.
+  FaunaDB time. See the `docs <https://fauna.com/documentation/queries#values-special_types>`__.
 
   For dates, regular :class:`datetime.date` objects are used.
   """
