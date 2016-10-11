@@ -71,6 +71,14 @@ class SetRef(_Expr):
   For query sets see :doc:`query`.
   """
 
+  def __init__(self, set_ref):
+    if isinstance(set_ref, _Expr):
+      value = set_ref.value
+    else:
+      value = set_ref
+
+    super(SetRef, self).__init__(value)
+
   def to_fauna_json(self):
     return {"@set": self.value}
 
@@ -106,7 +114,6 @@ class FaunaTime(_Expr):
     # Convert +00:00 offset to zulu for comparison equality
     # We don't check for +0000 or +00 as they are not valid in FaunaDB
     super(FaunaTime, self).__init__(value.replace("+00:00", "Z"))
-    """ISO8601 time string"""
 
   def to_datetime(self):
     """

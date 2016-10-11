@@ -123,7 +123,8 @@ class ErrorsTest(FaunaTestCase):
       code, position)
 
   def _assert_invalid_data(self, class_name, data, code, field):
-    exception = self.assert_raises(BadRequest, lambda: self.client.query(create(Ref(class_name), data)))
+    exception = self.assert_raises(BadRequest,
+                                   lambda: self.client.query(create(Ref(class_name), data)))
     self._assert_error(exception, "validation failed", [])
     failures = exception.errors[0].failures
     self.assertEqual(len(failures), 1)
