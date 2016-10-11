@@ -48,7 +48,7 @@ class DeserializationTest(TestCase):
   def test_complex_object(self):
     json = """{
       "ref": {"@ref":"classes/widget"},
-      "set_ref": {"@set":{"match":{"@ref":"classes/wiget"},"terms":"Laptop"}},
+      "set_ref": {"@set":{"match":{"@ref":"classes/widget"},"terms":"Laptop"}},
       "date": {"@date":"1970-01-01"},
       "time": {"@ts":"1970-01-01T00:00:00.123456789Z"},
       "object": {"@obj":{"key":"value"}},
@@ -59,10 +59,10 @@ class DeserializationTest(TestCase):
 
     self.assertJson(json, {
       "ref": Ref("classes/widget"),
-      "set_ref": SetRef({"match":Ref("classes/wiget"), "terms":"Laptop"}),
+      "set_ref": SetRef({"match": Ref("classes/widget"), "terms": "Laptop"}),
       "date": parse_date("1970-01-01").date(),
       "time": FaunaTime("1970-01-01T00:00:00.123456789Z"),
-      "object": {"key":"value"},
+      "object": {"key": "value"},
       "array": [1, 2],
       "string": "a string",
       "number": 1
