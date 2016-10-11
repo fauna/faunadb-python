@@ -1,7 +1,7 @@
 from unittest import TestCase
 from iso8601 import parse_date
 
-from faunadb.objects import Ref, SetRef, FaunaTime
+from faunadb.objects import Ref, SetRef
 from faunadb._json import parse_json
 
 class DeserializationTest(TestCase):
@@ -14,9 +14,9 @@ class DeserializationTest(TestCase):
     self.assertJson('{"@set":{"match":{"@ref":"classes/widgets"},"terms":"Laptop"}}',
                     SetRef({"match": Ref("classes/widgets"), "terms": "Laptop"}))
 
-  def test_fauna_time(self):
+  def test_time(self):
     self.assertJson('{"@ts":"1970-01-01T00:00:00.123456789Z"}',
-                    FaunaTime('1970-01-01T00:00:00.123456789Z'))
+                    parse_date('1970-01-01T00:00:00.123456789Z'))
 
   def test_date(self):
     self.assertJson('{"@date":"1970-01-01"}', parse_date("1970-01-01").date())
@@ -61,7 +61,7 @@ class DeserializationTest(TestCase):
       "ref": Ref("classes/widget"),
       "set_ref": SetRef({"match": Ref("classes/widget"), "terms": "Laptop"}),
       "date": parse_date("1970-01-01").date(),
-      "time": FaunaTime("1970-01-01T00:00:00.123456789Z"),
+      "time": parse_date("1970-01-01T00:00:00.123456789Z"),
       "object": {"key": "value"},
       "array": [1, 2],
       "string": "a string",

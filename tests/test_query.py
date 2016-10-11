@@ -1,8 +1,9 @@
 from __future__ import division
-from datetime import date
+from datetime import date, datetime
+from iso8601 import parse_date
 
 from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import FaunaTime, Ref, SetRef
+from faunadb.objects import Ref, SetRef
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -291,14 +292,14 @@ class QueryTest(FaunaTestCase):
 
   def test_time(self):
     time = "1970-01-01T00:00:00.123456789Z"
-    self.assertEqual(self._q(query.time(time)), FaunaTime(time))
+    self.assertEqual(self._q(query.time(time)), parse_date(time))
 
     # "now" refers to the current time.
-    self.assertIsInstance(self._q(query.time("now")), FaunaTime)
+    self.assertIsInstance(self._q(query.time("now")), datetime)
 
   def test_epoch(self):
-    self.assertEqual(self._q(query.epoch(12, "second")), FaunaTime("1970-01-01T00:00:12Z"))
-    nano_time = FaunaTime("1970-01-01T00:00:00.123456789Z")
+    self.assertEqual(self._q(query.epoch(12, "second")), parse_date("1970-01-01T00:00:12Z"))
+    nano_time = parse_date("1970-01-01T00:00:00.123456789Z")
     self.assertEqual(self._q(query.epoch(123456789, "nanosecond")), nano_time)
 
   def test_date(self):

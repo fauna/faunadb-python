@@ -1,7 +1,8 @@
 from datetime import date, datetime
 import iso8601
 
-from faunadb.objects import FaunaTime, Ref, SetRef
+from faunadb._json import to_json
+from faunadb.objects import Ref, SetRef
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -38,28 +39,16 @@ class ObjectsTest(FaunaTestCase):
 
     self.assertNotEqual(match, SetRef(query.match(index, Ref("classes", "frogs", "456"))))
 
-  def test_time_conversion(self):
-    dt = datetime.now(iso8601.UTC)
-    self.assertEqual(FaunaTime(dt).to_datetime(), dt)
-
+  def test_timezone_aware(self):
     # Must be time zone aware.
-    self.assertRaises(ValueError, lambda: FaunaTime(datetime.utcnow()))
-
-    dt = datetime.fromtimestamp(0, iso8601.UTC)
-    ft = FaunaTime(dt)
-    self.assertEqual(ft, FaunaTime("1970-01-01T00:00:00Z"))
-    self.assertEqual(ft.to_datetime(), dt)
+    self.assertRaises(ValueError, lambda: to_json(datetime.utcnow()))
 
   def test_time(self):
-    test_ts = FaunaTime("1970-01-01T00:00:00.123456789Z")
-    test_ts_json = '{"@ts":"1970-01-01T00:00:00.123456789Z"}'
+    test_ts = iso8601.parse_date("1970-01-01T00:00:00.123456Z")
+    test_ts_json = '{"@ts":"1970-01-01T00:00:00.123456Z"}'
     self.assertJson(test_ts, test_ts_json)
 
     self.assertToJson(datetime.fromtimestamp(0, iso8601.UTC), '{"@ts":"1970-01-01T00:00:00Z"}')
-
-    self.assertEqual(repr(test_ts), "FaunaTime('1970-01-01T00:00:00.123456789Z')")
-
-    self.assertNotEqual(test_ts, FaunaTime("some_other_time"))
 
   def test_date(self):
     test_date = date(1970, 1, 1)
