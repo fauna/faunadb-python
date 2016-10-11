@@ -28,7 +28,8 @@ class QueryTest(FaunaTestCase):
     self.ref_m1 = self._create(m=1)["ref"]
     self.ref_n1m1 = self._create(n=1, m=1)["ref"]
 
-    self.thimble_class_ref = self.client.query(query.create(Ref("classes"), {"name": "thimbles"}))["ref"]
+    thimble_class = self.client.query(query.create(Ref("classes"), {"name": "thimbles"}))
+    self.thimble_class_ref = thimble_class["ref"]
 
   #region Helpers
 
@@ -72,12 +73,15 @@ class QueryTest(FaunaTestCase):
 
 
   def test_lambda_query(self):
-    self.assertEqual(self._q(query.map_expr(query.lambda_query(lambda a: query.add(a, 1)), [1,2,3])),
-                     [2, 3, 4])
+    expr = query.map_expr(query.lambda_query(lambda a: query.add(a, 1)),
+                          [1, 2, 3])
+    self.assertEqual(self._q(expr), [2, 3, 4])
 
   def test_lambda_query_multiple_args(self):
-    self.assertEqual(self._q(query.map_expr(query.lambda_query(lambda a,b: query.add(a, b)),
-                                            [[1,1],[2,2],[3,3]])), [2, 4, 6])
+    #pylint: disable=unnecessary-lambda
+    expr = query.map_expr(query.lambda_query(lambda a, b: query.add(a, b)),
+                          [[1, 1], [2, 2], [3, 3]])
+    self.assertEqual(self._q(expr), [2, 4, 6])
 
   #endregion
 

@@ -114,7 +114,6 @@ class FaunaTime(_Expr):
     # Convert +00:00 offset to zulu for comparison equality
     # We don't check for +0000 or +00 as they are not valid in FaunaDB
     super(FaunaTime, self).__init__(value.replace("+00:00", "Z"))
-    """ISO8601 time string"""
 
   def to_datetime(self):
     """
