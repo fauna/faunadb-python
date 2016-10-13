@@ -372,6 +372,9 @@ class QueryTest(FaunaTestCase):
 
   #region Miscellaneous functions
 
+  def test_next_id(self):
+    self.assertIsNotNone(self._q(query.next_id()))
+
   def test_equals(self):
     self.assertTrue(self._q(query.equals(1, 1, 1)))
     self.assertFalse(self._q(query.equals(1, 1, 2)))

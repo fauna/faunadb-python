@@ -296,6 +296,10 @@ def date(string):
 
 #region Miscellaneous functions
 
+def next_id():
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"next_id": None})
+
 def equals(*values):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"equals": _varargs(values)})
