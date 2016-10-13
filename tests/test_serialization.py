@@ -149,6 +149,10 @@ class SerializationTest(TestCase):
     self.assertJson(query.remove(Ref("classes/widget"), ts=123, action="create"),
                     '{"action":"create","remove":{"@ref":"classes/widget"},"ts":123}')
 
+  def test_create_class(self):
+    self.assertJson(query.create_class({"name": "widget"}),
+                    '{"create_class":{"object":{"name":"widget"}}}')
+
   #endregion
 
   #region Sets

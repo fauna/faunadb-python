@@ -185,6 +185,12 @@ def remove(ref, ts, action):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
   return _fn({"remove": ref, "ts": ts, "action": action})
 
+
+def create_class(class_params):
+  """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
+  return _fn({"create_class": class_params})
+
+
 #endregion
 
 #region Sets

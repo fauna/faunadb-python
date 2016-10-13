@@ -221,6 +221,15 @@ class QueryTest(FaunaTestCase):
     # Assert that it was undone
     self.assertEqual(self._q(query.get(ref)), instance)
 
+  def test_create_class(self):
+    resource = self._q(query.create_class({"name": "class_for_test"}))
+
+    self.assertEqual(resource["ref"], Ref("classes/class_for_test"))
+    self.assertEqual(resource["class"], Ref("classes"))
+    self.assertEqual(resource["name"], "class_for_test")
+
+    self._q(query.delete(resource["ref"]))
+
   #endregion
 
   #region Sets
