@@ -254,6 +254,20 @@ class QueryTest(FaunaTestCase):
     self._q(query.delete(resource["ref"]))
     self._q(query.delete(Ref("classes/class_for_test")))
 
+  def test_create_key(self):
+    resource = self.root_client.query(query.create_key({
+      "database": self.db_ref,
+      "role": "client"}))
+
+    self.assertIn("ref", resource)
+    self.assertIn("secret", resource)
+    self.assertIn("hashed_secret", resource)
+    self.assertEqual(resource["class"], Ref("keys"))
+    self.assertEqual(resource["database"], self.db_ref)
+    self.assertEqual(resource["role"], "client")
+
+    self.root_client.query(query.delete(resource["ref"]))
+
   #endregion
 
   #region Sets
