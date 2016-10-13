@@ -4,13 +4,6 @@ from builtins import object
 
 from requests import codes
 
-class UnexpectedError(Exception):
-  """Error for when the server returns an unexpected kind of response."""
-  def __init__(self, description, request_result):
-    super(UnexpectedError, self).__init__(description)
-    self.request_result = request_result
-    # :any:`RequestResult` for the request that caused this error.
-
 def _get_or_raise(request_result, dct, key):
   if isinstance(dct, dict) and key in dct:
     return dct[key]
@@ -46,47 +39,58 @@ class FaunaError(Exception):
     else:
       raise UnexpectedError("Unexpected status code.", request_result)
 
+  def __init__(self, description, request_result):
+    super(FaunaError, self).__init__(description)
+    self.request_result = request_result
+    """:any:`RequestResult` for the request that caused this error."""
+
+
+class UnexpectedError(FaunaError):
+  """Error for when the server returns an unexpected kind of response."""
+  pass
+
+
+class HttpError(FaunaError):
   def __init__(self, request_result):
     self.errors = self._get_errors(request_result)
     """List of all :py:class:`ErrorData` objects sent by the server."""
-    self.request_result = request_result
-    """:any:`RequestResult` for the request that caused this error."""
-    super(FaunaError, self).__init__(self._get_description())
+    super(HttpError, self).__init__(self._get_description(), request_result)
 
   def _get_errors(self, request_result):
     response = request_result.response_content
-    errors_raw = _get_or_raise(request_result, response, "errors")
-    return [ErrorData.from_dict(error, request_result) for error in errors_raw]
+    errors = _get_or_raise(request_result, response, "errors")
+    return [ErrorData.from_dict(error, request_result) for error in errors]
 
   def _get_description(self):
     return self.errors[0].description if self.errors else "(empty `errors`)"
 
-class BadRequest(FaunaError):
+
+class BadRequest(HttpError):
   """HTTP 400 error."""
   pass
 
 
-class Unauthorized(FaunaError):
+class Unauthorized(HttpError):
   """HTTP 401 error."""
   pass
 
 
-class PermissionDenied(FaunaError):
+class PermissionDenied(HttpError):
   """HTTP 403 error."""
   pass
 
 
-class NotFound(FaunaError):
+class NotFound(HttpError):
   """HTTP 404 error."""
   pass
 
 
-class InternalError(FaunaError):
+class InternalError(HttpError):
   """HTTP 500 error."""
   pass
 
 
-class UnavailableError(FaunaError):
+class UnavailableError(HttpError):
   """HTTP 503 error."""
   pass
 
