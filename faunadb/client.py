@@ -4,7 +4,7 @@ from builtins import object
 
 from requests import Request, Session
 
-from faunadb.errors import FaunaError, UnexpectedError
+from faunadb.errors import _get_or_raise, FaunaError, UnexpectedError
 from faunadb.objects import Ref
 from faunadb.query import _wrap
 from faunadb.request_result import RequestResult
@@ -103,11 +103,11 @@ class Client(object):
     start_time = time()
     response = self._perform_request(action, path, data, query)
     end_time = time()
+
     response_raw = response.text
     response_content = parse_json_or_none(response_raw)
 
     request_result = RequestResult(
-      self,
       action, path, query, data,
       response_raw, response_content, response.status_code, response.headers,
       start_time, end_time)
@@ -119,7 +119,7 @@ class Client(object):
       raise UnexpectedError("Invalid JSON.", request_result)
 
     FaunaError.raise_for_status_code(request_result)
-    return UnexpectedError.get_or_raise(request_result, response_content, "resource")
+    return _get_or_raise(request_result, response_content, "resource")
 
   def _perform_request(self, action, path, data, query):
     """Performs an HTTP action."""

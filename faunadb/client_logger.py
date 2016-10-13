@@ -35,11 +35,10 @@ def show_request_result(request_result):
     query_string = ""
 
   log("Fauna %s /%s%s\n" % (rr.method, rr.path, query_string))
-  log("  Credentials: %s\n" % ("None" if rr.auth is None else "%s:%s" % rr.auth))
   if rr.request_content is not None:
     log("  Request JSON: %s\n" % _indent(to_json(rr.request_content, pretty=True)))
   log("  Response headers: %s\n" % _indent(to_json(dict(rr.response_headers), pretty=True)))
   log("  Response JSON: %s\n" % _indent(to_json(rr.response_content, pretty=True)))
   log("  Response (%i): Network latency %ims\n" % (rr.status_code, int(rr.time_taken * 1000)))
 
-  return "".join(parts)
+  return u"".join(parts)

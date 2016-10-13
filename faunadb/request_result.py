@@ -7,14 +7,11 @@ class RequestResult(object):
   # pylint: disable=too-many-instance-attributes
 
   def __init__(
-      self, client,
-      method, path, query, request_content,
+      self, method, path, query, request_content,
       response_raw, response_content, status_code, response_headers,
       start_time, end_time):
-    self.client = client
-    """The :any:`Client`."""
     self.method = method
-    """"GET", "POST", "PUT", "PATCH", or "DELETE"."""
+    """"GET" or "POST"."""
     self.path = path
     """Path that was queried. Relative to client's domain."""
     self.query = query
@@ -42,8 +39,3 @@ class RequestResult(object):
   def time_taken(self):
     """``end_time - start_time``"""
     return self.end_time - self.start_time
-
-  @property
-  def auth(self):
-    """``(user, pass)`` used by the client."""
-    return self.client.session.auth

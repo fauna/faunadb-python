@@ -4,19 +4,11 @@ from builtins import object
 
 from requests import codes
 
-class UnexpectedError(Exception):
-  """Error for when the server returns an unexpected kind of response."""
-  def __init__(self, description, request_result):
-    super(UnexpectedError, self).__init__(description)
-    self.request_result = request_result
-    # :any:`RequestResult` for the request that caused this error.
-
-  @staticmethod
-  def get_or_raise(request_result, dct, key):
-    if isinstance(dct, dict) and key in dct:
-      return dct[key]
-    else:
-      raise UnexpectedError("Response JSON does not contain expected key %s" % key, request_result)
+def _get_or_raise(request_result, dct, key):
+  if isinstance(dct, dict) and key in dct:
+    return dct[key]
+  else:
+    raise UnexpectedError("Response JSON does not contain expected key %s" % key, request_result)
 
 #region FaunaError
 
@@ -40,8 +32,6 @@ class FaunaError(Exception):
       raise PermissionDenied(request_result)
     elif code == codes.not_found:
       raise NotFound(request_result)
-    elif code == codes.method_not_allowed:
-      raise MethodNotAllowed(request_result)
     elif code == codes.internal_server_error:
       raise InternalError(request_result)
     elif code == codes.unavailable:
@@ -49,50 +39,61 @@ class FaunaError(Exception):
     else:
       raise UnexpectedError("Unexpected status code.", request_result)
 
-  def __init__(self, request_result):
-    response = request_result.response_content
-    errors_raw = UnexpectedError.get_or_raise(request_result, response, "errors")
-    self.errors = [ErrorData.from_dict(error, request_result) for error in errors_raw]
-    """List of all :py:class:`ErrorData` objects sent by the server."""
-    super(FaunaError, self).__init__(
-      self.errors[0].description if self.errors else "(empty `errors`)")
+  def __init__(self, description, request_result):
+    super(FaunaError, self).__init__(description)
     self.request_result = request_result
     """:any:`RequestResult` for the request that caused this error."""
 
 
-class BadRequest(FaunaError):
+class UnexpectedError(FaunaError):
+  """Error for when the server returns an unexpected kind of response."""
+  pass
+
+
+class HttpError(FaunaError):
+  def __init__(self, request_result):
+    self.errors = self._get_errors(request_result)
+    """List of all :py:class:`ErrorData` objects sent by the server."""
+    super(HttpError, self).__init__(self._get_description(), request_result)
+
+  def _get_errors(self, request_result):
+    response = request_result.response_content
+    errors = _get_or_raise(request_result, response, "errors")
+    return [ErrorData.from_dict(error, request_result) for error in errors]
+
+  def _get_description(self):
+    return self.errors[0].description if self.errors else "(empty `errors`)"
+
+
+class BadRequest(HttpError):
   """HTTP 400 error."""
   pass
 
 
-class Unauthorized(FaunaError):
+class Unauthorized(HttpError):
   """HTTP 401 error."""
   pass
 
 
-class PermissionDenied(FaunaError):
+class PermissionDenied(HttpError):
   """HTTP 403 error."""
   pass
 
 
-class NotFound(FaunaError):
+class NotFound(HttpError):
   """HTTP 404 error."""
   pass
 
 
-class MethodNotAllowed(FaunaError):
-  """HTTP 405 error."""
-  pass
-
-
-class InternalError(FaunaError):
+class InternalError(HttpError):
   """HTTP 500 error."""
   pass
 
 
-class UnavailableError(FaunaError):
+class UnavailableError(HttpError):
   """HTTP 503 error."""
   pass
+
 
 #endregion
 
@@ -103,14 +104,17 @@ class ErrorData(object):
 
   @staticmethod
   def from_dict(dct, request_result):
-    code = UnexpectedError.get_or_raise(request_result, dct, "code")
-    description = UnexpectedError.get_or_raise(request_result, dct, "description")
-    position = dct.get("position")
+    return ErrorData(
+      _get_or_raise(request_result, dct, "code"),
+      _get_or_raise(request_result, dct, "description"),
+      dct.get("position"),
+      ErrorData.get_failures(dct, request_result))
+
+  @staticmethod
+  def get_failures(dct, request_result):
     if "failures" in dct:
-      failures = [Failure.from_dict(failure, request_result) for failure in dct["failures"]]
-    else:
-      failures = None
-    return ErrorData(code, description, position, failures)
+      return [Failure.from_dict(failure, request_result) for failure in dct["failures"]]
+    return None
 
   def __init__(self, code, description, position, failures):
     self.code = code
@@ -148,9 +152,9 @@ class Failure(object):
   @staticmethod
   def from_dict(dct, request_result):
     return Failure(
-      UnexpectedError.get_or_raise(request_result, dct, "code"),
-      UnexpectedError.get_or_raise(request_result, dct, "description"),
-      UnexpectedError.get_or_raise(request_result, dct, "field"))
+      _get_or_raise(request_result, dct, "code"),
+      _get_or_raise(request_result, dct, "description"),
+      _get_or_raise(request_result, dct, "field"))
 
   def __init__(self, code, description, field):
     self.code = code
