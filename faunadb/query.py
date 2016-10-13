@@ -311,6 +311,11 @@ def index(index_name):
   return _fn({"index": index_name})
 
 
+def class_expr(class_name):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"class": class_name})
+
+
 def equals(*values):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"equals": _varargs(values)})
