@@ -4,11 +4,6 @@ from faunadb.query import create
 from tests.helpers import FaunaTestCase
 
 class ClientTest(FaunaTestCase):
-  def test_parse_secret(self):
-    self.assertEqual(Client._parse_secret(("user", "pass")), ("user", "pass"))
-    self.assertEqual(Client._parse_secret("user"), ("user", ""))
-    self.assertEqual(Client._parse_secret("user:pass"), ("user", "pass"))
-    self.assertRaises(ValueError, lambda: Client._parse_secret(("user", "pass", "potato")))
 
   def test_ping(self):
     self.assertEqual(self.client.ping("all"), "Scope all is OK")

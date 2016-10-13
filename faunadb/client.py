@@ -56,7 +56,7 @@ class Client(object):
 
     self.session = Session()
     if secret is not None:
-      self.session.auth = Client._parse_secret(secret)
+      self.session.auth = (secret, "")
 
     self.session.headers.update({
       "Accept-Encoding": "gzip",
@@ -126,15 +126,3 @@ class Client(object):
     url = self.base_url + "/" + path
     req = Request(action, url, params=query, data=to_json(data))
     return self.session.send(self.session.prepare_request(req))
-
-  @staticmethod
-  def _parse_secret(secret):
-    if isinstance(secret, tuple):
-      if len(secret) != 2:
-        raise ValueError("Secret tuple must have exactly two entries")
-      return secret
-    else:
-      pair = secret.split(":", 1)
-      if len(pair) == 1:
-        pair.append("")
-      return tuple(pair)
