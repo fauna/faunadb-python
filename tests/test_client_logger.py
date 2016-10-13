@@ -15,7 +15,6 @@ class ClientLoggerTest(FaunaTestCase):
 
     read_line = StringIO(logged).readline
     self.assertEqual(read_line(), "Fauna GET /ping\n")
-    self.assertRegexCompat(read_line(), r"^  Credentials:")
     self.assertEqual(read_line(), "  Response headers: {\n")
     # Skip through headers
     while True:
@@ -35,7 +34,6 @@ class ClientLoggerTest(FaunaTestCase):
 
     read_line = StringIO(logged).readline
     self.assertEqual(read_line(), "Fauna POST /\n")
-    self.assertRegexCompat(read_line(), r"^  Credentials:")
     self.assertEqual(read_line(), "  Request JSON: {\n")
     self.assertEqual(read_line(), '    "create": {\n')
     self.assertEqual(read_line(), '      "@ref": "classes/logging_tests"\n')
