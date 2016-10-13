@@ -195,6 +195,11 @@ def create_database(db_params):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
   return _fn({"create_database": db_params})
 
+
+def create_index(index_params):
+  """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
+  return _fn({"create_index": index_params})
+
 #endregion
 
 #region Sets

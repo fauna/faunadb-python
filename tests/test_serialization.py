@@ -157,6 +157,11 @@ class SerializationTest(TestCase):
     self.assertJson(query.create_database({"name": "db-name"}),
                     '{"create_database":{"object":{"name":"db-name"}}}')
 
+  def test_create_index(self):
+    self.assertJson(query.create_index({"name": "index-name", "source": Ref("classes/widget")}),
+                    ('{"create_index":{"object":{"name":"index-name",'
+                     '"source":{"@ref":"classes/widget"}}}}'))
+
   #endregion
 
   #region Sets

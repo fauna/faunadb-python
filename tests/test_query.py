@@ -239,6 +239,21 @@ class QueryTest(FaunaTestCase):
 
     self.root_client.query(query.delete(resource["ref"]))
 
+  def test_create_index(self):
+    self._q(query.create_class({"name": "class_for_test"}))
+
+    resource = self._q(query.create_index({
+      "name": "index_for_test",
+      "source": Ref("classes/class_for_test")}))
+
+    self.assertEqual(resource["ref"], Ref("indexes/index_for_test"))
+    self.assertEqual(resource["class"], Ref("indexes"))
+    self.assertEqual(resource["name"], "index_for_test")
+    self.assertEqual(resource["source"], Ref("classes/class_for_test"))
+
+    self._q(query.delete(resource["ref"]))
+    self._q(query.delete(Ref("classes/class_for_test")))
+
   #endregion
 
   #region Sets
