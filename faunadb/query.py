@@ -234,6 +234,11 @@ def difference(*sets):
   return _fn({"difference": _varargs(sets)})
 
 
+def distinct(set):
+  """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
+  return _fn({"distinct": set})
+
+
 def join(source, target):
   """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
   return _fn({"join": source, "with": target})

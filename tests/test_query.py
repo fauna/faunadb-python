@@ -288,6 +288,23 @@ class QueryTest(FaunaTestCase):
     q = query.difference(self._set_n(1), self._set_m(1))
     self.assertEqual(self._set_to_list(q), [self.ref_n1]) # but not self.ref_n1m1
 
+  def test_distinct(self):
+    thimble_index = self._q(query.create_index({
+      "name": "thimble_name",
+      "source": self.thimble_class_ref,
+      "values": [{"field": ["data", "name"]}]}))
+    thimble_index_ref = thimble_index["ref"]
+
+    self._create_thimble({"name": "Golden Thimble"})
+    self._create_thimble({"name": "Golden Thimble"})
+    self._create_thimble({"name": "Golden Thimble"})
+    self._create_thimble({"name": "Silver Thimble"})
+    self._create_thimble({"name": "Copper Thimble"})
+
+    thimbles = query.distinct(query.match(thimble_index_ref))
+
+    self.assertEqual(self._set_to_list(thimbles), ["Copper Thimble", "Golden Thimble", "Silver Thimble"])
+
   def test_join(self):
     referenced = [self._create(n=12)["ref"], self._create(n=12)["ref"]]
     referencers = [self._create(m=referenced[0])["ref"], self._create(m=referenced[1])["ref"]]

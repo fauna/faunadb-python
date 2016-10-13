@@ -196,6 +196,10 @@ class SerializationTest(TestCase):
     self.assertJson(query.difference(Ref("indexes/widget"), Ref("indexes/things")),
                     '{"difference":[{"@ref":"indexes/widget"},{"@ref":"indexes/things"}]}')
 
+  def test_distinct(self):
+    self.assertJson(query.distinct(SetRef({"match": Ref("indexes/widget")})),
+                    '{"distinct":{"@set":{"match":{"@ref":"indexes/widget"}}}}')
+
   def test_join(self):
     self.assertJson(query.join(query.match(Ref("indexes/widget")), Ref("indexes/things")),
                     '{"join":{"match":{"@ref":"indexes/widget"}},"with":{"@ref":"indexes/things"}}')
