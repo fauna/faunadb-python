@@ -230,6 +230,15 @@ class QueryTest(FaunaTestCase):
 
     self._q(query.delete(resource["ref"]))
 
+  def test_create_database(self):
+    resource = self.root_client.query(query.create_database({"name": "database_for_test"}))
+
+    self.assertEqual(resource["ref"], Ref("databases/database_for_test"))
+    self.assertEqual(resource["class"], Ref("databases"))
+    self.assertEqual(resource["name"], "database_for_test")
+
+    self.root_client.query(query.delete(resource["ref"]))
+
   #endregion
 
   #region Sets

@@ -153,6 +153,10 @@ class SerializationTest(TestCase):
     self.assertJson(query.create_class({"name": "widget"}),
                     '{"create_class":{"object":{"name":"widget"}}}')
 
+  def test_create_database(self):
+    self.assertJson(query.create_database({"name": "db-name"}),
+                    '{"create_database":{"object":{"name":"db-name"}}}')
+
   #endregion
 
   #region Sets

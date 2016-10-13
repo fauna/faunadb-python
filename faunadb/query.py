@@ -191,6 +191,10 @@ def create_class(class_params):
   return _fn({"create_class": class_params})
 
 
+def create_database(db_params):
+  """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
+  return _fn({"create_database": db_params})
+
 #endregion
 
 #region Sets
