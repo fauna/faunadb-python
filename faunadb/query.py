@@ -306,6 +306,11 @@ def database(db_name):
   return _fn({"database": db_name})
 
 
+def index(index_name):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"index": index_name})
+
+
 def equals(*values):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"equals": _varargs(values)})

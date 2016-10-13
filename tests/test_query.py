@@ -381,6 +381,11 @@ class QueryTest(FaunaTestCase):
     db_name = self.db_ref.id()
     self.assertEqual(self.root_client.query(query.database(db_name)), Ref("databases", db_name))
 
+  def test_index(self):
+    self.assertRaises(BadRequest, lambda: self._q(query.index("index-name")))
+
+    self.assertEqual(self._q(query.index("widgets_by_n")), Ref("indexes/widgets_by_n"))
+
   def test_equals(self):
     self.assertTrue(self._q(query.equals(1, 1, 1)))
     self.assertFalse(self._q(query.equals(1, 1, 2)))
