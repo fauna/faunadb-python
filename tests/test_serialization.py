@@ -253,6 +253,9 @@ class SerializationTest(TestCase):
   def test_next_id(self):
     self.assertJson(query.next_id(), '{"next_id":null}')
 
+  def test_database(self):
+    self.assertJson(query.database("db-name"), '{"database":"db-name"}')
+
   def test_equals(self):
     self.assertJson(query.equals(1), '{"equals":1}')
     self.assertJson(query.equals(1, 2), '{"equals":[1,2]}')

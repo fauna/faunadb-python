@@ -375,6 +375,12 @@ class QueryTest(FaunaTestCase):
   def test_next_id(self):
     self.assertIsNotNone(self._q(query.next_id()))
 
+  def test_database(self):
+    self.assertRaises(BadRequest, lambda: self.root_client.query(query.database("db-name")))
+
+    db_name = self.db_ref.id()
+    self.assertEqual(self.root_client.query(query.database(db_name)), Ref("databases", db_name))
+
   def test_equals(self):
     self.assertTrue(self._q(query.equals(1, 1, 1)))
     self.assertFalse(self._q(query.equals(1, 1, 2)))
