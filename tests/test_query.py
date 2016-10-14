@@ -222,51 +222,33 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.get(ref)), instance)
 
   def test_create_class(self):
-    resource = self._q(query.create_class({"name": "class_for_test"}))
-
-    self.assertEqual(resource["ref"], Ref("classes/class_for_test"))
-    self.assertEqual(resource["class"], Ref("classes"))
-    self.assertEqual(resource["name"], "class_for_test")
-
-    self._q(query.delete(resource["ref"]))
-
-  def test_create_database(self):
-    resource = self.root_client.query(query.create_database({"name": "database_for_test"}))
-
-    self.assertEqual(resource["ref"], Ref("databases/database_for_test"))
-    self.assertEqual(resource["class"], Ref("databases"))
-    self.assertEqual(resource["name"], "database_for_test")
-
-    self.root_client.query(query.delete(resource["ref"]))
-
-  def test_create_index(self):
     self._q(query.create_class({"name": "class_for_test"}))
 
-    resource = self._q(query.create_index({
+    self.assertTrue(self._q(query.exists(Ref("classes/class_for_test"))))
+
+  def test_create_database(self):
+    self.admin_client.query(query.create_database({"name": "database_for_test"}))
+
+    self.assertTrue(self.admin_client.query(query.exists(Ref("databases/database_for_test"))))
+
+  def test_create_index(self):
+    self._q(query.create_index({
       "name": "index_for_test",
-      "source": Ref("classes/class_for_test")}))
+      "source": Ref("classes/widgets")}))
 
-    self.assertEqual(resource["ref"], Ref("indexes/index_for_test"))
-    self.assertEqual(resource["class"], Ref("indexes"))
-    self.assertEqual(resource["name"], "index_for_test")
-    self.assertEqual(resource["source"], Ref("classes/class_for_test"))
-
-    self._q(query.delete(resource["ref"]))
-    self._q(query.delete(Ref("classes/class_for_test")))
+    self.assertTrue(self._q(query.exists(Ref("indexes/index_for_test"))))
 
   def test_create_key(self):
-    resource = self.root_client.query(query.create_key({
-      "database": self.db_ref,
+    self.admin_client.query(query.create_database({"name": "database_for_test"}))
+
+    resource = self.admin_client.query(query.create_key({
+      "database": Ref("databases/database_for_test"),
       "role": "client"}))
 
+    self.assertNotIn("errors", resource)
     self.assertIn("ref", resource)
     self.assertIn("secret", resource)
     self.assertIn("hashed_secret", resource)
-    self.assertEqual(resource["class"], Ref("keys"))
-    self.assertEqual(resource["database"], self.db_ref)
-    self.assertEqual(resource["role"], "client")
-
-    self.root_client.query(query.delete(resource["ref"]))
 
   #endregion
 
