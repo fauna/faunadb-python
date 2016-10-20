@@ -243,12 +243,13 @@ class QueryTest(FaunaTestCase):
 
     resource = self.admin_client.query(query.create_key({
       "database": Ref("databases/database_for_test"),
-      "role": "client"}))
+      "role": "server"}))
 
-    self.assertNotIn("errors", resource)
-    self.assertIn("ref", resource)
-    self.assertIn("secret", resource)
-    self.assertIn("hashed_secret", resource)
+    new_client = self.get_client(secret=resource["secret"])
+
+    new_client.query(query.create_class({"name": "class_for_test"}))
+
+    self.assertTrue(new_client.query(query.exists(Ref("classes/class_for_test"))))
 
   #endregion
 
