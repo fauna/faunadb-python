@@ -42,6 +42,10 @@ class FaunaTestCase(TestCase):
       query.create(Ref("keys"), {"database": self.db_ref, "role": "server"}))["secret"]
     self.client = self.get_client()
 
+    self.admin_key = self.root_client.query(
+      query.create(Ref("keys"), {"database": self.db_ref, "role": "admin"}))["secret"]
+    self.admin_client = self.get_client(secret=self.admin_key)
+
   def tearDown(self):
     self.root_client.query(query.delete(self.db_ref))
 

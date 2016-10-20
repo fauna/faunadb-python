@@ -185,6 +185,26 @@ def remove(ref, ts, action):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
   return _fn({"remove": ref, "ts": ts, "action": action})
 
+
+def create_class(class_params):
+  """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
+  return _fn({"create_class": class_params})
+
+
+def create_database(db_params):
+  """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
+  return _fn({"create_database": db_params})
+
+
+def create_index(index_params):
+  """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
+  return _fn({"create_index": index_params})
+
+
+def create_key(key_params):
+  """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
+  return _fn({"create_key": key_params})
+
 #endregion
 
 #region Sets
@@ -212,6 +232,11 @@ def intersection(*sets):
 def difference(*sets):
   """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
   return _fn({"difference": _varargs(sets)})
+
+
+def distinct(set):
+  """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
+  return _fn({"distinct": set})
 
 
 def join(source, target):
@@ -270,6 +295,26 @@ def date(string):
 #endregion
 
 #region Miscellaneous functions
+
+def next_id():
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"next_id": None})
+
+
+def database(db_name):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"database": db_name})
+
+
+def index(index_name):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"index": index_name})
+
+
+def class_expr(class_name):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"class": class_name})
+
 
 def equals(*values):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""

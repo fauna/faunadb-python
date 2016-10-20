@@ -149,6 +149,24 @@ class SerializationTest(TestCase):
     self.assertJson(query.remove(Ref("classes/widget"), ts=123, action="create"),
                     '{"action":"create","remove":{"@ref":"classes/widget"},"ts":123}')
 
+  def test_create_class(self):
+    self.assertJson(query.create_class({"name": "widget"}),
+                    '{"create_class":{"object":{"name":"widget"}}}')
+
+  def test_create_database(self):
+    self.assertJson(query.create_database({"name": "db-name"}),
+                    '{"create_database":{"object":{"name":"db-name"}}}')
+
+  def test_create_index(self):
+    self.assertJson(query.create_index({"name": "index-name", "source": Ref("classes/widget")}),
+                    ('{"create_index":{"object":{"name":"index-name",'
+                     '"source":{"@ref":"classes/widget"}}}}'))
+
+  def test_create_key(self):
+    self.assertJson(query.create_key({"database": Ref("databases/db-name"), "role": "client"}),
+                    ('{"create_key":{"object":{"database":{"@ref":"databases/db-name"},'
+                     '"role":"client"}}}'))
+
   #endregion
 
   #region Sets
@@ -177,6 +195,10 @@ class SerializationTest(TestCase):
                     '{"difference":{"@ref":"indexes/widget"}}')
     self.assertJson(query.difference(Ref("indexes/widget"), Ref("indexes/things")),
                     '{"difference":[{"@ref":"indexes/widget"},{"@ref":"indexes/things"}]}')
+
+  def test_distinct(self):
+    self.assertJson(query.distinct(SetRef({"match": Ref("indexes/widget")})),
+                    '{"distinct":{"@set":{"match":{"@ref":"indexes/widget"}}}}')
 
   def test_join(self):
     self.assertJson(query.join(query.match(Ref("indexes/widget")), Ref("indexes/things")),
@@ -227,6 +249,18 @@ class SerializationTest(TestCase):
   #endregion
 
   #region Miscellaneous functions
+
+  def test_next_id(self):
+    self.assertJson(query.next_id(), '{"next_id":null}')
+
+  def test_database(self):
+    self.assertJson(query.database("db-name"), '{"database":"db-name"}')
+
+  def test_index(self):
+    self.assertJson(query.index("index-name"), '{"index":"index-name"}')
+
+  def test_class(self):
+    self.assertJson(query.class_expr("class-name"), '{"class":"class-name"}')
 
   def test_equals(self):
     self.assertJson(query.equals(1), '{"equals":1}')

@@ -221,6 +221,36 @@ class QueryTest(FaunaTestCase):
     # Assert that it was undone
     self.assertEqual(self._q(query.get(ref)), instance)
 
+  def test_create_class(self):
+    self._q(query.create_class({"name": "class_for_test"}))
+
+    self.assertTrue(self._q(query.exists(Ref("classes/class_for_test"))))
+
+  def test_create_database(self):
+    self.admin_client.query(query.create_database({"name": "database_for_test"}))
+
+    self.assertTrue(self.admin_client.query(query.exists(Ref("databases/database_for_test"))))
+
+  def test_create_index(self):
+    self._q(query.create_index({
+      "name": "index_for_test",
+      "source": Ref("classes/widgets")}))
+
+    self.assertTrue(self._q(query.exists(Ref("indexes/index_for_test"))))
+
+  def test_create_key(self):
+    self.admin_client.query(query.create_database({"name": "database_for_test"}))
+
+    resource = self.admin_client.query(query.create_key({
+      "database": Ref("databases/database_for_test"),
+      "role": "server"}))
+
+    new_client = self.get_client(secret=resource["secret"])
+
+    new_client.query(query.create_class({"name": "class_for_test"}))
+
+    self.assertTrue(new_client.query(query.exists(Ref("classes/class_for_test"))))
+
   #endregion
 
   #region Sets
@@ -240,6 +270,23 @@ class QueryTest(FaunaTestCase):
   def test_difference(self):
     q = query.difference(self._set_n(1), self._set_m(1))
     self.assertEqual(self._set_to_list(q), [self.ref_n1]) # but not self.ref_n1m1
+
+  def test_distinct(self):
+    thimble_index = self._q(query.create_index({
+      "name": "thimble_name",
+      "source": self.thimble_class_ref,
+      "values": [{"field": ["data", "name"]}]}))
+    thimble_index_ref = thimble_index["ref"]
+
+    self._create_thimble({"name": "Golden Thimble"})
+    self._create_thimble({"name": "Golden Thimble"})
+    self._create_thimble({"name": "Golden Thimble"})
+    self._create_thimble({"name": "Silver Thimble"})
+    self._create_thimble({"name": "Copper Thimble"})
+
+    thimbles = query.distinct(query.match(thimble_index_ref))
+
+    self.assertEqual(self._set_to_list(thimbles), ["Copper Thimble", "Golden Thimble", "Silver Thimble"])
 
   def test_join(self):
     referenced = [self._create(n=12)["ref"], self._create(n=12)["ref"]]
@@ -307,6 +354,25 @@ class QueryTest(FaunaTestCase):
   #endregion
 
   #region Miscellaneous functions
+
+  def test_next_id(self):
+    self.assertIsNotNone(self._q(query.next_id()))
+
+  def test_database(self):
+    self.assertRaises(BadRequest, lambda: self.root_client.query(query.database("db-name")))
+
+    db_name = self.db_ref.id()
+    self.assertEqual(self.root_client.query(query.database(db_name)), Ref("databases", db_name))
+
+  def test_index(self):
+    self.assertRaises(BadRequest, lambda: self._q(query.index("index-name")))
+
+    self.assertEqual(self._q(query.index("widgets_by_n")), Ref("indexes/widgets_by_n"))
+
+  def test_class(self):
+    self.assertRaises(BadRequest, lambda: self._q(query.class_expr("class-name")))
+
+    self.assertEqual(self._q(query.class_expr("widgets")), Ref("classes/widgets"))
 
   def test_equals(self):
     self.assertTrue(self._q(query.equals(1, 1, 1)))
