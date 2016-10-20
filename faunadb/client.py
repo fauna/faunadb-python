@@ -11,7 +11,7 @@ from faunadb.request_result import RequestResult
 from faunadb._json import parse_json_or_none, to_json
 
 
-class Client(object):
+class FaunaClient(object):
   """
   Directly communicates with FaunaDB via JSON.
 

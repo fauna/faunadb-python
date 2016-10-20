@@ -10,12 +10,12 @@ from builtins import object, range
 from requests import codes
 
 from faunadb._json import to_json, parse_json
-from faunadb.client import Client
+from faunadb.client import FaunaClient
 from faunadb.objects import Ref
 from faunadb import query
 
 _FAUNA_ROOT_KEY = environ["FAUNA_ROOT_KEY"]
-# If None, these have defaults in Client.
+# If None, these have defaults in FaunaClient.
 _FAUNA_DOMAIN = environ.get("FAUNA_DOMAIN")
 _FAUNA_SCHEME = environ.get("FAUNA_SCHEME")
 _FAUNA_PORT = environ.get("FAUNA_PORT")
@@ -69,7 +69,7 @@ class FaunaTestCase(TestCase):
     args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
     # If None, use default instead
     non_null_args = {k: v for k, v in args.items() if v is not None}
-    return Client(secret=secret, observer=observer, **non_null_args)
+    return FaunaClient(secret=secret, observer=observer, **non_null_args)
 
   def assert_raises(self, exception_class, action):
     """Like self.assertRaises and returns the exception too."""
@@ -79,7 +79,7 @@ class FaunaTestCase(TestCase):
 
 
 def mock_client(response_text, status_code=codes.ok):
-  c = Client()
+  c = FaunaClient()
   c.session = _MockSession(response_text, status_code)
   return c
 

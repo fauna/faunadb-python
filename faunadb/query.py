@@ -1,6 +1,6 @@
 """
 This module contains functions that generate query objects,
-suitable to be passed into :any:`Client.query`.
+suitable to be passed into :any:`FaunaClient.query`.
 
 In addition to these functions, queries may contain:
 
