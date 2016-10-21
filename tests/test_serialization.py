@@ -3,7 +3,7 @@ from datetime import datetime
 import iso8601
 
 from faunadb import query
-from faunadb.objects import Ref, SetRef, FaunaTime
+from faunadb.objects import Ref, SetRef
 from faunadb._json import to_json
 
 class SerializationTest(TestCase):
@@ -17,8 +17,8 @@ class SerializationTest(TestCase):
                     '{"@set":{"match":{"@ref":"indexes/widgets"},"terms":"Laptop"}}')
 
   def test_fauna_time(self):
-    self.assertJson(FaunaTime('1970-01-01T00:00:00.123456789Z'),
-                    '{"@ts":"1970-01-01T00:00:00.123456789Z"}')
+    self.assertJson(iso8601.parse_date('1970-01-01T00:00:00.123456Z'),
+                    '{"@ts":"1970-01-01T00:00:00.123456Z"}')
     self.assertJson(datetime.fromtimestamp(0, iso8601.UTC),
                     '{"@ts":"1970-01-01T00:00:00Z"}')
 
