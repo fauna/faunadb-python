@@ -6,10 +6,11 @@ from faunadb import query
 from tests.helpers import FaunaTestCase
 
 class ObjectsTest(FaunaTestCase):
-  def setUp(self):
-    super(ObjectsTest, self).setUp()
-    self.ref = Ref("classes", "frogs", "123")
-    self.json_ref = '{"@ref":"classes/frogs/123"}'
+  @classmethod
+  def setUpClass(cls):
+    super(ObjectsTest, cls).setUpClass()
+    cls.ref = Ref("classes", "frogs", "123")
+    cls.json_ref = '{"@ref":"classes/frogs/123"}'
 
   def test_obj(self):
     self.assertParseJson({"a": 1, "b": 2}, '{"@obj": {"a": 1, "b": 2}}')
