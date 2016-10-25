@@ -32,23 +32,19 @@ class QueryTest(FaunaTestCase):
       "values": [{"field": ["data", "z"]}]
     }))["ref"]
 
-    cls._wait_index(cls.m_index_ref)
-    cls._wait_index(cls.n_index_ref)
-    cls._wait_index(cls.z_index_ref)
+    cls._wait_for_index(cls.m_index_ref, cls.n_index_ref, cls.z_index_ref)
 
   #region Helpers
 
   @classmethod
-  def _wait_index(cls, ref):
-    while not cls._q(query.get(ref))["active"]:
-      sleep(0.2)
+  def _wait_for_index(cls, *refs):
+    expr = query.map_expr(lambda ref: query.select(["active"], query.get(ref)), refs)
+    while not all(active for active in cls._q(expr)):
+      sleep(1)
 
   @classmethod
-  def _create(cls, n=0, **kv):
-    data = {"n": n}
-
-    for k,v in kv.items():
-      data[k] = v
+  def _create(cls, n=0, **data):
+    data["n"] = n
 
     return cls._q(query.create(cls.class_ref, {"data": data}))
 
