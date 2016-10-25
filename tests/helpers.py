@@ -21,33 +21,35 @@ _FAUNA_SCHEME = environ.get("FAUNA_SCHEME")
 _FAUNA_PORT = environ.get("FAUNA_PORT")
 
 class FaunaTestCase(TestCase):
-  def setUp(self):
-    super(FaunaTestCase, self).setUp()
+  @classmethod
+  def setUpClass(cls):
+    super(FaunaTestCase, cls).setUpClass()
 
     # Turn off annoying logging about reset connections.
     getLogger("requests").setLevel(WARNING)
 
-    self.root_client = self.get_client(secret=_FAUNA_ROOT_KEY)
+    cls.root_client = cls.get_client(secret=_FAUNA_ROOT_KEY)
 
     rnd = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
     db_name = "faunadb-python-test" + rnd
-    self.db_ref = Ref("databases", db_name)
+    cls.db_ref = Ref("databases", db_name)
 
-    if self.root_client.query(query.exists(self.db_ref)):
-      self.root_client.query(query.delete(self.db_ref))
+    if cls.root_client.query(query.exists(cls.db_ref)):
+      cls.root_client.query(query.delete(cls.db_ref))
 
-    self.root_client.query(query.create(Ref("databases"), {"name": db_name}))
+    cls.root_client.query(query.create(Ref("databases"), {"name": db_name}))
 
-    self.server_key = self.root_client.query(
-      query.create(Ref("keys"), {"database": self.db_ref, "role": "server"}))["secret"]
-    self.client = self.get_client()
+    cls.server_key = cls.root_client.query(
+      query.create(Ref("keys"), {"database": cls.db_ref, "role": "server"}))["secret"]
+    cls.client = cls.get_client()
 
-    self.admin_key = self.root_client.query(
-      query.create(Ref("keys"), {"database": self.db_ref, "role": "admin"}))["secret"]
-    self.admin_client = self.get_client(secret=self.admin_key)
+    cls.admin_key = cls.root_client.query(
+      query.create(Ref("keys"), {"database": cls.db_ref, "role": "admin"}))["secret"]
+    cls.admin_client = cls.get_client(secret=cls.admin_key)
 
-  def tearDown(self):
-    self.root_client.query(query.delete(self.db_ref))
+  @classmethod
+  def tearDownClass(cls):
+    cls.root_client.query(query.delete(cls.db_ref))
 
   def assertJson(self, obj, json):
     self.assertToJson(obj, json)
@@ -66,9 +68,10 @@ class FaunaTestCase(TestCase):
       warnings.filterwarnings("ignore", category=DeprecationWarning)
       self.assertRegexpMatches(text, regex, msg=msg)
 
-  def get_client(self, secret=None, observer=None):
+  @classmethod
+  def get_client(cls, secret=None, observer=None):
     if secret is None:
-      secret = self.server_key
+      secret = cls.server_key
 
     args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
     # If None, use default instead

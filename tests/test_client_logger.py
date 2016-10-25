@@ -6,9 +6,10 @@ from faunadb.query import create
 from tests.helpers import FaunaTestCase
 
 class ClientLoggerTest(FaunaTestCase):
-  def setUp(self):
-    super(ClientLoggerTest, self).setUp()
-    self.class_ref = self.client.query(create(Ref("classes"), {"name": "logging_tests"}))["ref"]
+  @classmethod
+  def setUpClass(cls):
+    super(ClientLoggerTest, cls).setUpClass()
+    cls.class_ref = cls.client.query(create(Ref("classes"), {"name": "logging_tests"}))["ref"]
 
   def test_logging(self):
     logged = self.get_logged(lambda client: client.ping())

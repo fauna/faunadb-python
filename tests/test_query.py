@@ -1,5 +1,6 @@
 from __future__ import division
 from datetime import date
+from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
 from faunadb.objects import FaunaTime, Ref, SetRef
@@ -7,50 +8,53 @@ from faunadb import query
 from tests.helpers import FaunaTestCase
 
 class QueryTest(FaunaTestCase):
-  def setUp(self):
-    super(QueryTest, self).setUp()
+  @classmethod
+  def setUpClass(cls):
+    super(QueryTest, cls).setUpClass()
 
-    self.class_ref = self.client.query(query.create(Ref("classes"), {"name": "widgets"}))["ref"]
+    cls.class_ref = cls.client.query(query.create(Ref("classes"), {"name": "widgets"}))["ref"]
 
-    self.n_index_ref = self.client.query(query.create(Ref("indexes"), {
+    cls.n_index_ref = cls.client.query(query.create(Ref("indexes"), {
       "name": "widgets_by_n",
-      "source": self.class_ref,
+      "source": cls.class_ref,
       "terms": [{"field": ["data", "n"]}]
     }))["ref"]
 
-    self.m_index_ref = self.client.query(query.create(Ref("indexes"), {
+    cls.m_index_ref = cls.client.query(query.create(Ref("indexes"), {
       "name": "widgets_by_m",
-      "source": self.class_ref,
+      "source": cls.class_ref,
       "terms": [{"field": ["data", "m"]}]
     }))["ref"]
 
-    self.ref_n1 = self._create(n=1)["ref"]
-    self.ref_m1 = self._create(m=1)["ref"]
-    self.ref_n1m1 = self._create(n=1, m=1)["ref"]
+    cls.z_index_ref = cls._q(query.create_index({
+      "name": "widgets_by_z",
+      "source": cls.class_ref,
+      "values": [{"field": ["data", "z"]}]
+    }))["ref"]
 
-    thimble_class = self.client.query(query.create(Ref("classes"), {"name": "thimbles"}))
-    self.thimble_class_ref = thimble_class["ref"]
+    cls._wait_for_index(cls.m_index_ref, cls.n_index_ref, cls.z_index_ref)
 
   #region Helpers
 
-  def _set_n(self, n):
-    return query.match(self.n_index_ref, n)
+  @classmethod
+  def _wait_for_index(cls, *refs):
+    expr = query.map_expr(lambda ref: query.select(["active"], query.get(ref)), refs)
+    while not all(active for active in cls._q(expr)):
+      sleep(1)
 
-  def _set_m(self, m):
-    return query.match(self.m_index_ref, m)
+  @classmethod
+  def _create(cls, n=0, **data):
+    data["n"] = n
 
-  def _create(self, n=0, m=None):
-    data = {"n": n} if m is None else {"n": n, "m": m}
-    return self._q(query.create(self.class_ref, {"data": data}))
+    return cls._q(query.create(cls.class_ref, {"data": data}))
 
-  def _create_thimble(self, data):
-    return self._q(query.create(self.thimble_class_ref, {"data": data}))
+  @classmethod
+  def _q(cls, query_json):
+    return cls.client.query(query_json)
 
-  def _q(self, query_json):
-    return self.client.query(query_json)
-
-  def _set_to_list(self, _set):
-    return self._q(query.paginate(_set, size=1000))["data"]
+  @classmethod
+  def _set_to_list(cls, _set):
+    return cls._q(query.paginate(_set, size=1000))["data"]
 
   def _assert_bad_query(self, q):
     self.assertRaises(BadRequest, lambda: self._q(q))
@@ -70,7 +74,6 @@ class QueryTest(FaunaTestCase):
     ref = self._create()["ref"]
     self.assertEqual(self._q(query.do(query.delete(ref), 1)), 1)
     self.assertFalse(self._q(query.exists(ref)))
-
 
   def test_lambda_query(self):
     expr = query.map_expr(query.lambda_query(lambda a: query.add(a, 1)),
@@ -93,9 +96,13 @@ class QueryTest(FaunaTestCase):
       self._q(query.map_expr(lambda a: query.multiply(2, a), [1, 2, 3])),
       [2, 4, 6])
 
-    page = query.paginate(self._set_n(1))
+    self._create(n=10)
+    self._create(n=10)
+    self._create(n=10)
+
+    page = query.paginate(query.match(self.n_index_ref, 10))
     ns = query.map_expr(lambda a: query.select(["data", "n"], query.get(a)), page)
-    self.assertEqual(self._q(ns), {"data": [1, 1]})
+    self.assertEqual(self._q(ns), {"data": [10, 10, 10]})
 
   def test_foreach(self):
     refs = [self._create()["ref"], self._create()["ref"]]
@@ -108,9 +115,13 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(evens), [2, 4])
 
     # Works on page too
-    page = query.paginate(self._set_n(1))
+    ref = self._create(n=11, m=12)["ref"]
+    self._create(n=11)
+    self._create(n=11)
+
+    page = query.paginate(query.match(self.n_index_ref, 11))
     refs_with_m = query.filter_expr(lambda a: query.contains(["data", "m"], query.get(a)), page)
-    self.assertEqual(self._q(refs_with_m), {"data": [self.ref_n1m1]})
+    self.assertEqual(self._q(refs_with_m), {"data": [ref]})
 
   def test_take(self):
     self.assertEqual(self._q(query.take(1, [1, 2])), [1])
@@ -137,21 +148,25 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.get(instance["ref"])), instance)
 
   def test_paginate(self):
-    test_set = self._set_n(1)
-    control = [self.ref_n1, self.ref_n1m1]
-    self.assertEqual(self._q(query.paginate(test_set)), {"data": control})
+    n_value = 200
+
+    refs = [self._create(n=n_value)["ref"], self._create(n=n_value)["ref"], self._create(n=n_value)["ref"]]
+
+    test_set = query.match(self.n_index_ref, n_value)
+    self.assertEqual(self._q(query.paginate(test_set)), {"data": refs})
 
     data = []
     page1 = self._q(query.paginate(test_set, size=1))
     data.extend(page1["data"])
     page2 = self._q(query.paginate(test_set, size=1, after=page1["after"]))
     data.extend(page2["data"])
-    self.assertEqual(data, control)
+    self.assertEqual(data, [refs[0], refs[1]])
 
     self.assertEqual(self._q(query.paginate(test_set, sources=True)), {
       "data": [
-        {"sources": [SetRef(test_set)], "value": self.ref_n1},
-        {"sources": [SetRef(test_set)], "value": self.ref_n1m1}
+        {"sources": [SetRef(test_set)], "value": refs[0]},
+        {"sources": [SetRef(test_set)], "value": refs[1]},
+        {"sources": [SetRef(test_set)], "value": refs[2]}
       ]
     })
 
@@ -164,7 +179,7 @@ class QueryTest(FaunaTestCase):
   def test_count(self):
     self._create(123)
     self._create(123)
-    instances = self._set_n(123)
+    instances = query.match(self.n_index_ref, 123)
     # `count` is currently only approximate. Should be 2.
     self.assertIsInstance(self._q(query.count(instances)), int)
 
@@ -194,25 +209,25 @@ class QueryTest(FaunaTestCase):
     self.assertFalse(self._q(query.exists(ref)))
 
   def test_insert(self):
-    instance = self._create_thimble({"weight": 1})
+    instance = self._create(n=1)
     ref = instance["ref"]
     ts = instance["ts"]
     prev_ts = ts - 1
 
     # Add previous event
-    inserted = {"data": {"weight": 0}}
+    inserted = {"data": {"n": 0}}
     self._q(query.insert(ref, prev_ts, "create", inserted))
 
     # Get version from previous event
     old = self._q(query.get(ref, ts=prev_ts))
-    self.assertEqual(old["data"], {"weight": 0})
+    self.assertEqual(old["data"], {"n": 0})
 
   def test_remove(self):
-    instance = self._create_thimble({"weight": 0})
+    instance = self._create(n=0)
     ref = instance["ref"]
 
     # Change it
-    new_instance = self._q(query.replace(ref, {"data": {"weight": 1}}))
+    new_instance = self._q(query.replace(ref, {"data": {"n": 1}}))
     self.assertEqual(self._q(query.get(ref)), new_instance)
 
     # Delete that event
@@ -239,10 +254,10 @@ class QueryTest(FaunaTestCase):
     self.assertTrue(self._q(query.exists(Ref("indexes/index_for_test"))))
 
   def test_create_key(self):
-    self.admin_client.query(query.create_database({"name": "database_for_test"}))
+    self.admin_client.query(query.create_database({"name": "database_for_key_test"}))
 
     resource = self.admin_client.query(query.create_key({
-      "database": Ref("databases/database_for_test"),
+      "database": Ref("databases/database_for_key_test"),
       "role": "server"}))
 
     new_client = self.get_client(secret=resource["secret"])
@@ -256,48 +271,66 @@ class QueryTest(FaunaTestCase):
   #region Sets
 
   def test_match(self):
-    q = self._set_n(1)
-    self.assertEqual(self._set_to_list(q), [self.ref_n1, self.ref_n1m1])
+    n_value = 100
+    m_value = 200
+    ref_n = self._create(n=n_value)["ref"]
+    ref_m = self._create(m=m_value)["ref"]
+    ref_nm = self._create(n=n_value, m=m_value)["ref"]
+
+    q = query.match(self.n_index_ref, n_value)
+    self.assertEqual(self._set_to_list(q), [ref_n, ref_nm])
 
   def test_union(self):
-    q = query.union(self._set_n(1), self._set_m(1))
-    self.assertEqual(self._set_to_list(q), [self.ref_n1, self.ref_m1, self.ref_n1m1])
+    n_value = 101
+    m_value = 201
+    ref_n = self._create(n=n_value)["ref"]
+    ref_m = self._create(m=m_value)["ref"]
+    ref_nm = self._create(n=n_value, m=m_value)["ref"]
+
+    q = query.union(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    self.assertEqual(self._set_to_list(q), [ref_n, ref_m, ref_nm])
 
   def test_intersection(self):
-    q = query.intersection(self._set_n(1), self._set_m(1))
-    self.assertEqual(self._set_to_list(q), [self.ref_n1m1])
+    n_value = 102
+    m_value = 202
+    ref_n = self._create(n=n_value)["ref"]
+    ref_m = self._create(m=m_value)["ref"]
+    ref_nm = self._create(n=n_value, m=m_value)["ref"]
+
+    q = query.intersection(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    self.assertEqual(self._set_to_list(q), [ref_nm])
 
   def test_difference(self):
-    q = query.difference(self._set_n(1), self._set_m(1))
-    self.assertEqual(self._set_to_list(q), [self.ref_n1]) # but not self.ref_n1m1
+    n_value = 103
+    m_value = 203
+    ref_n = self._create(n=n_value)["ref"]
+    ref_m = self._create(m=m_value)["ref"]
+    ref_nm = self._create(n=n_value, m=m_value)["ref"]
+
+    q = query.difference(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    self.assertEqual(self._set_to_list(q), [ref_n]) # but not ref_nm
 
   def test_distinct(self):
-    thimble_index = self._q(query.create_index({
-      "name": "thimble_name",
-      "source": self.thimble_class_ref,
-      "values": [{"field": ["data", "name"]}]}))
-    thimble_index_ref = thimble_index["ref"]
+    self._create(z=0)
+    self._create(z=0)
+    self._create(z=1)
+    self._create(z=1)
+    self._create(z=1)
 
-    self._create_thimble({"name": "Golden Thimble"})
-    self._create_thimble({"name": "Golden Thimble"})
-    self._create_thimble({"name": "Golden Thimble"})
-    self._create_thimble({"name": "Silver Thimble"})
-    self._create_thimble({"name": "Copper Thimble"})
+    distinct = query.distinct(query.match(self.z_index_ref))
 
-    thimbles = query.distinct(query.match(thimble_index_ref))
-
-    self.assertEqual(self._set_to_list(thimbles), ["Copper Thimble", "Golden Thimble", "Silver Thimble"])
+    self.assertEqual(self._set_to_list(distinct), [0, 1])
 
   def test_join(self):
-    referenced = [self._create(n=12)["ref"], self._create(n=12)["ref"]]
-    referencers = [self._create(m=referenced[0])["ref"], self._create(m=referenced[1])["ref"]]
+    join_refs = [self._create(n=12)["ref"], self._create(n=12)["ref"]]
+    assoc_refs = [self._create(m=ref)["ref"] for ref in join_refs]
 
-    source = self._set_n(12)
-    self.assertEqual(self._set_to_list(source), referenced)
+    source = query.match(self.n_index_ref, 12)
+    self.assertEqual(self._set_to_list(source), join_refs)
 
     # For each obj with n=12, get the set of elements whose data.m refers to it.
     joined = query.join(source, lambda a: query.match(self.m_index_ref, a))
-    self.assertEqual(self._set_to_list(joined), referencers)
+    self.assertEqual(self._set_to_list(joined), assoc_refs)
 
   #endregion
 
