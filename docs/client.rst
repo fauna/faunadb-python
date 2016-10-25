@@ -1,5 +1,5 @@
-Client
+FaunaClient
 ======
 
-.. autoclass:: faunadb.client.Client
+.. autoclass:: faunadb.client.FaunaClient
    :members:
