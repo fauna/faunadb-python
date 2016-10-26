@@ -105,11 +105,6 @@ class SerializationTest(TestCase):
     self.assertJson(query.exists(Ref("classes/widget"), ts=123),
                     '{"exists":{"@ref":"classes/widget"},"ts":123}')
 
-  def test_count(self):
-    self.assertJson(query.count(Ref("classes/widget")), '{"count":{"@ref":"classes/widget"}}')
-    self.assertJson(query.count(Ref("classes/widget"), events=True),
-                    '{"count":{"@ref":"classes/widget"},"events":true}')
-
   #endregion
 
   #region Write functions

@@ -147,11 +147,6 @@ def exists(ref, ts=None):
   """See the `docs <https://fauna.com/documentation/queries#read_functions>`__."""
   return _params({"exists": ref}, {"ts": ts})
 
-
-def count(set, events=None):
-  """See the `docs <https://fauna.com/documentation/queries#read_functions>`__."""
-  return _params({"count": set}, {"events": events})
-
 #endregion
 
 #region Write functions
