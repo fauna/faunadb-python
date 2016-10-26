@@ -150,7 +150,11 @@ class QueryTest(FaunaTestCase):
   def test_paginate(self):
     n_value = 200
 
-    refs = [self._create(n=n_value)["ref"], self._create(n=n_value)["ref"], self._create(n=n_value)["ref"]]
+    refs = [
+      self._create(n=n_value)["ref"],
+      self._create(n=n_value)["ref"],
+      self._create(n=n_value)["ref"]
+    ]
 
     test_set = query.match(self.n_index_ref, n_value)
     self.assertEqual(self._q(query.paginate(test_set)), {"data": refs})
@@ -267,8 +271,8 @@ class QueryTest(FaunaTestCase):
     n_value = 100
     m_value = 200
     ref_n = self._create(n=n_value)["ref"]
-    ref_m = self._create(m=m_value)["ref"]
     ref_nm = self._create(n=n_value, m=m_value)["ref"]
+    self._create(m=m_value)
 
     q = query.match(self.n_index_ref, n_value)
     self.assertEqual(self._set_to_list(q), [ref_n, ref_nm])
@@ -280,27 +284,30 @@ class QueryTest(FaunaTestCase):
     ref_m = self._create(m=m_value)["ref"]
     ref_nm = self._create(n=n_value, m=m_value)["ref"]
 
-    q = query.union(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    q = query.union(query.match(self.n_index_ref, n_value),
+                    query.match(self.m_index_ref, m_value))
     self.assertEqual(self._set_to_list(q), [ref_n, ref_m, ref_nm])
 
   def test_intersection(self):
     n_value = 102
     m_value = 202
-    ref_n = self._create(n=n_value)["ref"]
-    ref_m = self._create(m=m_value)["ref"]
     ref_nm = self._create(n=n_value, m=m_value)["ref"]
+    self._create(n=n_value)
+    self._create(m=m_value)
 
-    q = query.intersection(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    q = query.intersection(query.match(self.n_index_ref, n_value),
+                           query.match(self.m_index_ref, m_value))
     self.assertEqual(self._set_to_list(q), [ref_nm])
 
   def test_difference(self):
     n_value = 103
     m_value = 203
     ref_n = self._create(n=n_value)["ref"]
-    ref_m = self._create(m=m_value)["ref"]
-    ref_nm = self._create(n=n_value, m=m_value)["ref"]
+    self._create(m=m_value)
+    self._create(n=n_value, m=m_value)
 
-    q = query.difference(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    q = query.difference(query.match(self.n_index_ref, n_value),
+                         query.match(self.m_index_ref, m_value))
     self.assertEqual(self._set_to_list(q), [ref_n]) # but not ref_nm
 
   def test_distinct(self):
