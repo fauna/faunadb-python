@@ -1,4 +1,3 @@
-from faunadb.client import Client
 from faunadb.objects import Ref
 from faunadb.query import create
 from tests.helpers import FaunaTestCase

@@ -1,6 +1,6 @@
 """
 This module contains functions that generate query objects,
-suitable to be passed into :any:`Client.query`.
+suitable to be passed into :any:`FaunaClient.query`.
 
 In addition to these functions, queries may contain:
 
@@ -9,7 +9,7 @@ In addition to these functions, queries may contain:
 * Strings (``"foo"``)
 * Lists (``[1, "foo"]``)
 * Dicts (``{"foo": "bar"}``)
-* A :any:`Ref`, :any:`Set`, :any:`FaunaTime`, or :class:`datetime.date`.
+* A :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, or :class:`datetime.date`.
 
 For example: ``select("a", {"a": Ref("widgets", 123)})``.
 """
@@ -52,7 +52,7 @@ def lambda_query(func):
       # }
 
   You usually don't need to call this directly as lambdas in queries will be converted for you.
-  For example: ``query.map(lambda a: query.add(a, 1), collection)``.
+  For example: ``query.map_expr(lambda a: query.add(a, 1), collection)``.
 
   You can also use :any:`lambda_expr` directly.
 

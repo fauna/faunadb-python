@@ -15,7 +15,7 @@ class RequestResult(object):
     self.path = path
     """Path that was queried. Relative to client's domain."""
     self.query = query
-    """URL query. ``None`` unless ``method == GET``. *Not* related to :any:`Client.query`."""
+    """URL query. ``None`` unless ``method == GET``. *Not* related to :any:`FaunaClient.query`."""
     self.request_content = request_content
     """Request data."""
     self.response_raw = response_raw

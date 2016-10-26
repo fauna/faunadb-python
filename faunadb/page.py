@@ -14,10 +14,7 @@ class Page(object):
 
   def __init__(self, data, before=None, after=None):
     self.data = data
-    """
-    Always a list.
-    Elements could be raw data; some methods (such as :any:`Model.page`) convert data.
-    """
+    """List of elements returned by the query."""
     self.before = before
     """Optional :any:`Ref` for an instance that comes before this page."""
     self.after = after

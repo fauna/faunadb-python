@@ -3,14 +3,14 @@ from faunadb._json import to_json
 
 def logger(logger_func):
   """
-  Function that can be the ``observer`` for a :any:`Client`.
+  Function that can be the ``observer`` for a :any:`FaunaClient`.
   Will call ``logger_func`` on a string representation of each :any:`RequestResult`.
 
   Use it like::
 
     def log(logged):
       print logged
-    client = Client(observer=logger(log), ...)
+    client = FaunaClient(observer=logger(log), ...)
     client.ping() # Calls `log`
 
   :param logger_func: Callback taking a string to be logged.

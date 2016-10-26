@@ -11,7 +11,7 @@ from faunadb.request_result import RequestResult
 from faunadb._json import parse_json_or_none, to_json
 
 
-class Client(object):
+class FaunaClient(object):
   """
   Directly communicates with FaunaDB via JSON.
 
@@ -45,7 +45,6 @@ class Client(object):
       Read timeout in seconds.
     :param secret:
       Auth token for the FaunaDB server.
-      Should resemble "username", "username:password", or ("username", "password").
     :param observer:
       Callback that will be passed a :any:`RequestResult` after every completed request.
     """
@@ -79,7 +78,7 @@ class Client(object):
     """
     Use the FaunaDB query API.
 
-    :param expression: A query. See :doc:query for information on queries.
+    :param expression: A query. See :doc:`query` for information on queries.
     :return: Converted JSON response.
     """
     return self._execute("POST", "", _wrap(expression))
