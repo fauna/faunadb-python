@@ -176,13 +176,6 @@ class QueryTest(FaunaTestCase):
     self._q(query.delete(ref))
     self.assertFalse(self._q(query.exists(ref)))
 
-  def test_count(self):
-    self._create(123)
-    self._create(123)
-    instances = query.match(self.n_index_ref, 123)
-    # `count` is currently only approximate. Should be 2.
-    self.assertIsInstance(self._q(query.count(instances)), int)
-
   #endregion
 
   #region Write functions
