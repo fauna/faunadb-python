@@ -8,6 +8,10 @@ from faunadb.query import create, add, get, var, _Expr
 
 from tests.helpers import FaunaTestCase, mock_client
 
+class TestObj(object):
+  def __str__(self):
+    return "TestObj"
+
 class ErrorsTest(FaunaTestCase):
 
   #region UnexpectedError
@@ -17,6 +21,10 @@ class ErrorsTest(FaunaTestCase):
     rr = err.request_result
     self.assertIsNone(rr.response_content)
     self.assertEqual(rr.response_raw, "I like fine wine")
+
+  def test_json_serialization(self):
+    msg = "Unserializable object TestObj of type <class 'tests.test_errors.TestObj'"
+    self.assertRaisesRegexCompat(UnexpectedError, msg, lambda: self.client.query(TestObj()))
 
   def test_resource_error(self):
     # Response must have "resource"

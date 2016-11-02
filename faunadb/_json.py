@@ -3,6 +3,7 @@ from json import dumps, loads, JSONEncoder
 from iso8601 import parse_date
 
 from faunadb.objects import FaunaTime, Ref, SetRef
+from faunadb.errors import UnexpectedError
 from faunadb.query import _Expr
 
 
@@ -61,4 +62,4 @@ class _FaunaJSONEncoder(JSONEncoder):
     elif isinstance(obj, date):
       return {"@date": obj.isoformat()}
     else:
-      return obj
+      raise UnexpectedError("Unserializable object {} of type {}".format(obj, type(obj)), None)

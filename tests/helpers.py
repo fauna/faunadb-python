@@ -68,6 +68,13 @@ class FaunaTestCase(TestCase):
       warnings.filterwarnings("ignore", category=DeprecationWarning)
       self.assertRegexpMatches(text, regex, msg=msg)
 
+  def assertRaisesRegexCompat(self, exception, regexp, callable, *args, **kwds):
+    # pylint: disable=deprecated-method
+    with warnings.catch_warnings():
+      # Deprecated in 3.x but 2.x does not have it under the new name.
+      warnings.filterwarnings("ignore", category=DeprecationWarning)
+      self.assertRaisesRegexp(exception, regexp, callable, *args, **kwds)
+
   @classmethod
   def get_client(cls, secret=None, observer=None):
     if secret is None:
