@@ -206,6 +206,7 @@ def create_key(key_params):
 
 def match(index, *terms):
   """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
+  # pylint: disable=redefined-outer-name
   m = {"match": index}
 
   if len(terms) >= 1:

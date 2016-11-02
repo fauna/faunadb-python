@@ -52,11 +52,12 @@ class UnexpectedError(FaunaError):
 
 class HttpError(FaunaError):
   def __init__(self, request_result):
-    self.errors = self._get_errors(request_result)
+    self.errors = HttpError._get_errors(request_result)
     """List of all :py:class:`ErrorData` objects sent by the server."""
     super(HttpError, self).__init__(self._get_description(), request_result)
 
-  def _get_errors(self, request_result):
+  @staticmethod
+  def _get_errors(request_result):
     response = request_result.response_content
     errors = _get_or_raise(request_result, response, "errors")
     return [ErrorData.from_dict(error, request_result) for error in errors]

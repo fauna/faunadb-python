@@ -3,7 +3,7 @@ from datetime import date
 from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import FaunaTime, Ref, SetRef
+from faunadb.objects import FaunaTime, Ref, SetRef, _Expr
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -76,6 +76,10 @@ class QueryTest(FaunaTestCase):
     self.assertFalse(self._q(query.exists(ref)))
 
   def test_lambda_query(self):
+    invalid_lambda = lambda: query.add(1, 2)
+    self.assertRaises(ValueError,
+                      lambda: self._q(query.map_expr(query.lambda_query(invalid_lambda), [])))
+
     expr = query.map_expr(query.lambda_query(lambda a: query.add(a, 1)),
                           [1, 2, 3])
     self.assertEqual(self._q(expr), [2, 3, 4])
@@ -150,7 +154,11 @@ class QueryTest(FaunaTestCase):
   def test_paginate(self):
     n_value = 200
 
-    refs = [self._create(n=n_value)["ref"], self._create(n=n_value)["ref"], self._create(n=n_value)["ref"]]
+    refs = [
+      self._create(n=n_value)["ref"],
+      self._create(n=n_value)["ref"],
+      self._create(n=n_value)["ref"]
+    ]
 
     test_set = query.match(self.n_index_ref, n_value)
     self.assertEqual(self._q(query.paginate(test_set)), {"data": refs})
@@ -267,8 +275,8 @@ class QueryTest(FaunaTestCase):
     n_value = 100
     m_value = 200
     ref_n = self._create(n=n_value)["ref"]
-    ref_m = self._create(m=m_value)["ref"]
     ref_nm = self._create(n=n_value, m=m_value)["ref"]
+    self._create(m=m_value)
 
     q = query.match(self.n_index_ref, n_value)
     self.assertEqual(self._set_to_list(q), [ref_n, ref_nm])
@@ -280,27 +288,30 @@ class QueryTest(FaunaTestCase):
     ref_m = self._create(m=m_value)["ref"]
     ref_nm = self._create(n=n_value, m=m_value)["ref"]
 
-    q = query.union(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    q = query.union(query.match(self.n_index_ref, n_value),
+                    query.match(self.m_index_ref, m_value))
     self.assertEqual(self._set_to_list(q), [ref_n, ref_m, ref_nm])
 
   def test_intersection(self):
     n_value = 102
     m_value = 202
-    ref_n = self._create(n=n_value)["ref"]
-    ref_m = self._create(m=m_value)["ref"]
     ref_nm = self._create(n=n_value, m=m_value)["ref"]
+    self._create(n=n_value)
+    self._create(m=m_value)
 
-    q = query.intersection(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    q = query.intersection(query.match(self.n_index_ref, n_value),
+                           query.match(self.m_index_ref, m_value))
     self.assertEqual(self._set_to_list(q), [ref_nm])
 
   def test_difference(self):
     n_value = 103
     m_value = 203
     ref_n = self._create(n=n_value)["ref"]
-    ref_m = self._create(m=m_value)["ref"]
-    ref_nm = self._create(n=n_value, m=m_value)["ref"]
+    self._create(m=m_value)
+    self._create(n=n_value, m=m_value)
 
-    q = query.difference(query.match(self.n_index_ref, n_value), query.match(self.m_index_ref, m_value))
+    q = query.difference(query.match(self.n_index_ref, n_value),
+                         query.match(self.m_index_ref, m_value))
     self.assertEqual(self._set_to_list(q), [ref_n]) # but not ref_nm
 
   def test_distinct(self):
@@ -495,3 +506,14 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.let({"x": [2, 3, 5]}, query.add(query.var("x")))), 10)
 
   #endregion
+
+  def test_equality(self):
+    self.assertEqual(query.var("x"), _Expr({"var": "x"}))
+    self.assertEqual(query.match(Ref("indexes/widgets_by_name"), "computer"),
+                     _Expr({"match": Ref("indexes/widgets_by_name"), "terms": "computer"}))
+
+  def test_repr(self):
+    self.assertRegexCompat(repr(query.var("x")), r"Expr\({u?'var': u?'x'}\)")
+    self.assertRegexCompat(repr(Ref("classes")), r"Ref\(u?'classes'\)")
+    self.assertRegexCompat(repr(SetRef(query.match(Ref("indexes/widgets")))),
+                           r"SetRef\({u?'match': Ref\(u?'indexes/widgets'\)}\)")

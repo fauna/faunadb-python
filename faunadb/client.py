@@ -5,7 +5,6 @@ from builtins import object
 from requests import Request, Session
 
 from faunadb.errors import _get_or_raise, FaunaError, UnexpectedError
-from faunadb.objects import Ref
 from faunadb.query import _wrap
 from faunadb.request_result import RequestResult
 from faunadb._json import parse_json_or_none, to_json
@@ -92,10 +91,6 @@ class FaunaClient(object):
 
   def _execute(self, action, path, data=None, query=None):
     """Performs an HTTP action, logs it, and looks for errors."""
-    # pylint: disable=raising-bad-type
-    if isinstance(path, Ref):
-      path = path.value
-
     if query is not None:
       query = {k: v for k, v in query.items() if v is not None}
 
