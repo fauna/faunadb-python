@@ -28,7 +28,7 @@ class FaunaTestCase(TestCase):
     # Turn off annoying logging about reset connections.
     getLogger("requests").setLevel(WARNING)
 
-    cls.root_client = cls.get_client(secret=_FAUNA_ROOT_KEY)
+    cls.root_client = cls._get_client()
 
     rnd = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
     db_name = "faunadb-python-test" + rnd
@@ -41,11 +41,11 @@ class FaunaTestCase(TestCase):
 
     cls.server_key = cls.root_client.query(
       query.create(Ref("keys"), {"database": cls.db_ref, "role": "server"}))["secret"]
-    cls.client = cls.get_client()
+    cls.client = cls.root_client.new_session_client(secret=cls.server_key)
 
     cls.admin_key = cls.root_client.query(
       query.create(Ref("keys"), {"database": cls.db_ref, "role": "admin"}))["secret"]
-    cls.admin_client = cls.get_client(secret=cls.admin_key)
+    cls.admin_client = cls.root_client.new_session_client(secret=cls.admin_key)
 
   @classmethod
   def tearDownClass(cls):
@@ -76,14 +76,11 @@ class FaunaTestCase(TestCase):
       self.assertRaisesRegexp(exception, regexp, callable, *args, **kwds)
 
   @classmethod
-  def get_client(cls, secret=None, observer=None):
-    if secret is None:
-      secret = cls.server_key
-
+  def _get_client(cls):
     args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
     # If None, use default instead
     non_null_args = {k: v for k, v in args.items() if v is not None}
-    return FaunaClient(secret=secret, observer=observer, **non_null_args)
+    return FaunaClient(secret=_FAUNA_ROOT_KEY, **non_null_args)
 
   def assert_raises(self, exception_class, action):
     """Like self.assertRaises and returns the exception too."""
@@ -93,7 +90,7 @@ class FaunaTestCase(TestCase):
 
 
 def mock_client(response_text, status_code=codes.ok):
-  c = FaunaClient()
+  c = FaunaClient(secret=None)
   c.session = _MockSession(response_text, status_code)
   return c
 
