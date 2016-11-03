@@ -12,25 +12,22 @@ from faunadb.request_result import RequestResult
 from faunadb._json import parse_json_or_none, to_json
 
 class _Counter(object):
-  def __init__(self):
+  def __init__(self, init_value=0):
     self.lock = threading.Lock()
-    self.counter = 0
+    self.counter = init_value
 
   def __str__(self):
     return "Counter(%s)" % self.counter
 
-  def increment(self):
+  def get_and_increment(self):
     with self.lock:
+      counter = self.counter
       self.counter += 1
-      return self.counter
+      return counter
 
   def decrement(self):
     with self.lock:
       self.counter -= 1
-      return self.counter
-
-  def get(self):
-    with self.lock:
       return self.counter
 
 class FaunaClient(object):
@@ -82,7 +79,7 @@ class FaunaClient(object):
 
     if ('session' not in kwargs) or ('counter' not in kwargs):
       self.session = Session()
-      self.counter = _Counter()
+      self.counter = _Counter(1)
 
       self.session.headers.update({
         "Accept-Encoding": "gzip",
@@ -92,8 +89,6 @@ class FaunaClient(object):
     else:
       self.session = kwargs['session']
       self.counter = kwargs['counter']
-
-    self.counter.increment()
 
   def __del__(self):
     # pylint: disable=bare-except
@@ -130,7 +125,7 @@ class FaunaClient(object):
       Callback that will be passed a :any:`RequestResult` after every completed request.
     :return:
     """
-    if self.counter.get() > 0:
+    if self.counter.get_and_increment() > 0:
       return FaunaClient(secret=secret,
                          domain=self.domain,
                          scheme=self.scheme,
