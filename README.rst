@@ -6,10 +6,14 @@ WIP
 
 This driver is under development. Changes may happen until we have an official release
 
-.. image:: https://img.shields.io/travis/faunadb/faunadb-python/master.svg?maxAge=21600 :target: https://travis-ci.org/faunadb/faunadb-python
-.. image:: https://codecov.io/gh/faunadb/faunadb-python/branch/master/graph/badge.svg :target: https://codecov.io/gh/faunadb/faunadb-python
-.. image:: https://img.shields.io/pypi/v/faunadb.svg?maxAge=21600 :target: https://pypi.python.org/pypi/faunadb
-.. image:: https://img.shields.io/badge/license-MPL_2.0-blue.svg?maxAge=2592000 :target: https://raw.githubusercontent.com/faunadb/faunadb-python/master/LICENSE
+.. image:: https://img.shields.io/travis/faunadb/faunadb-python/master.svg?maxAge=21600
+ :target: https://travis-ci.org/faunadb/faunadb-python
+.. image:: https://img.shields.io/codecov/c/github/faunadb/faunadb-python/master.svg?maxAge=21600
+ :target: https://codecov.io/gh/faunadb/faunadb-python
+.. image:: https://img.shields.io/pypi/v/faunadb.svg?maxAge=21600
+ :target: https://pypi.python.org/pypi/faunadb
+.. image:: https://img.shields.io/badge/license-MPL_2.0-blue.svg?maxAge=2592000
+ :target: https://raw.githubusercontent.com/faunadb/faunadb-python/master/LICENSE
 
 Python driver for `FaunaDB <https://fauna.com>`_.
 
