@@ -5,6 +5,7 @@ import threading
 
 from requests import Request, Session
 from requests.auth import HTTPBasicAuth
+from requests.adapters import HTTPAdapter
 
 from faunadb.errors import _get_or_raise, FaunaError, UnexpectedError
 from faunadb.query import _wrap
@@ -53,6 +54,8 @@ class FaunaClient(object):
       port=None,
       timeout=60,
       observer=None,
+      pool_connections=10,
+      pool_maxsize=10,
       **kwargs):
     """
     :param secret:
@@ -67,6 +70,10 @@ class FaunaClient(object):
       Read timeout in seconds.
     :param observer:
       Callback that will be passed a :any:`RequestResult` after every completed request.
+    :param pool_connections:
+      The number of connection pools to cache.
+    :param pool_maxsize:
+      The maximum number of connections to save in the pool.
     """
 
     self.domain = domain
@@ -77,8 +84,15 @@ class FaunaClient(object):
     self.base_url = "%s://%s:%s" % (self.scheme, self.domain, self.port)
     self.observer = observer
 
+    self.pool_connections = pool_connections
+    self.pool_maxsize = pool_maxsize
+
     if ('session' not in kwargs) or ('counter' not in kwargs):
       self.session = Session()
+      self.session.mount('https://', HTTPAdapter(pool_connections=pool_connections,
+                                                 pool_maxsize=pool_maxsize))
+      self.session.mount('http://', HTTPAdapter(pool_connections=pool_connections,
+                                                pool_maxsize=pool_maxsize))
       self.counter = _Counter(1)
 
       self.session.headers.update({
@@ -133,7 +147,9 @@ class FaunaClient(object):
                          timeout=self.session.timeout,
                          observer=observer or self.observer,
                          session=self.session,
-                         counter=self.counter)
+                         counter=self.counter,
+                         pool_connections=self.pool_connections,
+                         pool_maxsize=self.pool_maxsize)
     else:
       raise UnexpectedError("Cannnot create a session client from a closed session", None)
 
