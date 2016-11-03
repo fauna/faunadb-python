@@ -8,7 +8,7 @@ This driver is under development. Changes may happen until we have an official r
 
 .. image:: https://img.shields.io/travis/faunadb/faunadb-python/master.svg?maxAge=21600
  :target: https://travis-ci.org/faunadb/faunadb-python
-.. image:: https://img.shields.io/codecov/c/github/faunadb/faunadb-python/master.svg?maxAge=3600
+.. image:: https://img.shields.io/codecov/c/github/faunadb/faunadb-python/master.svg?maxAge=21600
  :target: https://codecov.io/gh/faunadb/faunadb-python
 .. image:: https://img.shields.io/pypi/v/faunadb.svg?maxAge=21600
  :target: https://pypi.python.org/pypi/faunadb
