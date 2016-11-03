@@ -105,12 +105,8 @@ class FaunaClient(object):
       self.counter = kwargs['counter']
 
   def __del__(self):
-    # pylint: disable=bare-except
     if self.counter.decrement() == 0:
-      try:
-        self.session.close()
-      except:
-        pass
+      self.session.close()
 
   def query(self, expression):
     """
