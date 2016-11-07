@@ -1,14 +1,35 @@
 from time import time
 # pylint: disable=redefined-builtin
 from builtins import object
+import threading
 
 from requests import Request, Session
+from requests.auth import HTTPBasicAuth
+from requests.adapters import HTTPAdapter
 
 from faunadb.errors import _get_or_raise, FaunaError, UnexpectedError
 from faunadb.query import _wrap
 from faunadb.request_result import RequestResult
 from faunadb._json import parse_json_or_none, to_json
 
+class _Counter(object):
+  def __init__(self, init_value=0):
+    self.lock = threading.Lock()
+    self.counter = init_value
+
+  def __str__(self):
+    return "Counter(%s)" % self.counter
+
+  def get_and_increment(self):
+    with self.lock:
+      counter = self.counter
+      self.counter += 1
+      return counter
+
+  def decrement(self):
+    with self.lock:
+      self.counter -= 1
+      return self.counter
 
 class FaunaClient(object):
   """
@@ -27,13 +48,18 @@ class FaunaClient(object):
   # pylint: disable=too-many-arguments, too-many-instance-attributes
   def __init__(
       self,
+      secret,
       domain="rest.faunadb.com",
       scheme="https",
       port=None,
       timeout=60,
-      secret=None,
-      observer=None):
+      observer=None,
+      pool_connections=10,
+      pool_maxsize=10,
+      **kwargs):
     """
+    :param secret:
+      Auth token for the FaunaDB server.
     :param domain:
       Base URL for the FaunaDB server.
     :param scheme:
@@ -42,36 +68,45 @@ class FaunaClient(object):
       Port of the FaunaDB server.
     :param timeout:
       Read timeout in seconds.
-    :param secret:
-      Auth token for the FaunaDB server.
     :param observer:
       Callback that will be passed a :any:`RequestResult` after every completed request.
+    :param pool_connections:
+      The number of connection pools to cache.
+    :param pool_maxsize:
+      The maximum number of connections to save in the pool.
     """
 
     self.domain = domain
     self.scheme = scheme
     self.port = (443 if scheme == "https" else 80) if port is None else port
 
-    self.session = Session()
-    if secret is not None:
-      self.session.auth = (secret, "")
-
-    self.session.headers.update({
-      "Accept-Encoding": "gzip",
-      "Content-Type": "application/json;charset=utf-8"
-    })
-    self.session.timeout = timeout
-
+    self.auth = HTTPBasicAuth(secret, "")
     self.base_url = "%s://%s:%s" % (self.scheme, self.domain, self.port)
-
     self.observer = observer
 
+    self.pool_connections = pool_connections
+    self.pool_maxsize = pool_maxsize
+
+    if ('session' not in kwargs) or ('counter' not in kwargs):
+      self.session = Session()
+      self.session.mount('https://', HTTPAdapter(pool_connections=pool_connections,
+                                                 pool_maxsize=pool_maxsize))
+      self.session.mount('http://', HTTPAdapter(pool_connections=pool_connections,
+                                                pool_maxsize=pool_maxsize))
+      self.counter = _Counter(1)
+
+      self.session.headers.update({
+        "Accept-Encoding": "gzip",
+        "Content-Type": "application/json;charset=utf-8"
+      })
+      self.session.timeout = timeout
+    else:
+      self.session = kwargs['session']
+      self.counter = kwargs['counter']
+
   def __del__(self):
-    # pylint: disable=bare-except
-    try:
+    if self.counter.decrement() == 0:
       self.session.close()
-    except:
-      pass
 
   def query(self, expression):
     """
@@ -88,6 +123,31 @@ class FaunaClient(object):
     See the `docs <https://fauna.com/documentation/rest#other>`__.
     """
     return self._execute("GET", "ping", query={"scope": scope, "timeout": timeout})
+
+  def new_session_client(self, secret, observer=None):
+    """
+    Create a new client from the existing config with a given secret.
+    The returned client share its parent underlying resources.
+
+    :param secret:
+      Credentials to use when sending requests.
+    :param observer:
+      Callback that will be passed a :any:`RequestResult` after every completed request.
+    :return:
+    """
+    if self.counter.get_and_increment() > 0:
+      return FaunaClient(secret=secret,
+                         domain=self.domain,
+                         scheme=self.scheme,
+                         port=self.port,
+                         timeout=self.session.timeout,
+                         observer=observer or self.observer,
+                         session=self.session,
+                         counter=self.counter,
+                         pool_connections=self.pool_connections,
+                         pool_maxsize=self.pool_maxsize)
+    else:
+      raise UnexpectedError("Cannnot create a session client from a closed session", None)
 
   def _execute(self, action, path, data=None, query=None):
     """Performs an HTTP action, logs it, and looks for errors."""
@@ -118,5 +178,5 @@ class FaunaClient(object):
   def _perform_request(self, action, path, data, query):
     """Performs an HTTP action."""
     url = self.base_url + "/" + path
-    req = Request(action, url, params=query, data=to_json(data))
+    req = Request(action, url, params=query, data=to_json(data), auth=self.auth)
     return self.session.send(self.session.prepare_request(req))

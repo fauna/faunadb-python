@@ -36,13 +36,13 @@ class ErrorsTest(FaunaTestCase):
 
   #region FaunaError
   def test_unauthorized(self):
-    client = self.get_client(secret="bad_key")
+    client = self.root_client.new_session_client(secret="bad_key")
     self._assert_http_error(
       lambda: client.query(get(self.db_ref)), Unauthorized, "unauthorized")
 
   def test_permission_denied(self):
     # Create client with client key
-    client = self.get_client(
+    client = self.root_client.new_session_client(
       secret=self.root_client.query(
         create(Ref("keys"), {"database": self.db_ref, "role": "client"}))["secret"]
     )

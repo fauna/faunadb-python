@@ -261,7 +261,7 @@ class QueryTest(FaunaTestCase):
       "database": Ref("databases/database_for_key_test"),
       "role": "server"}))
 
-    new_client = self.get_client(secret=resource["secret"])
+    new_client = self.admin_client.new_session_client(secret=resource["secret"])
 
     new_client.query(query.create_class({"name": "class_for_test"}))
 
@@ -345,7 +345,7 @@ class QueryTest(FaunaTestCase):
       query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     secret = self.client.query(
       query.login(instance_ref, {"password": "sekrit"}))["secret"]
-    instance_client = self.get_client(secret=secret)
+    instance_client = self.client.new_session_client(secret=secret)
 
     self.assertEqual(instance_client.query(
       query.select("ref", query.get(Ref("classes/widgets/self")))), instance_ref)
