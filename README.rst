@@ -40,7 +40,7 @@ The following versions of Python are supported:
 Documentation
 -------------
 
-Driver documentation is available at http://pythonhosted.org/faunadb/.
+Driver documentation is available at https://pythonhosted.org/faunadb/.
 
 See the `FaunaDB Documentation <https://fauna.com/documentation>`_ for a complete API reference, or look in `tests`_
 for more examples.
