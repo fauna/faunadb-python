@@ -1,11 +1,6 @@
 FaunaDB Python
 ==============
 
-WIP
----
-
-This driver is under development. Changes may happen until we have an official release
-
 .. image:: https://img.shields.io/travis/faunadb/faunadb-python/master.svg?maxAge=21600
  :target: https://travis-ci.org/faunadb/faunadb-python
 .. image:: https://img.shields.io/codecov/c/github/faunadb/faunadb-python/master.svg?maxAge=21600
