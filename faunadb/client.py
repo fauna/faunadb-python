@@ -49,7 +49,7 @@ class FaunaClient(object):
   def __init__(
       self,
       secret,
-      domain="rest.faunadb.com",
+      domain="db.fauna.com",
       scheme="https",
       port=None,
       timeout=60,
