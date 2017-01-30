@@ -125,6 +125,11 @@ def get(ref, ts=None):
   return _params({"get": ref}, {"ts": ts})
 
 
+def key_from_secret(secret):
+  """See the `docs <https://fauna.com/documentation/queries#read_functions>`__."""
+  return _fn({"key_from_secret": secret})
+
+
 def paginate(
     set, size=None, ts=None, after=None, before=None, events=None, sources=None):
   """
