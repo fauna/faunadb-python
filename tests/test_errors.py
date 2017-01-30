@@ -23,7 +23,7 @@ class ErrorsTest(FaunaTestCase):
     self.assertEqual(rr.response_raw, "I like fine wine")
 
   def test_json_serialization(self):
-    msg = "Unserializable object TestObj of type <class 'tests.test_errors.TestObj'"
+    msg = r"Unserializable object TestObj of type <class '(tests\.)?test_errors\.TestObj'>"
     self.assertRaisesRegexCompat(UnexpectedError, msg, lambda: self.client.query(TestObj()))
 
   def test_resource_error(self):
