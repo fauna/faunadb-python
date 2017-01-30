@@ -151,6 +151,14 @@ class QueryTest(FaunaTestCase):
     instance = self._create()
     self.assertEqual(self._q(query.get(instance["ref"])), instance)
 
+  def test_key_from_secret(self):
+    db_ref = self.admin_client.query(query.create_database({"name": "database_for_key_from_secret_test"}))["ref"]
+    key = self.admin_client.query(query.create_key({
+      "database": db_ref,
+      "role": "server"}))
+
+    self.assertEqual(self.admin_client.query(query.key_from_secret(key["secret"]))["ref"], key["ref"])
+
   def test_paginate(self):
     n_value = 200
 
