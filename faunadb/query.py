@@ -20,6 +20,11 @@ from types import FunctionType
 
 #region Basic forms
 
+def at(timestamp, expr):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"at": timestamp, "expr": expr})
+
+
 def let(vars, in_expr):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
   return _fn({"let": _fn(vars), "in": in_expr})
