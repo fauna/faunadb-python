@@ -1,6 +1,6 @@
 ## 0.1.2.dev1
 
-- Added `key_for_secret` query function
+- Added `key_for_secret` and `at` query functions
 
 ## 0.1.1 (December 6, 2016)
 
