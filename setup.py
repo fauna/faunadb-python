@@ -25,7 +25,7 @@ setup(
   version=pkg_version,
   description="FaunaDB Python driver",
   long_description=long_description,
-  url="https://github.com/faunadb/faunadb-python",
+  url="https://github.com/fauna/faunadb-python",
   author=pkg_author,
   author_email="priority@fauna.com",
   license=pkg_license,

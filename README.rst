@@ -1,14 +1,14 @@
 FaunaDB Python
 ==============
 
-.. image:: https://img.shields.io/travis/faunadb/faunadb-python/master.svg?maxAge=21600
- :target: https://travis-ci.org/faunadb/faunadb-python
-.. image:: https://img.shields.io/codecov/c/github/faunadb/faunadb-python/master.svg?maxAge=21600
- :target: https://codecov.io/gh/faunadb/faunadb-python
+.. image:: https://img.shields.io/travis/fauna/faunadb-python/master.svg?maxAge=21600
+ :target: https://travis-ci.org/fauna/faunadb-python
+.. image:: https://img.shields.io/codecov/c/github/fauna/faunadb-python/master.svg?maxAge=21600
+ :target: https://codecov.io/gh/fauna/faunadb-python
 .. image:: https://img.shields.io/pypi/v/faunadb.svg?maxAge=21600
  :target: https://pypi.python.org/pypi/faunadb
 .. image:: https://img.shields.io/badge/license-MPL_2.0-blue.svg?maxAge=2592000
- :target: https://raw.githubusercontent.com/faunadb/faunadb-python/master/LICENSE
+ :target: https://raw.githubusercontent.com/fauna/faunadb-python/master/LICENSE
 
 Python driver for `FaunaDB <https://fauna.com>`_.
 
@@ -114,4 +114,4 @@ implied. See the License for the specific language governing
 permissions and limitations under the License.
 
 
-.. _`tests`: https://github.com/faunadb/faunadb-python/blob/master/tests/
+.. _`tests`: https://github.com/fauna/faunadb-python/blob/master/tests/
