@@ -24,9 +24,10 @@ class SerializationTest(TestCase):
                     '{"@ts":"1970-01-01T00:00:00Z"}')
 
   def test_bytes(self):
-    if sys.version_info.major == 3:
-      self.assertJson(b'\x01\x02\x03', '{"@bytes":"AQID"}')
     self.assertJson(bytearray(b'\x01\x02\x03'), '{"@bytes":"AQID"}')
+    if sys.version_info.major == 3:
+      # In Python 3.x we should also accept bytes
+      self.assertJson(b'\x01\x02\x03', '{"@bytes":"AQID"}')
 
   #region Basic forms
 

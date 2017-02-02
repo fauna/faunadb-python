@@ -1,4 +1,3 @@
-import sys
 from unittest import TestCase
 from iso8601 import parse_date
 
@@ -23,10 +22,7 @@ class DeserializationTest(TestCase):
     self.assertJson('{"@date":"1970-01-01"}', parse_date("1970-01-01").date())
 
   def test_bytes(self):
-    if sys.version_info.major == 2:
-      self.assertJson('{"@bytes":"AQID"}', bytearray(b'\x01\x02\x03'))
-    else:
-      self.assertJson('{"@bytes":"AQID"}', b'\x01\x02\x03')
+    self.assertJson('{"@bytes":"AQID"}', bytearray(b'\x01\x02\x03'))
 
   def test_string(self):
     self.assertJson('"a string"', "a string")
