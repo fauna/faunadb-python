@@ -63,6 +63,20 @@ class QueryTest(FaunaTestCase):
 
   #region Basic forms
 
+  def test_at(self):
+    instance = self._create(n=1)
+    ref = instance["ref"]
+    ts = instance["ts"]
+    prev_ts = ts - 1
+
+    # Add previous event
+    data = {"n": 0}
+    self._q(query.insert(ref, prev_ts, "create", {"data": data}))
+
+    # Get version from previous event
+    old = self._q(query.at(prev_ts, query.get(ref)))
+    self.assertEqual(old["data"], data)
+
   def test_let_var(self):
     self.assertEqual(self._q(query.let({"x": 1}, query.var("x"))), 1)
 

@@ -24,6 +24,10 @@ class SerializationTest(TestCase):
 
   #region Basic forms
 
+  def test_at(self):
+    self.assertJson(query.at(datetime.fromtimestamp(0, iso8601.UTC), query.get(Ref("indexes/widgets"))),
+                    '{"at":{"@ts":"1970-01-01T00:00:00Z"},"expr":{"get":{"@ref":"indexes/widgets"}}}')
+
   def test_let(self):
     self.assertJson(query.let({"x": 1}, 1), '{"in":1,"let":{"x":1}}')
 
