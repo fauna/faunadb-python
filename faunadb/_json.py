@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 from datetime import date, datetime
 from json import dumps, loads, JSONEncoder
 from iso8601 import parse_date
@@ -36,6 +37,8 @@ def _parse_json_hook(dct):
     return FaunaTime(dct["@ts"])
   if "@date" in dct:
     return parse_date(dct["@date"]).date()
+  if "@bytes" in dct:
+    return bytearray(urlsafe_b64decode(dct["@bytes"].encode()))
   else:
     return dct
 
@@ -61,5 +64,7 @@ class _FaunaJSONEncoder(JSONEncoder):
       return FaunaTime(obj).to_fauna_json()
     elif isinstance(obj, date):
       return {"@date": obj.isoformat()}
+    elif isinstance(obj, (bytes, bytearray)):
+      return {"@bytes": urlsafe_b64encode(obj).decode('utf-8')}
     else:
       raise UnexpectedError("Unserializable object {} of type {}".format(obj, type(obj)), None)

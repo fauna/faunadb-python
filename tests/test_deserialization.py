@@ -21,6 +21,9 @@ class DeserializationTest(TestCase):
   def test_date(self):
     self.assertJson('{"@date":"1970-01-01"}', parse_date("1970-01-01").date())
 
+  def test_bytes(self):
+    self.assertJson('{"@bytes":"AQID"}', bytearray(b'\x01\x02\x03'))
+
   def test_string(self):
     self.assertJson('"a string"', "a string")
 

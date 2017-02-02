@@ -1,6 +1,7 @@
+import iso8601
+import sys
 from unittest import TestCase
 from datetime import datetime
-import iso8601
 
 from faunadb import query
 from faunadb.objects import Ref, SetRef, FaunaTime
@@ -21,6 +22,12 @@ class SerializationTest(TestCase):
                     '{"@ts":"1970-01-01T00:00:00.123456789Z"}')
     self.assertJson(datetime.fromtimestamp(0, iso8601.UTC),
                     '{"@ts":"1970-01-01T00:00:00Z"}')
+
+  def test_bytes(self):
+    self.assertJson(bytearray(b'\x01\x02\x03'), '{"@bytes":"AQID"}')
+    if sys.version_info.major == 3:
+      # In Python 3.x we should also accept bytes
+      self.assertJson(b'\x01\x02\x03', '{"@bytes":"AQID"}')
 
   #region Basic forms
 
