@@ -24,6 +24,7 @@ def parse_json_or_none(json_string):
 
 
 def _parse_json_hook(dct):
+  #pylint: disable=too-many-return-statements
   """
   Looks for FaunaDB types in a JSON object and converts to them if possible.
   """

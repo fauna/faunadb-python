@@ -166,12 +166,16 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.get(instance["ref"])), instance)
 
   def test_key_from_secret(self):
-    db_ref = self.admin_client.query(query.create_database({"name": "database_for_key_from_secret_test"}))["ref"]
+    db_ref = self.admin_client.query(
+      query.create_database({"name": "database_for_key_from_secret_test"}))["ref"]
     key = self.admin_client.query(query.create_key({
       "database": db_ref,
       "role": "server"}))
 
-    self.assertEqual(self.admin_client.query(query.key_from_secret(key["secret"]))["ref"], key["ref"])
+    self.assertEqual(
+      self.admin_client.query(query.key_from_secret(key["secret"]))["ref"],
+      key["ref"]
+    )
 
   def test_paginate(self):
     n_value = 200
@@ -418,19 +422,13 @@ class QueryTest(FaunaTestCase):
     self.assertIsNotNone(self._q(query.next_id()))
 
   def test_database(self):
-    self.assertRaises(BadRequest, lambda: self.root_client.query(query.database("db-name")))
-
     db_name = self.db_ref.id()
     self.assertEqual(self.root_client.query(query.database(db_name)), Ref("databases", db_name))
 
   def test_index(self):
-    self.assertRaises(BadRequest, lambda: self._q(query.index("index-name")))
-
     self.assertEqual(self._q(query.index("widgets_by_n")), Ref("indexes/widgets_by_n"))
 
   def test_class(self):
-    self.assertRaises(BadRequest, lambda: self._q(query.class_expr("class-name")))
-
     self.assertEqual(self._q(query.class_expr("widgets")), Ref("classes/widgets"))
 
   def test_equals(self):
