@@ -1,4 +1,4 @@
-## 0.1.2.dev1
+## 0.1.2 (February 28, 2017)
 
 - Added `key_for_secret` and `at` query functions
 - Added `@bytes` type support (via `bytearray`)
