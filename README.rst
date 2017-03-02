@@ -30,12 +30,13 @@ The following versions of Python are supported:
 * Python 3.3
 * Python 3.4
 * Python 3.5
+* Python 3.6
 
 
 Documentation
 -------------
 
-Driver documentation is available at https://pythonhosted.org/faunadb/.
+Driver documentation is available at https://faunadb.readthedocs.org/en/latest/.
 
 See the `FaunaDB Documentation <https://fauna.com/documentation>`_ for a complete API reference, or look in `tests`_
 for more examples.
