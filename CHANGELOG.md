@@ -1,3 +1,7 @@
+## 1.0.0 (March 13, 2017)
+
+- Official release
+
 ## 0.1.2 (February 28, 2017)
 
 - Added `key_for_secret` and `at` query functions
