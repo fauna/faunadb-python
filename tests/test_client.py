@@ -5,7 +5,7 @@ from tests.helpers import FaunaTestCase
 class ClientTest(FaunaTestCase):
 
   def test_ping(self):
-    self.assertEqual(self.client.ping("all"), "Scope all is OK")
+    self.assertEqual(self.client.ping("node"), "Scope node is OK")
 
   def test_error_on_closed_client(self):
     client = FaunaClient(secret="secret")
