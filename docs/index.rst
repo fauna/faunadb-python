@@ -10,3 +10,4 @@
    client_logger
    request_result
    page
+   model/model
