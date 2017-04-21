@@ -45,11 +45,17 @@ for more examples.
 Basic Usage
 -----------
 
-The first step for any program is to create a ``client`` instance.
-This object must be explicitly threaded through any code that needs to access FaunaDB.
+.. code-block:: python
 
-FaunaDB can be used directly using the ``query`` API.
+    from faunadb import query as q
+    from faunadb.objects import Ref
+    from faunadb.client import FaunaClient
 
+    client = FaunaClient(secret="your-secret-here")
+
+    indexes = client.query(q.paginate(Ref("indexes")))
+
+    print(indexes)
 
 Building it yourself
 --------------------
