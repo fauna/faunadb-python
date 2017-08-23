@@ -4,7 +4,7 @@ from unittest import TestCase
 import iso8601
 
 from faunadb import query
-from faunadb.objects import Ref, SetRef, FaunaTime
+from faunadb.objects import Ref, SetRef, FaunaTime, Query
 from faunadb._json import to_json
 
 class SerializationTest(TestCase):
@@ -28,6 +28,10 @@ class SerializationTest(TestCase):
     if sys.version_info.major == 3:
       # In Python 3.x we should also accept bytes
       self.assertJson(b'\x01\x02\x03', '{"@bytes":"AQID"}')
+
+  def test_query(self):
+    self.assertJson(Query({"lambda": "x", "expr": {"var": "x"}}),
+                    '{"@query":{"expr":{"var":"x"},"lambda":"x"}}')
 
   #region Basic forms
 

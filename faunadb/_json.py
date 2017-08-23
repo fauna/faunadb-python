@@ -3,7 +3,7 @@ from datetime import date, datetime
 from json import dumps, loads, JSONEncoder
 from iso8601 import parse_date
 
-from faunadb.objects import FaunaTime, Ref, SetRef
+from faunadb.objects import FaunaTime, Ref, SetRef, Query
 from faunadb.errors import UnexpectedError
 from faunadb.query import _Expr
 
@@ -34,14 +34,15 @@ def _parse_json_hook(dct):
     return dct["@obj"]
   if "@set" in dct:
     return SetRef(dct["@set"])
+  if "@query" in dct:
+    return Query(dct["@query"])
   if "@ts" in dct:
     return FaunaTime(dct["@ts"])
   if "@date" in dct:
     return parse_date(dct["@date"]).date()
   if "@bytes" in dct:
     return bytearray(urlsafe_b64decode(dct["@bytes"].encode()))
-  else:
-    return dct
+  return dct
 
 
 def to_json(dct, pretty=False, sort_keys=False):
@@ -51,13 +52,12 @@ def to_json(dct, pretty=False, sort_keys=False):
   """
   if pretty:
     return dumps(dct, cls=_FaunaJSONEncoder, sort_keys=True, indent=2, separators=(", ", ": "))
-  else:
-    return dumps(dct, cls=_FaunaJSONEncoder, sort_keys=sort_keys, separators=(",", ":"))
+  return dumps(dct, cls=_FaunaJSONEncoder, sort_keys=sort_keys, separators=(",", ":"))
 
 
 class _FaunaJSONEncoder(JSONEncoder):
   """Converts :any:`_Expr`, :any:`datetime`, :any:`date` to JSON."""
-  # pylint: disable=method-hidden
+  # pylint: disable=method-hidden,arguments-differ
   def default(self, obj):
     if isinstance(obj, _Expr):
       return obj.to_fauna_json()
