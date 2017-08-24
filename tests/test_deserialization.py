@@ -1,7 +1,7 @@
 from unittest import TestCase
 from iso8601 import parse_date
 
-from faunadb.objects import Ref, SetRef, FaunaTime
+from faunadb.objects import Ref, SetRef, FaunaTime, Query
 from faunadb._json import parse_json
 
 class DeserializationTest(TestCase):
@@ -23,6 +23,10 @@ class DeserializationTest(TestCase):
 
   def test_bytes(self):
     self.assertJson('{"@bytes":"AQID"}', bytearray(b'\x01\x02\x03'))
+
+  def test_query(self):
+    self.assertJson('{"@query": {"lambda": "x", "expr": {"var": "x"}}}',
+                    Query({"lambda": "x", "expr": {"var": "x"}}))
 
   def test_string(self):
     self.assertJson('"a string"', "a string")

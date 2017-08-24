@@ -34,8 +34,7 @@ class Ref(_Expr):
     parts = self.value.split("/")
     if len(parts) == 1:
       return self
-    else:
-      return Ref(*parts[:-1])
+    return Ref(*parts[:-1])
 
   def id(self):
     """
@@ -130,6 +129,26 @@ class FaunaTime(_Expr):
 
   def __eq__(self, other):
     return isinstance(other, FaunaTime) and self.value == other.value
+
+  def __ne__(self, other):
+    # pylint: disable=unneeded-not
+    return not self == other
+
+
+class Query(_Expr):
+  """
+  Represents a `@query` type in FaunaDB.
+  See the `docs <https://fauna.com/documentation/queries#values-special_types>`__.
+  """
+
+  def to_fauna_json(self):
+    return {"@query": self.value}
+
+  def __repr__(self):
+    return "Query(%s)" % repr(self.value)
+
+  def __eq__(self, other):
+    return isinstance(other, Query) and self.value == other.value
 
   def __ne__(self, other):
     # pylint: disable=unneeded-not

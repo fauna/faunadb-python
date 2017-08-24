@@ -104,6 +104,20 @@ class QueryTest(FaunaTestCase):
                           [[1, 1], [2, 2], [3, 3]])
     self.assertEqual(self._q(expr), [2, 4, 6])
 
+  def test_call_function(self):
+    self._q(query.create_function({
+      "name": "concat_with_slash",
+      "body": query.query(lambda a, b: query.concat([a, b], "/"))
+    }))
+
+    self.assertEqual(self._q(query.call(Ref("functions/concat_with_slash"), "a", "b")), "a/b")
+
+  def test_echo_query(self):
+    body = self._q(query.query(lambda a, b: query.concat([a, b], "/")))
+    bodyEchoed = self._q(body)
+
+    self.assertEqual(body, bodyEchoed)
+
   #endregion
 
   #region Collection functions
@@ -292,6 +306,11 @@ class QueryTest(FaunaTestCase):
     new_client.query(query.create_class({"name": "class_for_test"}))
 
     self.assertTrue(new_client.query(query.exists(Ref("classes/class_for_test"))))
+
+  def test_create_function(self):
+    self._q(query.create_function({"name": "a_function", "body": query.query(lambda x: x)}))
+
+    self.assertTrue(self._q(query.exists(Ref("functions/a_function"))))
 
   #endregion
 

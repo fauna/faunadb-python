@@ -83,6 +83,18 @@ def lambda_expr(var_name_or_pattern, expr):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
   return _fn({"lambda": var_name_or_pattern, "expr": expr})
 
+
+def call(ref, *arguments):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"call": ref, "arguments": _varargs(arguments)})
+
+
+def query(_lambda):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  if isinstance(_lambda, FunctionType):
+    _lambda = lambda_query(_lambda)
+  return _fn({"query": _lambda})
+
 #endregion
 
 #region Collection functions
@@ -204,6 +216,11 @@ def create_database(db_params):
 def create_index(index_params):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
   return _fn({"create_index": index_params})
+
+
+def create_function(func_params):
+  """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
+  return _fn({"create_function": func_params})
 
 
 def create_key(key_params):
@@ -432,10 +449,9 @@ def _wrap(value):
     return lambda_query(value)
   elif isinstance(value, dict):
     return _Expr({"object": _wrap_values(value)})
-  elif isinstance(value, list) or isinstance(value, tuple):
+  elif isinstance(value, (list, tuple)):
     return _Expr([_wrap(sub_value) for sub_value in value])
-  else:
-    return value
+  return value
 
 
 def _wrap_values(dct):
