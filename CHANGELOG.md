@@ -1,3 +1,5 @@
+## 1.1.1.dev1 (Future release)
+
 ## 1.1.0 (September 12, 2017)
 - Added `call`, `query`, and `create_function` query functions
 - Added `@query` type support
