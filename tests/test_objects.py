@@ -1,7 +1,7 @@
 from datetime import date, datetime
 import iso8601
 
-from faunadb.objects import FaunaTime, Ref, SetRef
+from faunadb.objects import FaunaTime, Ref, SetRef, Native
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -9,8 +9,11 @@ class ObjectsTest(FaunaTestCase):
   @classmethod
   def setUpClass(cls):
     super(ObjectsTest, cls).setUpClass()
-    cls.ref = Ref("classes", "frogs", "123")
-    cls.json_ref = '{"@ref":"classes/frogs/123"}'
+    cls.ref = Ref("123", Ref("frogs", Native.CLASSES))
+    cls.json_ref = ('{"@ref":{'
+                    '"class":{"@ref":{"class":{"@ref":{"id":"classes"}},"id":"frogs"}},'
+                    '"id":"123"'
+                    '}}')
 
   def test_obj(self):
     self.assertParseJson({"a": 1, "b": 2}, '{"@obj": {"a": 1, "b": 2}}')
@@ -18,26 +21,29 @@ class ObjectsTest(FaunaTestCase):
   def test_ref(self):
     self.assertJson(self.ref, self.json_ref)
 
-    keys = Ref("keys")
-    self.assertEqual(keys.to_class(), keys)
-    self.assertRaises(ValueError, keys.id)
+    self.assertRaises(ValueError, lambda: Ref(None))
 
-    ref = Ref(keys, "123")
-    self.assertEqual(ref.to_class(), keys)
+    ref = Ref("123", Native.KEYS)
     self.assertEqual(ref.id(), "123")
+    self.assertEqual(ref.class_(), Native.KEYS)
+    self.assertEqual(ref.database(), None)
 
-    self.assertRegexCompat(repr(ref), r"Ref\(u?'keys/123'\)")
-
-    self.assertNotEqual(ref, Ref(keys, "456"))
+    self.assertRegexCompat(
+      repr(ref),
+      r"Ref\({u?'id': u?'123', u?'class': Ref\({u?'id': u?'keys'}\)}\)"
+    )
 
   def test_set(self):
-    index = Ref("indexes", "frogs_by_size")
-    json_index = '{"@ref":"indexes/frogs_by_size"}'
+    index = Ref("frogs_by_size", Native.INDEXES)
+    json_index = '{"@ref":{"class":{"@ref":{"id":"indexes"}},"id":"frogs_by_size"}}'
     match = SetRef(query.match(index, self.ref))
     json_match = '{"@set":{"match":%s,"terms":%s}}' % (json_index, self.json_ref)
     self.assertJson(match, json_match)
 
-    self.assertNotEqual(match, SetRef(query.match(index, Ref("classes", "frogs", "456"))))
+    self.assertNotEqual(
+      match,
+      SetRef(query.match(index, query.ref(query.class_expr("frogs"), "456")))
+    )
 
   def test_time_conversion(self):
     dt = datetime.now(iso8601.UTC)

@@ -4,18 +4,32 @@ from unittest import TestCase
 import iso8601
 
 from faunadb import query
-from faunadb.objects import Ref, SetRef, FaunaTime, Query
+from faunadb.objects import Ref, SetRef, FaunaTime, Query, Native
 from faunadb._json import to_json
 
 class SerializationTest(TestCase):
 
+  def test_native(self):
+    self.assertJson(Native.CLASSES, '{"@ref":{"id":"classes"}}')
+    self.assertJson(Native.INDEXES, '{"@ref":{"id":"indexes"}}')
+    self.assertJson(Native.DATABASES, '{"@ref":{"id":"databases"}}')
+    self.assertJson(Native.FUNCTIONS, '{"@ref":{"id":"functions"}}')
+    self.assertJson(Native.KEYS, '{"@ref":{"id":"keys"}}')
+
   def test_ref(self):
-    self.assertJson(Ref("classes"), '{"@ref":"classes"}')
-    self.assertJson(Ref("classes", "widgets"), '{"@ref":"classes/widgets"}')
+    self.assertJson(Ref("classes"),
+                    '{"@ref":{"id":"classes"}}')
+    self.assertJson(Ref("widgets", Native.CLASSES),
+                    '{"@ref":{"class":{"@ref":{"id":"classes"}},"id":"widgets"}}')
 
   def test_set_ref(self):
-    self.assertJson(SetRef({"match": Ref("indexes/widgets"), "terms": "Laptop"}),
-                    '{"@set":{"match":{"@ref":"indexes/widgets"},"terms":"Laptop"}}')
+    self.assertJson(SetRef({"match": Ref("widgets", Native.INDEXES), "terms": "Laptop"}),
+                    ('{'
+                     '"@set":{'
+                     '"match":{"@ref":{"class":{"@ref":{"id":"indexes"}},"id":"widgets"}},'
+                     '"terms":"Laptop"'
+                     '}'
+                     '}'))
 
   def test_fauna_time(self):
     self.assertJson(FaunaTime('1970-01-01T00:00:00.123456789Z'),
@@ -37,8 +51,8 @@ class SerializationTest(TestCase):
 
   def test_at(self):
     self.assertJson(
-      query.at(datetime.fromtimestamp(0, iso8601.UTC), query.get(Ref("indexes/widgets"))),
-      '{"at":{"@ts":"1970-01-01T00:00:00Z"},"expr":{"get":{"@ref":"indexes/widgets"}}}'
+      query.at(datetime.fromtimestamp(0, iso8601.UTC), query.get(query.index("widgets"))),
+      '{"at":{"@ts":"1970-01-01T00:00:00Z"},"expr":{"get":{"index":"widgets"}}}'
     )
 
   def test_let(self):
@@ -99,67 +113,67 @@ class SerializationTest(TestCase):
   #region Read functions
 
   def test_get(self):
-    self.assertJson(query.get(Ref("classes/widget")), '{"get":{"@ref":"classes/widget"}}')
-    self.assertJson(query.get(Ref("classes/widget"), ts=123),
-                    '{"get":{"@ref":"classes/widget"},"ts":123}')
+    self.assertJson(query.get(query.class_expr("widget")), '{"get":{"class":"widget"}}')
+    self.assertJson(query.get(query.class_expr("widget"), ts=123),
+                    '{"get":{"class":"widget"},"ts":123}')
 
   def test_paginate(self):
-    self.assertJson(query.paginate(Ref("classes/widget")), '{"paginate":{"@ref":"classes/widget"}}')
-    self.assertJson(query.paginate(Ref("classes/widget"),
+    self.assertJson(query.paginate(query.class_expr("widget")), '{"paginate":{"class":"widget"}}')
+    self.assertJson(query.paginate(query.class_expr("widget"),
                                    size=1,
                                    ts=123,
-                                   after=Ref("classes/widget/1"),
-                                   before=Ref("classes/widget/10"),
+                                   after=query.ref(query.class_expr("widget"), "1"),
+                                   before=query.ref(query.class_expr("widget"), "10"),
                                    events=True,
                                    sources=True),
-                    ('{"after":{"@ref":"classes/widget/1"},'
-                     '"before":{"@ref":"classes/widget/10"},'
-                     '"events":true,"paginate":{"@ref":"classes/widget"},'
+                    ('{"after":{"id":"1","ref":{"class":"widget"}},'
+                     '"before":{"id":"10","ref":{"class":"widget"}},'
+                     '"events":true,"paginate":{"class":"widget"},'
                      '"size":1,"sources":true,"ts":123}'))
 
   def test_exists(self):
-    self.assertJson(query.exists(Ref("classes/widget")), '{"exists":{"@ref":"classes/widget"}}')
-    self.assertJson(query.exists(Ref("classes/widget"), ts=123),
-                    '{"exists":{"@ref":"classes/widget"},"ts":123}')
+    self.assertJson(query.exists(query.class_expr("widget")), '{"exists":{"class":"widget"}}')
+    self.assertJson(query.exists(query.class_expr("widget"), ts=123),
+                    '{"exists":{"class":"widget"},"ts":123}')
 
   #endregion
 
   #region Write functions
 
   def test_create(self):
-    json = ('{"create":{"@ref":"classes/widget"},'
+    json = ('{"create":{"class":"widget"},'
             '"params":{"object":{"data":{"object":{"name":"Laptop"}}}}}')
-    self.assertJson(query.create(Ref("classes/widget"), {
+    self.assertJson(query.create(query.class_expr("widget"), {
       "data": {"name": "Laptop"}
     }), json)
 
   def test_update(self):
     json = ('{"params":{"object":{"data":{"object":{"name":"Laptop"}}}},'
-            '"update":{"@ref":"classes/widget"}}')
-    self.assertJson(query.update(Ref("classes/widget"), {
+            '"update":{"class":"widget"}}')
+    self.assertJson(query.update(query.class_expr("widget"), {
       "data": {"name": "Laptop"}
     }), json)
 
   def test_replace(self):
     json = ('{"params":{"object":{"data":{"object":{"name":"Laptop"}}}},'
-            '"replace":{"@ref":"classes/widget"}}')
-    self.assertJson(query.replace(Ref("classes/widget"), {
+            '"replace":{"class":"widget"}}')
+    self.assertJson(query.replace(query.class_expr("widget"), {
       "data": {"name": "Laptop"}
     }), json)
 
   def test_delete(self):
-    self.assertJson(query.delete(Ref("classes/widget")), '{"delete":{"@ref":"classes/widget"}}')
+    self.assertJson(query.delete(query.class_expr("widget")), '{"delete":{"class":"widget"}}')
 
   def test_insert(self):
-    json = ('{"action":"create","insert":{"@ref":"classes/widget"},'
+    json = ('{"action":"create","insert":{"class":"widget"},'
             '"params":{"object":{"data":{"object":{"name":"Laptop"}}}},"ts":123}')
-    self.assertJson(query.insert(Ref("classes/widget"), ts=123, action="create", params={
+    self.assertJson(query.insert(query.class_expr("widget"), ts=123, action="create", params={
       "data": {"name": "Laptop"}
     }), json)
 
   def test_remove(self):
-    self.assertJson(query.remove(Ref("classes/widget"), ts=123, action="create"),
-                    '{"action":"create","remove":{"@ref":"classes/widget"},"ts":123}')
+    self.assertJson(query.remove(query.class_expr("widget"), ts=123, action="create"),
+                    '{"action":"create","remove":{"class":"widget"},"ts":123}')
 
   def test_create_class(self):
     self.assertJson(query.create_class({"name": "widget"}),
@@ -170,66 +184,70 @@ class SerializationTest(TestCase):
                     '{"create_database":{"object":{"name":"db-name"}}}')
 
   def test_create_index(self):
-    self.assertJson(query.create_index({"name": "index-name", "source": Ref("classes/widget")}),
-                    ('{"create_index":{"object":{"name":"index-name",'
-                     '"source":{"@ref":"classes/widget"}}}}'))
+    self.assertJson(
+      query.create_index({"name": "index-name", "source": query.class_expr("widget")}),
+      '{"create_index":{"object":{"name":"index-name","source":{"class":"widget"}}}}'
+    )
 
   def test_create_key(self):
-    self.assertJson(query.create_key({"database": Ref("databases/db-name"), "role": "client"}),
-                    ('{"create_key":{"object":{"database":{"@ref":"databases/db-name"},'
-                     '"role":"client"}}}'))
+    self.assertJson(
+      query.create_key({"database": query.database("db-name"), "role": "client"}),
+      '{"create_key":{"object":{"database":{"database":"db-name"},"role":"client"}}}'
+    )
 
   #endregion
 
   #region Sets
 
   def test_match(self):
-    self.assertJson(query.match(Ref("indexes/widget")), '{"match":{"@ref":"indexes/widget"}}')
-    self.assertJson(query.match(Ref("indexes/widget"), "Laptop"),
-                    '{"match":{"@ref":"indexes/widget"},"terms":"Laptop"}')
+    self.assertJson(query.match(query.index("widget")), '{"match":{"index":"widget"}}')
+    self.assertJson(query.match(query.index("widget"), "Laptop"),
+                    '{"match":{"index":"widget"},"terms":"Laptop"}')
 
   def test_union(self):
     self.assertJson(query.union(), '{"union":[]}')
-    self.assertJson(query.union(Ref("indexes/widget")), '{"union":{"@ref":"indexes/widget"}}')
-    self.assertJson(query.union(Ref("indexes/widget"), Ref("indexes/things")),
-                    '{"union":[{"@ref":"indexes/widget"},{"@ref":"indexes/things"}]}')
+    self.assertJson(query.union(query.index("widget")), '{"union":{"index":"widget"}}')
+    self.assertJson(query.union(query.index("widget"), query.index("things")),
+                    '{"union":[{"index":"widget"},{"index":"things"}]}')
 
   def test_intersection(self):
     self.assertJson(query.intersection(), '{"intersection":[]}')
-    self.assertJson(query.intersection(Ref("indexes/widget")),
-                    '{"intersection":{"@ref":"indexes/widget"}}')
-    self.assertJson(query.intersection(Ref("indexes/widget"), Ref("indexes/things")),
-                    '{"intersection":[{"@ref":"indexes/widget"},{"@ref":"indexes/things"}]}')
+    self.assertJson(query.intersection(query.index("widget")),
+                    '{"intersection":{"index":"widget"}}')
+    self.assertJson(query.intersection(query.index("widget"), query.index("things")),
+                    '{"intersection":[{"index":"widget"},{"index":"things"}]}')
 
   def test_difference(self):
     self.assertJson(query.difference(), '{"difference":[]}')
-    self.assertJson(query.difference(Ref("indexes/widget")),
-                    '{"difference":{"@ref":"indexes/widget"}}')
-    self.assertJson(query.difference(Ref("indexes/widget"), Ref("indexes/things")),
-                    '{"difference":[{"@ref":"indexes/widget"},{"@ref":"indexes/things"}]}')
+    self.assertJson(query.difference(query.index("widget")),
+                    '{"difference":{"index":"widget"}}')
+    self.assertJson(query.difference(query.index("widget"), query.index("things")),
+                    '{"difference":[{"index":"widget"},{"index":"things"}]}')
 
   def test_distinct(self):
-    self.assertJson(query.distinct(SetRef({"match": Ref("indexes/widget")})),
-                    '{"distinct":{"@set":{"match":{"@ref":"indexes/widget"}}}}')
+    self.assertJson(query.distinct(SetRef({"match": query.index("widget")})),
+                    '{"distinct":{"@set":{"match":{"index":"widget"}}}}')
 
   def test_join(self):
-    self.assertJson(query.join(query.match(Ref("indexes/widget")), Ref("indexes/things")),
-                    '{"join":{"match":{"@ref":"indexes/widget"}},"with":{"@ref":"indexes/things"}}')
+    self.assertJson(query.join(query.match(query.index("widget")), query.index("things")),
+                    '{"join":{"match":{"index":"widget"}},"with":{"index":"things"}}')
 
   #endregion
 
   #region Authentication
 
   def test_login(self):
-    json = '{"login":{"@ref":"classes/widget/1"},"params":{"object":{"password":"abracadabra"}}}'
-    self.assertJson(query.login(Ref("classes/widget/1"), {"password": "abracadabra"}), json)
+    self.assertJson(
+      query.login(query.ref(query.class_expr("widget"), "1"), {"password": "abracadabra"}),
+      '{"login":{"id":"1","ref":{"class":"widget"}},"params":{"object":{"password":"abracadabra"}}}'
+    )
 
   def test_logout(self):
     self.assertJson(query.logout(True), '{"logout":true}')
 
   def test_identify(self):
-    self.assertJson(query.identify(Ref("classes/widget/1"), "abracadabra"),
-                    '{"identify":{"@ref":"classes/widget/1"},"password":"abracadabra"}')
+    self.assertJson(query.identify(query.ref(query.class_expr("widget"), "1"), "abracadabra"),
+                    '{"identify":{"id":"1","ref":{"class":"widget"}},"password":"abracadabra"}')
 
   #endregion
 

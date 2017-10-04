@@ -1,5 +1,4 @@
 from faunadb.page import Page
-from faunadb.objects import Ref
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -13,8 +12,8 @@ class PageTest(FaunaTestCase):
       Page([2, 3, 4], 2, 3))
 
   def test_set_iterator(self):
-    class_ref = self.client.query(query.create(Ref("classes"), {"name": "gadgets"}))["ref"]
-    index_ref = self.client.query(query.create(Ref("indexes"), {
+    class_ref = self.client.query(query.create_class({"name": "gadgets"}))["ref"]
+    index_ref = self.client.query(query.create_index({
       "name": "gadgets_by_n",
       "source": class_ref,
       "terms": [{"field": ["data", "n"]}]

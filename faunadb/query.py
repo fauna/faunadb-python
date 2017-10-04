@@ -11,7 +11,7 @@ In addition to these functions, queries may contain:
 * Dicts (``{"foo": "bar"}``)
 * A :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, or :class:`datetime.date`.
 
-For example: ``select("a", {"a": Ref("widgets", 123)})``.
+For example: ``select("a", {"a": Ref("123", Ref("widgets", Native.CLASSES))})``.
 """
 
 # pylint: disable=invalid-name, redefined-builtin
@@ -19,6 +19,40 @@ For example: ``select("a", {"a": Ref("widgets", 123)})``.
 from types import FunctionType
 
 #region Basic forms
+
+def ref(class_ref, id=None):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  if id is None:
+    return _fn({"@ref": class_ref})
+  return _fn({"ref": class_ref, "id": id})
+
+def classes(scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"classes": scope})
+
+def databases(scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"databases": scope})
+
+def indexes(scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"indexes": scope})
+
+def functions(scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"functions": scope})
+
+def keys(scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"keys": scope})
+
+def tokens(scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"tokens": scope})
+
+def credentials(scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"credentials": scope})
 
 def at(timestamp, expr):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
@@ -84,9 +118,9 @@ def lambda_expr(var_name_or_pattern, expr):
   return _fn({"lambda": var_name_or_pattern, "expr": expr})
 
 
-def call(ref, *arguments):
+def call(ref_, *arguments):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
-  return _fn({"call": ref, "arguments": _varargs(arguments)})
+  return _fn({"call": ref_, "arguments": _varargs(arguments)})
 
 
 def query(_lambda):
@@ -137,9 +171,9 @@ def append(elements, collection):
 
 #region Read functions
 
-def get(ref, ts=None):
+def get(ref_, ts=None):
   """See the `docs <https://fauna.com/documentation/queries#read_functions>`__."""
-  return _params({"get": ref}, {"ts": ts})
+  return _params({"get": ref_}, {"ts": ts})
 
 
 def key_from_secret(secret):
@@ -165,9 +199,9 @@ def paginate(
   return _params({"paginate": set}, opts)
 
 
-def exists(ref, ts=None):
+def exists(ref_, ts=None):
   """See the `docs <https://fauna.com/documentation/queries#read_functions>`__."""
-  return _params({"exists": ref}, {"ts": ts})
+  return _params({"exists": ref_}, {"ts": ts})
 
 #endregion
 
@@ -178,29 +212,29 @@ def create(class_ref, params):
   return _fn({"create": class_ref, "params": params})
 
 
-def update(ref, params):
+def update(ref_, params):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
-  return _fn({"update": ref, "params": params})
+  return _fn({"update": ref_, "params": params})
 
 
-def replace(ref, params):
+def replace(ref_, params):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
-  return _fn({"replace": ref, "params": params})
+  return _fn({"replace": ref_, "params": params})
 
 
-def delete(ref):
+def delete(ref_):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
-  return _fn({"delete": ref})
+  return _fn({"delete": ref_})
 
 
-def insert(ref, ts, action, params):
+def insert(ref_, ts, action, params):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
-  return _fn({"insert": ref, "ts": ts, "action": action, "params": params})
+  return _fn({"insert": ref_, "ts": ts, "action": action, "params": params})
 
 
-def remove(ref, ts, action):
+def remove(ref_, ts, action):
   """See the `docs <https://fauna.com/documentation/queries#write_functions>`__."""
-  return _fn({"remove": ref, "ts": ts, "action": action})
+  return _fn({"remove": ref_, "ts": ts, "action": action})
 
 
 def create_class(class_params):
@@ -270,9 +304,9 @@ def join(source, target):
 
 #region Authentication
 
-def login(ref, params):
+def login(ref_, params):
   """See the `docs <https://fauna.com/documentation/queries#auth_functions>`__."""
-  return _fn({"login": ref, "params": params})
+  return _fn({"login": ref_, "params": params})
 
 
 def logout(delete_tokens):
@@ -280,9 +314,9 @@ def logout(delete_tokens):
   return _fn({"logout": delete_tokens})
 
 
-def identify(ref, password):
+def identify(ref_, password):
   """See the `docs <https://fauna.com/documentation/queries#auth_functions>`__."""
-  return _fn({"identify": ref, "password": password})
+  return _fn({"identify": ref_, "password": password})
 
 #endregion
 
@@ -324,19 +358,24 @@ def next_id():
   return _fn({"next_id": None})
 
 
-def database(db_name):
+def database(db_name, scope=None):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
-  return _fn({"database": db_name})
+  return _params({"database": db_name}, {"scope": scope})
 
 
-def index(index_name):
+def index(index_name, scope=None):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
-  return _fn({"index": index_name})
+  return _params({"index": index_name}, {"scope": scope})
 
 
-def class_expr(class_name):
+def class_expr(class_name, scope=None):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
-  return _fn({"class": class_name})
+  return _params({"class": class_name}, {"scope": scope})
+
+
+def function(fn_name, scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _params({"function": fn_name}, {"scope": scope})
 
 
 def equals(*values):

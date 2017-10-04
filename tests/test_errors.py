@@ -3,8 +3,8 @@ from requests import codes
 from faunadb import query
 from faunadb.errors import ErrorData, Failure, BadRequest, InternalError, \
   NotFound, PermissionDenied, Unauthorized, UnavailableError, UnexpectedError
-from faunadb.objects import Ref
-from faunadb.query import create, add, get, var, _Expr
+from faunadb.objects import Native
+from faunadb.query import create, create_class, create_key, class_expr, add, get, var, ref, _Expr
 
 from tests.helpers import FaunaTestCase, mock_client
 
@@ -44,12 +44,12 @@ class ErrorsTest(FaunaTestCase):
     # Create client with client key
     client = self.root_client.new_session_client(
       secret=self.root_client.query(
-        create(Ref("keys"), {"database": self.db_ref, "role": "client"}))["secret"]
+        create_key({"database": self.db_ref, "role": "client"}))["secret"]
     )
 
     exception = self.assert_raises(
       PermissionDenied,
-      lambda: client.query(query.paginate(Ref("databases"))))
+      lambda: client.query(query.paginate(Native.DATABASES)))
     self._assert_error(exception, "permission denied", ["paginate"])
 
   def test_internal_error(self):
@@ -93,9 +93,9 @@ class ErrorsTest(FaunaTestCase):
 
   def test_instance_not_found(self):
     # Must be a reference to a real class or else we get InvalidExpression
-    self.client.query(create(Ref("classes"), {"name": "foofaws"}))
+    self.client.query(create_class({"name": "foofaws"}))
     self._assert_query_error(
-      get(Ref("classes/foofaws/123")),
+      get(ref(class_expr("foofaws"), "123")),
       NotFound,
       "instance not found")
 
@@ -103,14 +103,21 @@ class ErrorsTest(FaunaTestCase):
     self._assert_query_error(query.select("a", {}), NotFound, "value not found")
 
   def test_instance_already_exists(self):
-    self.client.query(create(Ref("classes"), {"name": "duplicates"}))
-    ref = self.client.query(create(Ref("classes/duplicates"), {}))["ref"]
-    self._assert_query_error(create(ref, {}), BadRequest, "instance already exists", ["create"])
+    self.client.query(create_class({"name": "duplicates"}))
+    r = self.client.query(create(class_expr("duplicates"), {}))["ref"]
+    self._assert_query_error(create(r, {}), BadRequest, "instance already exists", ["create"])
   #endregion
 
   #region InvalidData
   def test_invalid_type(self):
-    self._assert_invalid_data("classes", {"name": 123}, "invalid type", ["name"])
+    exception = self.assert_raises(BadRequest,
+                                   lambda: self.client.query(create_class({"name": 123})))
+    self._assert_error(exception, "validation failed", [])
+    failures = exception.errors[0].failures
+    self.assertEqual(len(failures), 1)
+    failure = failures[0]
+    self.assertEqual(failure.code, "invalid type")
+    self.assertEqual(failure.field, ["name"])
 
   def test_repr(self):
     err = ErrorData("code", "desc", None, None)
@@ -129,16 +136,6 @@ class ErrorsTest(FaunaTestCase):
     self._assert_error(
       self.assert_raises(exception_class, lambda: self.client.query(q)),
       code, position)
-
-  def _assert_invalid_data(self, class_name, data, code, field):
-    exception = self.assert_raises(BadRequest,
-                                   lambda: self.client.query(create(Ref(class_name), data)))
-    self._assert_error(exception, "validation failed", [])
-    failures = exception.errors[0].failures
-    self.assertEqual(len(failures), 1)
-    failure = failures[0]
-    self.assertEqual(failure.code, code)
-    self.assertEqual(failure.field, field)
 
   def _assert_http_error(self, action, exception_cls, code):
     self._assert_error(self.assert_raises(exception_cls, action), code)

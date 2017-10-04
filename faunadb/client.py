@@ -42,7 +42,8 @@ class FaunaClient(object):
   This is a dict containing lists, ints, floats, strings, and other dicts.
   Any :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, or :class:`datetime.date`
   values in it will also be parsed.
-  (So instead of ``{ "@ref": "classes/frogs/123" }``, you will get ``Ref("classes/frogs", "123")``.)
+  (So instead of ``{"@ref": {"id": "frogs", "class": {"@ref": {"id": "classes"}}}}``,
+  you will get ``Ref("frogs", Native.CLASSES)``.)
   """
 
   # pylint: disable=too-many-arguments, too-many-instance-attributes
@@ -97,7 +98,8 @@ class FaunaClient(object):
 
       self.session.headers.update({
         "Accept-Encoding": "gzip",
-        "Content-Type": "application/json;charset=utf-8"
+        "Content-Type": "application/json;charset=utf-8",
+        "X-FaunaDB-API-Version": "2.1"
       })
       self.session.timeout = timeout
     else:
