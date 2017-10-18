@@ -51,10 +51,14 @@ class Ref(_Expr):
     return {"@ref": self.value}
 
   def __str__(self):
-    return "Ref(%s)" % self.value
+    cls = ", class=%s" % self.value["class"] if "class" in self.value else ""
+    db = ", database=%s" % self.value["database"] if "database" in self.value else ""
+    return "Ref(id=%s%s%s)" % (self.value["id"], cls, db)
 
   def __repr__(self):
-    return "Ref(%r)" % self.value
+    cls = ", class=%r" % self.value["class"] if "class" in self.value else ""
+    db = ", database=%r" % self.value["database"] if "database" in self.value else ""
+    return "Ref(id=%s%s%s)" % (self.value["id"], cls, db)
 
   def __eq__(self, other):
     return isinstance(other, Ref) and self.value == other.value

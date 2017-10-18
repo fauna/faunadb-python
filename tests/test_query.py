@@ -611,6 +611,6 @@ class QueryTest(FaunaTestCase):
 
   def test_repr(self):
     self.assertRegexCompat(repr(query.var("x")), r"Expr\({u?'var': u?'x'}\)")
-    self.assertRegexCompat(repr(Ref("classes")), r"Ref\({u?'id': u?'classes'}\)")
+    self.assertRegexCompat(repr(Ref("classes")), r"Ref\(id=classes\)")
     self.assertRegexCompat(repr(SetRef(query.match(query.index("widgets")))),
                            r"SetRef\({u?'match': Expr\({u?'index': u?'widgets'}\)}\)")

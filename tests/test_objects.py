@@ -30,7 +30,7 @@ class ObjectsTest(FaunaTestCase):
 
     self.assertRegexCompat(
       repr(ref),
-      r"Ref\({u?'id': u?'123', u?'class': Ref\({u?'id': u?'keys'}\)}\)"
+      r"Ref\(id=123, class=Ref\(id=keys\)\)"
     )
 
   def test_set(self):
