@@ -3,7 +3,7 @@ from datetime import date, datetime
 from json import dumps, loads, JSONEncoder
 from iso8601 import parse_date
 
-from faunadb.objects import FaunaTime, Ref, SetRef, Query
+from faunadb.objects import FaunaTime, Ref, SetRef, Query, Native
 from faunadb.errors import UnexpectedError
 from faunadb.query import _Expr
 
@@ -29,7 +29,12 @@ def _parse_json_hook(dct):
   Looks for FaunaDB types in a JSON object and converts to them if possible.
   """
   if "@ref" in dct:
-    return Ref(dct["@ref"])
+    ref = dct["@ref"]
+
+    if (not "class" in ref) and (not "database" in ref):
+      return Native.from_name(ref["id"])
+
+    return Ref(ref["id"], ref.get("class"), ref.get("database"))
   if "@obj" in dct:
     return dct["@obj"]
   if "@set" in dct:

@@ -53,7 +53,7 @@ Basic Usage
 
     client = FaunaClient(secret="your-secret-here")
 
-    indexes = client.query(q.paginate(Ref("indexes")))
+    indexes = client.query(q.paginate(q.indexes()))
 
     print(indexes)
 

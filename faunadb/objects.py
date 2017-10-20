@@ -4,7 +4,6 @@ See the `docs <https://fauna.com/documentation/queries#values>`__.
 """
 from datetime import datetime
 # pylint: disable=redefined-builtin
-from builtins import str
 from iso8601 import parse_date
 from faunadb.query import _Expr
 
@@ -16,44 +15,50 @@ class Ref(_Expr):
   Queries that require a Ref will not work if you just pass in a string.
   """
 
-  def __init__(self, *parts):
-    """
-    Create a Ref from a string, such as ``Ref("databases/prydain")``.
-    Can also call ``Ref("databases", "prydain")`` or ``Ref(Ref("databases"), "prydain")``.
-    """
-    parts_str = "/".join(str(part) for part in parts)
+  def __init__(self, id, cls=None, db=None):
+    if id is None:
+      raise ValueError("The Ref must have an id.")
 
-    super(Ref, self).__init__(parts_str)
+    value = {"id": id}
 
-  def to_class(self):
+    if cls != None:
+      value["class"] = cls
+
+    if db != None:
+      value["database"] = db
+
+    super(Ref, self).__init__(value)
+
+  def class_(self):
     """
     Gets the class part out of the Ref.
-    This is done by removing the id.
-    So ``Ref("a", "b/c").to_class()`` will be ``Ref("a/b")``.
     """
-    parts = self.value.split("/")
-    if len(parts) == 1:
-      return self
-    return Ref(*parts[:-1])
+    return self.value.get("class")
+
+  def database(self):
+    """
+    Gets the database part out of the Ref.
+    """
+    return self.value.get("database")
 
   def id(self):
     """
-    Removes the class part of the Ref, leaving only the id.
-    This is everything after the last ``/``.
+    Gets the id part out of the Ref.
     """
-    parts = self.value.split("/")
-    if len(parts) == 1:
-      raise ValueError("The Ref does not have an id.")
-    return parts[-1]
+    return self.value["id"]
 
   def to_fauna_json(self):
     return {"@ref": self.value}
 
   def __str__(self):
-    return self.value
+    cls = ", class=%s" % self.value["class"] if "class" in self.value else ""
+    db = ", database=%s" % self.value["database"] if "database" in self.value else ""
+    return "Ref(id=%s%s%s)" % (self.value["id"], cls, db)
 
   def __repr__(self):
-    return "Ref(%s)" % repr(self.value)
+    cls = ", class=%r" % self.value["class"] if "class" in self.value else ""
+    db = ", database=%r" % self.value["database"] if "database" in self.value else ""
+    return "Ref(id=%s%s%s)" % (self.value["id"], cls, db)
 
   def __eq__(self, other):
     return isinstance(other, Ref) and self.value == other.value
@@ -62,6 +67,21 @@ class Ref(_Expr):
     # pylint: disable=unneeded-not
     return not self == other
 
+class Native(object):
+  CLASSES = Ref('classes')
+  INDEXES = Ref('indexes')
+  DATABASES = Ref('databases')
+  FUNCTIONS = Ref('functions')
+  KEYS = Ref('keys')
+  TOKENS = Ref('tokens')
+  CREDENTIALS = Ref('credentials')
+
+  def __init__(self):
+    raise TypeError
+
+  @classmethod
+  def from_name(cls, name):
+    return getattr(cls, name.upper(), Ref(name))
 
 class SetRef(_Expr):
   """

@@ -3,7 +3,7 @@ from datetime import date
 from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import FaunaTime, Ref, SetRef, _Expr
+from faunadb.objects import FaunaTime, Ref, SetRef, _Expr, Native
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -12,15 +12,15 @@ class QueryTest(FaunaTestCase):
   def setUpClass(cls):
     super(QueryTest, cls).setUpClass()
 
-    cls.class_ref = cls.client.query(query.create(Ref("classes"), {"name": "widgets"}))["ref"]
+    cls.class_ref = cls.client.query(query.create_class({"name": "widgets"}))["ref"]
 
-    cls.n_index_ref = cls.client.query(query.create(Ref("indexes"), {
+    cls.n_index_ref = cls.client.query(query.create_index({
       "name": "widgets_by_n",
       "source": cls.class_ref,
       "terms": [{"field": ["data", "n"]}]
     }))["ref"]
 
-    cls.m_index_ref = cls.client.query(query.create(Ref("indexes"), {
+    cls.m_index_ref = cls.client.query(query.create_index({
       "name": "widgets_by_m",
       "source": cls.class_ref,
       "terms": [{"field": ["data", "m"]}]
@@ -110,7 +110,7 @@ class QueryTest(FaunaTestCase):
       "body": query.query(lambda a, b: query.concat([a, b], "/"))
     }))
 
-    self.assertEqual(self._q(query.call(Ref("functions/concat_with_slash"), "a", "b")), "a/b")
+    self.assertEqual(self._q(query.call(query.function("concat_with_slash"), "a", "b")), "a/b")
 
   def test_echo_query(self):
     body = self._q(query.query(lambda a, b: query.concat([a, b], "/")))
@@ -232,7 +232,7 @@ class QueryTest(FaunaTestCase):
     instance = self._create()
     self.assertIn("ref", instance)
     self.assertIn("ts", instance)
-    self.assertEqual(instance["class"], self.class_ref)
+    self.assertEqual(instance["ref"].class_(), self.class_ref)
 
   def test_update(self):
     ref = self._create()["ref"]
@@ -280,37 +280,37 @@ class QueryTest(FaunaTestCase):
   def test_create_class(self):
     self._q(query.create_class({"name": "class_for_test"}))
 
-    self.assertTrue(self._q(query.exists(Ref("classes/class_for_test"))))
+    self.assertTrue(self._q(query.exists(query.class_expr("class_for_test"))))
 
   def test_create_database(self):
     self.admin_client.query(query.create_database({"name": "database_for_test"}))
 
-    self.assertTrue(self.admin_client.query(query.exists(Ref("databases/database_for_test"))))
+    self.assertTrue(self.admin_client.query(query.exists(query.database("database_for_test"))))
 
   def test_create_index(self):
     self._q(query.create_index({
       "name": "index_for_test",
-      "source": Ref("classes/widgets")}))
+      "source": query.class_expr("widgets")}))
 
-    self.assertTrue(self._q(query.exists(Ref("indexes/index_for_test"))))
+    self.assertTrue(self._q(query.exists(query.index("index_for_test"))))
 
   def test_create_key(self):
     self.admin_client.query(query.create_database({"name": "database_for_key_test"}))
 
     resource = self.admin_client.query(query.create_key({
-      "database": Ref("databases/database_for_key_test"),
+      "database": query.database("database_for_key_test"),
       "role": "server"}))
 
     new_client = self.admin_client.new_session_client(secret=resource["secret"])
 
     new_client.query(query.create_class({"name": "class_for_test"}))
 
-    self.assertTrue(new_client.query(query.exists(Ref("classes/class_for_test"))))
+    self.assertTrue(new_client.query(query.exists(query.class_expr("class_for_test"))))
 
   def test_create_function(self):
     self._q(query.create_function({"name": "a_function", "body": query.query(lambda x: x)}))
 
-    self.assertTrue(self._q(query.exists(Ref("functions/a_function"))))
+    self.assertTrue(self._q(query.exists(query.function("a_function"))))
 
   #endregion
 
@@ -393,7 +393,7 @@ class QueryTest(FaunaTestCase):
     instance_client = self.client.new_session_client(secret=secret)
 
     self.assertEqual(instance_client.query(
-      query.select("ref", query.get(Ref("classes/widgets/self")))), instance_ref)
+      query.select("ref", query.get(Ref("self", Ref("widgets", Native.CLASSES))))), instance_ref)
 
     self.assertTrue(instance_client.query(query.logout(True)))
 
@@ -441,14 +441,16 @@ class QueryTest(FaunaTestCase):
     self.assertIsNotNone(self._q(query.next_id()))
 
   def test_database(self):
-    db_name = self.db_ref.id()
-    self.assertEqual(self.root_client.query(query.database(db_name)), Ref("databases", db_name))
+    self.assertEqual(self._q(query.database("db-name")), Ref("db-name", Native.DATABASES))
 
   def test_index(self):
-    self.assertEqual(self._q(query.index("widgets_by_n")), Ref("indexes/widgets_by_n"))
+    self.assertEqual(self._q(query.index("idx-name")), Ref("idx-name", Native.INDEXES))
 
   def test_class(self):
-    self.assertEqual(self._q(query.class_expr("widgets")), Ref("classes/widgets"))
+    self.assertEqual(self._q(query.class_expr("cls-name")), Ref("cls-name", Native.CLASSES))
+
+  def test_function(self):
+    self.assertEqual(self._q(query.function("fn-name")), Ref("fn-name", Native.FUNCTIONS))
 
   def test_equals(self):
     self.assertTrue(self._q(query.equals(1, 1, 1)))
@@ -546,13 +548,69 @@ class QueryTest(FaunaTestCase):
 
   #endregion
 
+  #region Recursive references
+
+  def test_nested_references(self):
+    client1 = self.create_new_database(self.admin_client, "parent-database")
+    self.create_new_database(client1, "child-database")
+
+    key = client1.query(query.create_key({
+      "database": query.database("child-database"),
+      "role": "server"
+    }))
+    client2 = client1.new_session_client(key["secret"])
+
+    client2.query(query.create_class({"name": "a_class"}))
+
+    nested_database_ref = query.database("child-database", query.database("parent-database"))
+    nested_class_ref = query.class_expr("a_class", nested_database_ref)
+
+    self.assertEqual(self._q(query.exists(nested_class_ref)), True)
+
+    parent_db_ref = Ref("parent-database", Native.DATABASES)
+    child_db_ref = Ref("child-database", Native.DATABASES, parent_db_ref)
+
+    self.assertEqual(self._q(query.paginate(query.classes(nested_database_ref)))["data"],
+                     [Ref("a_class", Native.CLASSES, child_db_ref)])
+
+  def test_nested_keys(self):
+    client = self.create_new_database(self.admin_client, "db-for-keys")
+    client.query(query.create_database({"name": "db-test"}))
+
+    server_key = client.query(query.create_key({
+      "database": query.database("db-test"),
+      "role": "server"
+    }))
+
+    admin_key = client.query(query.create_key({
+      "database": query.database("db-test"),
+      "role": "admin"
+    }))
+
+    self.assertEqual(
+      client.query(query.paginate(query.keys()))["data"],
+      [server_key["ref"], admin_key["ref"]]
+    )
+
+    self.assertEqual(
+      self.admin_client.query(query.paginate(query.keys(query.database("db-for-keys"))))["data"],
+      [server_key["ref"], admin_key["ref"]]
+    )
+
+  def create_new_database(self, client, name):
+    client.query(query.create_database({"name": name}))
+    key = client.query(query.create_key({"database": query.database(name), "role": "admin"}))
+    return client.new_session_client(secret=key["secret"])
+
+  #endregion
+
   def test_equality(self):
     self.assertEqual(query.var("x"), _Expr({"var": "x"}))
-    self.assertEqual(query.match(Ref("indexes/widgets_by_name"), "computer"),
-                     _Expr({"match": Ref("indexes/widgets_by_name"), "terms": "computer"}))
+    self.assertEqual(query.match(Ref("widgets_by_name", Native.INDEXES), "computer"),
+                     _Expr({"match": Ref("widgets_by_name", Native.INDEXES), "terms": "computer"}))
 
   def test_repr(self):
     self.assertRegexCompat(repr(query.var("x")), r"Expr\({u?'var': u?'x'}\)")
-    self.assertRegexCompat(repr(Ref("classes")), r"Ref\(u?'classes'\)")
-    self.assertRegexCompat(repr(SetRef(query.match(Ref("indexes/widgets")))),
-                           r"SetRef\({u?'match': Ref\(u?'indexes/widgets'\)}\)")
+    self.assertRegexCompat(repr(Ref("classes")), r"Ref\(id=classes\)")
+    self.assertRegexCompat(repr(SetRef(query.match(query.index("widgets")))),
+                           r"SetRef\({u?'match': Expr\({u?'index': u?'widgets'}\)}\)")

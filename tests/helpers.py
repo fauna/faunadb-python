@@ -11,7 +11,6 @@ from requests import codes
 
 from faunadb._json import to_json, parse_json
 from faunadb.client import FaunaClient
-from faunadb.objects import Ref
 from faunadb import query
 
 _FAUNA_ROOT_KEY = environ["FAUNA_ROOT_KEY"]
@@ -31,20 +30,20 @@ class FaunaTestCase(TestCase):
     cls.root_client = cls._get_client()
 
     rnd = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
-    db_name = "faunadb-python-test" + rnd
-    cls.db_ref = Ref("databases", db_name)
+    cls.db_name = "faunadb-python-test" + rnd
+    cls.db_ref = query.database(cls.db_name)
 
     if cls.root_client.query(query.exists(cls.db_ref)):
       cls.root_client.query(query.delete(cls.db_ref))
 
-    cls.root_client.query(query.create(Ref("databases"), {"name": db_name}))
+    cls.root_client.query(query.create_database({"name": cls.db_name}))
 
     cls.server_key = cls.root_client.query(
-      query.create(Ref("keys"), {"database": cls.db_ref, "role": "server"}))["secret"]
+      query.create_key({"database": cls.db_ref, "role": "server"}))["secret"]
     cls.client = cls.root_client.new_session_client(secret=cls.server_key)
 
     cls.admin_key = cls.root_client.query(
-      query.create(Ref("keys"), {"database": cls.db_ref, "role": "admin"}))["secret"]
+      query.create_key({"database": cls.db_ref, "role": "admin"}))["secret"]
     cls.admin_client = cls.root_client.new_session_client(secret=cls.admin_key)
 
   @classmethod

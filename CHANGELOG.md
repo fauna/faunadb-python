@@ -1,6 +1,9 @@
-## 1.1.1.dev1 (Future release)
+## 2.0.0.dev1 (Future release)
+
+- Added support for recursive references
 
 ## 1.1.0 (September 12, 2017)
+
 - Added `call`, `query`, and `create_function` query functions
 - Added `@query` type support
 
