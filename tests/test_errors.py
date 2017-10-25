@@ -4,7 +4,7 @@ from faunadb import query
 from faunadb.errors import ErrorData, Failure, BadRequest, InternalError, \
   NotFound, PermissionDenied, Unauthorized, UnavailableError, UnexpectedError
 from faunadb.objects import Native
-from faunadb.query import create, create_class, create_key, class_expr, add, get, var, ref, _Expr
+from faunadb.query import create, create_class, create_key, class_, add, get, var, ref, _Expr
 
 from tests.helpers import FaunaTestCase, mock_client
 
@@ -95,7 +95,7 @@ class ErrorsTest(FaunaTestCase):
     # Must be a reference to a real class or else we get InvalidExpression
     self.client.query(create_class({"name": "foofaws"}))
     self._assert_query_error(
-      get(ref(class_expr("foofaws"), "123")),
+      get(ref(class_("foofaws"), "123")),
       NotFound,
       "instance not found")
 
@@ -104,7 +104,7 @@ class ErrorsTest(FaunaTestCase):
 
   def test_instance_already_exists(self):
     self.client.query(create_class({"name": "duplicates"}))
-    r = self.client.query(create(class_expr("duplicates"), {}))["ref"]
+    r = self.client.query(create(class_("duplicates"), {}))["ref"]
     self._assert_query_error(create(r, {}), BadRequest, "instance already exists", ["create"])
   #endregion
 
