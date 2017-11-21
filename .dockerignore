@@ -1,0 +1,16 @@
+*.swp
+*.egg
+*.pyc
+.idea
+.Python
+.git/
+.gitignore
+.eggs/
+.coverage
+build
+dist
+docs/_build
+htmlcov/
+faunadb.egg-info
+venv
+venv3
