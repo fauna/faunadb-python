@@ -7,13 +7,11 @@ def deprecated(reason):
     @functools.wraps(old_func)
     def new_func(*args, **kvargs):
       fmt = '{name}: {reason}'
-      warnings.simplefilter('always', DeprecationWarning)
       warnings.warn(
         fmt.format(name=old_func.__name__, reason=reason),
         category=DeprecationWarning,
         stacklevel=2
       )
-      warnings.simplefilter('default', DeprecationWarning)
       return old_func(*args, **kvargs)
 
     return new_func
