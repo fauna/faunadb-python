@@ -6,7 +6,7 @@ def deprecated(reason):
 
     @functools.wraps(old_func)
     def new_func(*args, **kvargs):
-      fmt = '{name}: {reason}'
+      fmt = "{name}: {reason}"
       warnings.warn(
         fmt.format(name=old_func.__name__, reason=reason),
         category=DeprecationWarning,

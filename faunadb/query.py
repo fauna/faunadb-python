@@ -70,7 +70,7 @@ def var(var_name):
   return _fn({"var": var_name})
 
 
-@deprecated('use if_ instead')
+@deprecated("use if_ instead")
 def if_expr(condition, then, else_):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
   return if_(condition, then, else_)
@@ -120,7 +120,7 @@ def lambda_query(func):
     return lambda_(vars, func(*[var(v) for v in vars]))
 
 
-@deprecated('use lambda_ instaed')
+@deprecated("use lambda_ instead")
 def lambda_expr(var_name_or_pattern, expr):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return lambda_(var_name_or_pattern, expr)
@@ -146,7 +146,7 @@ def query(_lambda):
 
 #region Collection functions
 
-@deprecated('use map_ instead')
+@deprecated("use map_ instead")
 def map_expr(expr, collection):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return map_(expr, collection)
@@ -162,7 +162,7 @@ def foreach(expr, collection):
   return _fn({"foreach": expr, "collection": collection})
 
 
-@deprecated('use filter_ instead')
+@deprecated("use filter_ instead")
 def filter_expr(expr, collection):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return filter_(expr, collection)
@@ -393,7 +393,7 @@ def index(index_name, scope=None):
   return _params({"index": index_name}, {"scope": scope})
 
 
-@deprecated('use class_ instead')
+@deprecated("use class_ instead")
 def class_expr(class_name, scope=None):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return class_(class_name, scope)
@@ -476,7 +476,7 @@ def gte(*values):
   return _fn({"gte": _varargs(values)})
 
 
-@deprecated('use and_ instead')
+@deprecated("use and_ instead")
 def and_expr(*booleans):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return and_(*booleans)
@@ -487,7 +487,7 @@ def and_(*booleans):
   return _fn({"and": _varargs(booleans)})
 
 
-@deprecated('use or_ instead')
+@deprecated("use or_ instead")
 def or_expr(*booleans):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return or_(*booleans)
@@ -498,7 +498,7 @@ def or_(*booleans):
   return _fn({"or": _varargs(booleans)})
 
 
-@deprecated('use not_ instead')
+@deprecated("use not_ instead")
 def not_expr(boolean):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return not_(boolean)
