@@ -39,7 +39,7 @@ class Page(object):
     Iterator that keeps getting new pages of a set.
 
     :param map_lambda:
-      If present, a :any:`lambda_expr` for mapping set elements.
+      If present, a :any:`lambda_` for mapping set elements.
     :param mapper:
       Mapping Python function used on each page element.
     :param page_size:
@@ -51,7 +51,7 @@ class Page(object):
     def get_page(**kwargs):
       queried = query.paginate(set_query, **kwargs)
       if map_lambda is not None:
-        queried = query.map_expr(map_lambda, queried)
+        queried = query.map_(map_lambda, queried)
       return Page.from_raw(client.query(queried))
 
     page = get_page(size=page_size)

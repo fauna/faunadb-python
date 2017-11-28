@@ -4,7 +4,7 @@ doc:
 	sphinx-build -E -b html docs docs/_build/html
 
 test:
-	python -m unittest discover
+	python -W error -m unittest discover
 
 coverage:
 	coverage run -m unittest discover

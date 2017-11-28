@@ -38,7 +38,7 @@ class QueryTest(FaunaTestCase):
 
   @classmethod
   def _wait_for_index(cls, *refs):
-    expr = query.map_expr(lambda ref: query.select(["active"], query.get(ref)), refs)
+    expr = query.map_(lambda ref: query.select(["active"], query.get(ref)), refs)
     while not all(active for active in cls._q(expr)):
       sleep(1)
 
@@ -81,8 +81,8 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.let({"x": 1}, query.var("x"))), 1)
 
   def test_if(self):
-    self.assertEqual(self._q(query.if_expr(True, "t", "f")), "t")
-    self.assertEqual(self._q(query.if_expr(False, "t", "f")), "f")
+    self.assertEqual(self._q(query.if_(True, "t", "f")), "t")
+    self.assertEqual(self._q(query.if_(False, "t", "f")), "f")
 
   def test_do(self):
     ref = self._create()["ref"]
@@ -92,16 +92,16 @@ class QueryTest(FaunaTestCase):
   def test_lambda_query(self):
     invalid_lambda = lambda: query.add(1, 2)
     self.assertRaises(ValueError,
-                      lambda: self._q(query.map_expr(query.lambda_query(invalid_lambda), [])))
+                      lambda: self._q(query.map_(query.lambda_query(invalid_lambda), [])))
 
-    expr = query.map_expr(query.lambda_query(lambda a: query.add(a, 1)),
-                          [1, 2, 3])
+    expr = query.map_(query.lambda_query(lambda a: query.add(a, 1)),
+                      [1, 2, 3])
     self.assertEqual(self._q(expr), [2, 3, 4])
 
   def test_lambda_query_multiple_args(self):
     #pylint: disable=unnecessary-lambda
-    expr = query.map_expr(query.lambda_query(lambda a, b: query.add(a, b)),
-                          [[1, 1], [2, 2], [3, 3]])
+    expr = query.map_(query.lambda_query(lambda a, b: query.add(a, b)),
+                      [[1, 1], [2, 2], [3, 3]])
     self.assertEqual(self._q(expr), [2, 4, 6])
 
   def test_call_function(self):
@@ -125,7 +125,7 @@ class QueryTest(FaunaTestCase):
   def test_map(self):
     # This is also test_lambda_expr (can't test that alone)
     self.assertEqual(
-      self._q(query.map_expr(lambda a: query.multiply(2, a), [1, 2, 3])),
+      self._q(query.map_(lambda a: query.multiply(2, a), [1, 2, 3])),
       [2, 4, 6])
 
     self._create(n=10)
@@ -133,7 +133,7 @@ class QueryTest(FaunaTestCase):
     self._create(n=10)
 
     page = query.paginate(query.match(self.n_index_ref, 10))
-    ns = query.map_expr(lambda a: query.select(["data", "n"], query.get(a)), page)
+    ns = query.map_(lambda a: query.select(["data", "n"], query.get(a)), page)
     self.assertEqual(self._q(ns), {"data": [10, 10, 10]})
 
   def test_foreach(self):
@@ -143,7 +143,7 @@ class QueryTest(FaunaTestCase):
       self.assertFalse(self._q(query.exists(ref)))
 
   def test_filter(self):
-    evens = query.filter_expr(lambda a: query.equals(query.modulo(a, 2), 0), [1, 2, 3, 4])
+    evens = query.filter_(lambda a: query.equals(query.modulo(a, 2), 0), [1, 2, 3, 4])
     self.assertEqual(self._q(evens), [2, 4])
 
     # Works on page too
@@ -152,7 +152,7 @@ class QueryTest(FaunaTestCase):
     self._create(n=11)
 
     page = query.paginate(query.match(self.n_index_ref, 11))
-    refs_with_m = query.filter_expr(lambda a: query.contains(["data", "m"], query.get(a)), page)
+    refs_with_m = query.filter_(lambda a: query.contains(["data", "m"], query.get(a)), page)
     self.assertEqual(self._q(refs_with_m), {"data": [ref]})
 
   def test_take(self):
@@ -280,7 +280,7 @@ class QueryTest(FaunaTestCase):
   def test_create_class(self):
     self._q(query.create_class({"name": "class_for_test"}))
 
-    self.assertTrue(self._q(query.exists(query.class_expr("class_for_test"))))
+    self.assertTrue(self._q(query.exists(query.class_("class_for_test"))))
 
   def test_create_database(self):
     self.admin_client.query(query.create_database({"name": "database_for_test"}))
@@ -290,7 +290,7 @@ class QueryTest(FaunaTestCase):
   def test_create_index(self):
     self._q(query.create_index({
       "name": "index_for_test",
-      "source": query.class_expr("widgets")}))
+      "source": query.class_("widgets")}))
 
     self.assertTrue(self._q(query.exists(query.index("index_for_test"))))
 
@@ -305,7 +305,7 @@ class QueryTest(FaunaTestCase):
 
     new_client.query(query.create_class({"name": "class_for_test"}))
 
-    self.assertTrue(new_client.query(query.exists(query.class_expr("class_for_test"))))
+    self.assertTrue(new_client.query(query.exists(query.class_("class_for_test"))))
 
   def test_create_function(self):
     self._q(query.create_function({"name": "a_function", "body": query.query(lambda x: x)}))
@@ -447,7 +447,7 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.index("idx-name")), Ref("idx-name", Native.INDEXES))
 
   def test_class(self):
-    self.assertEqual(self._q(query.class_expr("cls-name")), Ref("cls-name", Native.CLASSES))
+    self.assertEqual(self._q(query.class_("cls-name")), Ref("cls-name", Native.CLASSES))
 
   def test_function(self):
     self.assertEqual(self._q(query.function("fn-name")), Ref("fn-name", Native.FUNCTIONS))
@@ -516,22 +516,22 @@ class QueryTest(FaunaTestCase):
     self.assertTrue(self._q(query.gte(1, 1)))
 
   def test_and(self):
-    self.assertFalse(self._q(query.and_expr(True, True, False)))
-    self.assertTrue(self._q(query.and_expr(True, True, True)))
-    self.assertTrue(self._q(query.and_expr(True)))
-    self.assertFalse(self._q(query.and_expr(False)))
-    self._assert_bad_query(query.and_expr())
+    self.assertFalse(self._q(query.and_(True, True, False)))
+    self.assertTrue(self._q(query.and_(True, True, True)))
+    self.assertTrue(self._q(query.and_(True)))
+    self.assertFalse(self._q(query.and_(False)))
+    self._assert_bad_query(query.and_())
 
   def test_or(self):
-    self.assertTrue(self._q(query.or_expr(False, False, True)))
-    self.assertFalse(self._q(query.or_expr(False, False, False)))
-    self.assertTrue(self._q(query.or_expr(True)))
-    self.assertFalse(self._q(query.or_expr(False)))
-    self._assert_bad_query(query.or_expr())
+    self.assertTrue(self._q(query.or_(False, False, True)))
+    self.assertFalse(self._q(query.or_(False, False, False)))
+    self.assertTrue(self._q(query.or_(True)))
+    self.assertFalse(self._q(query.or_(False)))
+    self._assert_bad_query(query.or_())
 
   def test_not(self):
-    self.assertFalse(self._q(query.not_expr(True)))
-    self.assertTrue(self._q(query.not_expr(False)))
+    self.assertFalse(self._q(query.not_(True)))
+    self.assertTrue(self._q(query.not_(False)))
 
   #endregion
 
@@ -563,7 +563,7 @@ class QueryTest(FaunaTestCase):
     client2.query(query.create_class({"name": "a_class"}))
 
     nested_database_ref = query.database("child-database", query.database("parent-database"))
-    nested_class_ref = query.class_expr("a_class", nested_database_ref)
+    nested_class_ref = query.class_("a_class", nested_database_ref)
 
     self.assertEqual(self._q(query.exists(nested_class_ref)), True)
 

@@ -62,7 +62,7 @@ class SerializationTest(TestCase):
     self.assertJson(query.var("x"), '{"var":"x"}')
 
   def test_if_expr(self):
-    self.assertJson(query.if_expr(True, "true", "false"),
+    self.assertJson(query.if_(True, "true", "false"),
                     '{"else":"false","if":true,"then":"true"}')
 
   def test_do(self):
@@ -76,8 +76,8 @@ class SerializationTest(TestCase):
                     '{"expr":{"add":[{"var":"a"},{"var":"b"}]},"lambda":["a","b"]}')
 
   def test_lambda_expr(self):
-    self.assertJson(query.lambda_expr("a", query.var("a")), '{"expr":{"var":"a"},"lambda":"a"}')
-    self.assertJson(query.lambda_expr(["a", "b"], query.add(query.var("a"), query.var("b"))),
+    self.assertJson(query.lambda_("a", query.var("a")), '{"expr":{"var":"a"},"lambda":"a"}')
+    self.assertJson(query.lambda_(["a", "b"], query.add(query.var("a"), query.var("b"))),
                     '{"expr":{"add":[{"var":"a"},{"var":"b"}]},"lambda":["a","b"]}')
 
   #endregion
@@ -85,7 +85,7 @@ class SerializationTest(TestCase):
   #region Collection functions
 
   def test_map_expr(self):
-    self.assertJson(query.map_expr(lambda a: a, [1, 2, 3]),
+    self.assertJson(query.map_(lambda a: a, [1, 2, 3]),
                     '{"collection":[1,2,3],"map":{"expr":{"var":"a"},"lambda":"a"}}')
 
   def test_foreach(self):
@@ -93,7 +93,7 @@ class SerializationTest(TestCase):
                     '{"collection":[1,2,3],"foreach":{"expr":{"var":"a"},"lambda":"a"}}')
 
   def test_filter_expr(self):
-    self.assertJson(query.filter_expr(lambda a: a, [True, False, True]),
+    self.assertJson(query.filter_(lambda a: a, [True, False, True]),
                     '{"collection":[true,false,true],"filter":{"expr":{"var":"a"},"lambda":"a"}}')
 
   def test_take(self):
@@ -113,17 +113,17 @@ class SerializationTest(TestCase):
   #region Read functions
 
   def test_get(self):
-    self.assertJson(query.get(query.class_expr("widget")), '{"get":{"class":"widget"}}')
-    self.assertJson(query.get(query.class_expr("widget"), ts=123),
+    self.assertJson(query.get(query.class_("widget")), '{"get":{"class":"widget"}}')
+    self.assertJson(query.get(query.class_("widget"), ts=123),
                     '{"get":{"class":"widget"},"ts":123}')
 
   def test_paginate(self):
-    self.assertJson(query.paginate(query.class_expr("widget")), '{"paginate":{"class":"widget"}}')
-    self.assertJson(query.paginate(query.class_expr("widget"),
+    self.assertJson(query.paginate(query.class_("widget")), '{"paginate":{"class":"widget"}}')
+    self.assertJson(query.paginate(query.class_("widget"),
                                    size=1,
                                    ts=123,
-                                   after=query.ref(query.class_expr("widget"), "1"),
-                                   before=query.ref(query.class_expr("widget"), "10"),
+                                   after=query.ref(query.class_("widget"), "1"),
+                                   before=query.ref(query.class_("widget"), "10"),
                                    events=True,
                                    sources=True),
                     ('{"after":{"id":"1","ref":{"class":"widget"}},'
@@ -132,8 +132,8 @@ class SerializationTest(TestCase):
                      '"size":1,"sources":true,"ts":123}'))
 
   def test_exists(self):
-    self.assertJson(query.exists(query.class_expr("widget")), '{"exists":{"class":"widget"}}')
-    self.assertJson(query.exists(query.class_expr("widget"), ts=123),
+    self.assertJson(query.exists(query.class_("widget")), '{"exists":{"class":"widget"}}')
+    self.assertJson(query.exists(query.class_("widget"), ts=123),
                     '{"exists":{"class":"widget"},"ts":123}')
 
   #endregion
@@ -143,36 +143,36 @@ class SerializationTest(TestCase):
   def test_create(self):
     json = ('{"create":{"class":"widget"},'
             '"params":{"object":{"data":{"object":{"name":"Laptop"}}}}}')
-    self.assertJson(query.create(query.class_expr("widget"), {
+    self.assertJson(query.create(query.class_("widget"), {
       "data": {"name": "Laptop"}
     }), json)
 
   def test_update(self):
     json = ('{"params":{"object":{"data":{"object":{"name":"Laptop"}}}},'
             '"update":{"class":"widget"}}')
-    self.assertJson(query.update(query.class_expr("widget"), {
+    self.assertJson(query.update(query.class_("widget"), {
       "data": {"name": "Laptop"}
     }), json)
 
   def test_replace(self):
     json = ('{"params":{"object":{"data":{"object":{"name":"Laptop"}}}},'
             '"replace":{"class":"widget"}}')
-    self.assertJson(query.replace(query.class_expr("widget"), {
+    self.assertJson(query.replace(query.class_("widget"), {
       "data": {"name": "Laptop"}
     }), json)
 
   def test_delete(self):
-    self.assertJson(query.delete(query.class_expr("widget")), '{"delete":{"class":"widget"}}')
+    self.assertJson(query.delete(query.class_("widget")), '{"delete":{"class":"widget"}}')
 
   def test_insert(self):
     json = ('{"action":"create","insert":{"class":"widget"},'
             '"params":{"object":{"data":{"object":{"name":"Laptop"}}}},"ts":123}')
-    self.assertJson(query.insert(query.class_expr("widget"), ts=123, action="create", params={
+    self.assertJson(query.insert(query.class_("widget"), ts=123, action="create", params={
       "data": {"name": "Laptop"}
     }), json)
 
   def test_remove(self):
-    self.assertJson(query.remove(query.class_expr("widget"), ts=123, action="create"),
+    self.assertJson(query.remove(query.class_("widget"), ts=123, action="create"),
                     '{"action":"create","remove":{"class":"widget"},"ts":123}')
 
   def test_create_class(self):
@@ -185,7 +185,7 @@ class SerializationTest(TestCase):
 
   def test_create_index(self):
     self.assertJson(
-      query.create_index({"name": "index-name", "source": query.class_expr("widget")}),
+      query.create_index({"name": "index-name", "source": query.class_("widget")}),
       '{"create_index":{"object":{"name":"index-name","source":{"class":"widget"}}}}'
     )
 
@@ -238,7 +238,7 @@ class SerializationTest(TestCase):
 
   def test_login(self):
     self.assertJson(
-      query.login(query.ref(query.class_expr("widget"), "1"), {"password": "abracadabra"}),
+      query.login(query.ref(query.class_("widget"), "1"), {"password": "abracadabra"}),
       '{"login":{"id":"1","ref":{"class":"widget"}},"params":{"object":{"password":"abracadabra"}}}'
     )
 
@@ -246,7 +246,7 @@ class SerializationTest(TestCase):
     self.assertJson(query.logout(True), '{"logout":true}')
 
   def test_identify(self):
-    self.assertJson(query.identify(query.ref(query.class_expr("widget"), "1"), "abracadabra"),
+    self.assertJson(query.identify(query.ref(query.class_("widget"), "1"), "abracadabra"),
                     '{"identify":{"id":"1","ref":{"class":"widget"}},"password":"abracadabra"}')
 
   #endregion
@@ -290,7 +290,7 @@ class SerializationTest(TestCase):
     self.assertJson(query.index("index-name"), '{"index":"index-name"}')
 
   def test_class(self):
-    self.assertJson(query.class_expr("class-name"), '{"class":"class-name"}')
+    self.assertJson(query.class_("class-name"), '{"class":"class-name"}')
 
   def test_equals(self):
     self.assertJson(query.equals(1), '{"equals":1}')
@@ -361,17 +361,17 @@ class SerializationTest(TestCase):
     self.assertJson(query.gte([1, 2, 3]), '{"gte":[1,2,3]}')
 
   def test_and_expr(self):
-    self.assertJson(query.and_expr(True), '{"and":true}')
-    self.assertJson(query.and_expr(True, False, False), '{"and":[true,false,false]}')
-    self.assertJson(query.and_expr([True, False, False]), '{"and":[true,false,false]}')
+    self.assertJson(query.and_(True), '{"and":true}')
+    self.assertJson(query.and_(True, False, False), '{"and":[true,false,false]}')
+    self.assertJson(query.and_([True, False, False]), '{"and":[true,false,false]}')
 
   def test_or_expr(self):
-    self.assertJson(query.or_expr(False), '{"or":false}')
-    self.assertJson(query.or_expr(False, True, True), '{"or":[false,true,true]}')
-    self.assertJson(query.or_expr([False, True, True]), '{"or":[false,true,true]}')
+    self.assertJson(query.or_(False), '{"or":false}')
+    self.assertJson(query.or_(False, True, True), '{"or":[false,true,true]}')
+    self.assertJson(query.or_([False, True, True]), '{"or":[false,true,true]}')
 
   def test_not_expr(self):
-    self.assertJson(query.not_expr(False), '{"not":false}')
+    self.assertJson(query.not_(False), '{"not":false}')
 
   #endregion
 

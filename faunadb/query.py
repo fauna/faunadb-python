@@ -17,6 +17,7 @@ For example: ``select("a", {"a": Ref("123", Ref("widgets", Native.CLASSES))})``.
 # pylint: disable=invalid-name, redefined-builtin
 
 from types import FunctionType
+from faunadb.deprecated import deprecated
 
 #region Basic forms
 
@@ -69,7 +70,13 @@ def var(var_name):
   return _fn({"var": var_name})
 
 
+@deprecated("use if_ instead")
 def if_expr(condition, then, else_):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return if_(condition, then, else_)
+
+
+def if_(condition, then, else_):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
   return _fn({"if": condition, "then": then, "else": else_})
 
@@ -91,14 +98,14 @@ def lambda_query(func):
       # }
 
   You usually don't need to call this directly as lambdas in queries will be converted for you.
-  For example: ``query.map_expr(lambda a: query.add(a, 1), collection)``.
+  For example: ``query.map_(lambda a: query.add(a, 1), collection)``.
 
-  You can also use :any:`lambda_expr` directly.
+  You can also use :any:`lambda_` directly.
 
   :param func:
     Takes one or more :any:`var` expressions and uses them to construct an expression.
     If this has more than one argument, the lambda destructures an array argument.
-    (To destructure single-element arrays use :any:`lambda_expr`.)
+    (To destructure single-element arrays use :any:`lambda_`.)
   """
 
   vars = func.__code__.co_varnames
@@ -108,12 +115,18 @@ def lambda_query(func):
     raise ValueError("Function must take at least 1 argument.")
   elif n_args == 1:
     v = vars[0]
-    return lambda_expr(v, func(var(v)))
+    return lambda_(v, func(var(v)))
   else:
-    return lambda_expr(vars, func(*[var(v) for v in vars]))
+    return lambda_(vars, func(*[var(v) for v in vars]))
 
 
+@deprecated("use lambda_ instead")
 def lambda_expr(var_name_or_pattern, expr):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return lambda_(var_name_or_pattern, expr)
+
+
+def lambda_(var_name_or_pattern, expr):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
   return _fn({"lambda": var_name_or_pattern, "expr": expr})
 
@@ -133,7 +146,13 @@ def query(_lambda):
 
 #region Collection functions
 
+@deprecated("use map_ instead")
 def map_expr(expr, collection):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return map_(expr, collection)
+
+
+def map_(expr, collection):
   """See the `docs <https://fauna.com/documentation/queries#collection_functions>`__."""
   return _fn({"map": expr, "collection": collection})
 
@@ -143,7 +162,13 @@ def foreach(expr, collection):
   return _fn({"foreach": expr, "collection": collection})
 
 
+@deprecated("use filter_ instead")
 def filter_expr(expr, collection):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return filter_(expr, collection)
+
+
+def filter_(expr, collection):
   """See the `docs <https://fauna.com/documentation/queries#collection_functions>`__."""
   return _fn({"filter": expr, "collection": collection})
 
@@ -368,7 +393,13 @@ def index(index_name, scope=None):
   return _params({"index": index_name}, {"scope": scope})
 
 
+@deprecated("use class_ instead")
 def class_expr(class_name, scope=None):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return class_(class_name, scope)
+
+
+def class_(class_name, scope=None):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _params({"class": class_name}, {"scope": scope})
 
@@ -445,17 +476,35 @@ def gte(*values):
   return _fn({"gte": _varargs(values)})
 
 
+@deprecated("use and_ instead")
 def and_expr(*booleans):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return and_(*booleans)
+
+
+def and_(*booleans):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"and": _varargs(booleans)})
 
 
+@deprecated("use or_ instead")
 def or_expr(*booleans):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return or_(*booleans)
+
+
+def or_(*booleans):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"or": _varargs(booleans)})
 
 
+@deprecated("use not_ instead")
 def not_expr(boolean):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return not_(boolean)
+
+
+def not_(boolean):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"not": boolean})
 
