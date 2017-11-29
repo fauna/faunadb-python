@@ -81,6 +81,9 @@ If you use FaunaDB cloud, this is the password you log in with.
 Then run ``make test``.
 To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTest.test_ping``.
 
+Tests can also be run via a Docker container with ``FAUNA_ROOT_KEY="your-cloud-secret" make docker-test``
+(an alternate Alpine-based Python image can be provided via `RUNTIME_IMAGE`).
+
 
 Coverage
 ~~~~~~~~
