@@ -1,8 +1,6 @@
 FaunaDB Python
 ==============
 
-.. image:: https://img.shields.io/travis/fauna/faunadb-python/master.svg?maxAge=21600
- :target: https://travis-ci.org/fauna/faunadb-python
 .. image:: https://img.shields.io/codecov/c/github/fauna/faunadb-python/master.svg?maxAge=21600
  :target: https://codecov.io/gh/fauna/faunadb-python
 .. image:: https://img.shields.io/pypi/v/faunadb.svg?maxAge=21600
