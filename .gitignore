@@ -12,3 +12,4 @@ htmlcov/
 faunadb.egg-info
 venv
 venv3
+results/

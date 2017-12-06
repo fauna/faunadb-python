@@ -14,3 +14,7 @@ htmlcov/
 faunadb.egg-info
 venv
 venv3
+
+# Docker/Jenkins
+Dockerfile.test
+results/

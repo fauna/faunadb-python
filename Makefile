@@ -17,6 +17,10 @@ ifdef FAUNA_PORT
 DOCKER_RUN_FLAGS += -e FAUNA_PORT=$(FAUNA_PORT)
 endif
 
+ifdef FAUNA_TIMEOUT
+DOCKER_RUN_FLAGS += -e FAUNA_TIMEOUT=$(FAUNA_TIMEOUT)
+endif
+
 all: test lint doc
 
 doc:
@@ -35,6 +39,12 @@ lint-faunadb:
 
 lint-tests:
 	pylint tests --reports=n --indent-string='  ' --indent-after-paren=2 --disable=invalid-name,locally-disabled,missing-docstring,too-few-public-methods,too-many-arguments,no-member,no-self-use,protected-access,relative-import,too-many-public-methods
+
+jenkins-test:
+	python -W all -m nose2 --with-coverage --coverage-report xml --plugin nose2.plugins.junitxml --junit-xml && mv coverage.xml nose2-junit.xml results/ || { code=$$?; mv coverage.xml nose2-junit.xml results/; exit $$code; }
+
+docker-wait:
+	dockerize -wait $(FAUNA_SCHEME)://$(FAUNA_DOMAIN):$(FAUNA_PORT)/ping -timeout $(FAUNA_TIMEOUT)
 
 docker-test:
 	docker build -f Dockerfile.test -t faunadb-python-test:latest --build-arg RUNTIME_IMAGE=$(RUNTIME_IMAGE) .
