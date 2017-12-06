@@ -14,9 +14,14 @@ requires = [
   "future",
 ]
 
+tests_requires = [
+  "nose2",
+  "nose2[coverage_plugin]",
+]
+
 extras_require = {
   "doc": ["sphinx", "sphinx_rtd_theme"],
-  "coverage": ["coverage"],
+  "test": tests_requires,
   "lint": ["pylint"],
 }
 
@@ -49,5 +54,6 @@ setup(
   packages=["faunadb"],
   install_requires=requires,
   extras_require=extras_require,
-  test_suite="tests",
+  tests_require=tests_requires,
+  test_suite="nose2.collector.collector",
 )

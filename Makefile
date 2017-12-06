@@ -23,19 +23,17 @@ doc:
 	sphinx-build -E -b html docs docs/_build/html
 
 test:
-	python -W error -m unittest discover
+	python -W all -m nose2
 
 coverage:
-	coverage run -m unittest discover
-	coverage report -m
-	coverage html
+	python -W all -m nose2 --with-coverage --coverage-report html
 
-lint: lint_faunadb lint_tests
+lint: lint-faunadb lint-tests
 
-lint_faunadb:
+lint-faunadb:
 	pylint faunadb --reports=n --indent-string='  ' --indent-after-paren=2 --disable=invalid-name,locally-disabled,missing-docstring,too-few-public-methods,too-many-arguments
 
-lint_tests:
+lint-tests:
 	pylint tests --reports=n --indent-string='  ' --indent-after-paren=2 --disable=invalid-name,locally-disabled,missing-docstring,too-few-public-methods,too-many-arguments,no-member,no-self-use,protected-access,relative-import,too-many-public-methods
 
 docker-test:
