@@ -21,6 +21,10 @@ from faunadb.deprecated import deprecated
 
 #region Basic forms
 
+def abort(msg):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"abort": msg})
+
 def ref(class_ref, id=None):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
   if id is None:

@@ -49,6 +49,12 @@ class SerializationTest(TestCase):
 
   #region Basic forms
 
+  def test_abort(self):
+    self.assertJson(
+      query.abort("aborting"),
+      '{"abort":"aborting"}'
+    )
+
   def test_at(self):
     self.assertJson(
       query.at(datetime.fromtimestamp(0, iso8601.UTC), query.get(query.index("widgets"))),

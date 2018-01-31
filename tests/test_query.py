@@ -63,6 +63,9 @@ class QueryTest(FaunaTestCase):
 
   #region Basic forms
 
+  def test_abort(self):
+    self._assert_bad_query(query.abort("aborting"))
+
   def test_at(self):
     instance = self._create(n=1)
     ref = instance["ref"]
