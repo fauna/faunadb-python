@@ -23,7 +23,7 @@ class ClientLoggerTest(FaunaTestCase):
         self.assertEqual(line, "  }\n")
         break
     self.assertEqual(read_line(), "  Response JSON: {\n")
-    self.assertEqual(read_line(), '    "resource": "Scope global is OK"\n')
+    self.assertEqual(read_line(), '    "resource": "Scope write is OK"\n')
     self.assertEqual(read_line(), "  }\n")
     self.assertRegexCompat(
       read_line(),
