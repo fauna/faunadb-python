@@ -448,8 +448,8 @@ class QueryTest(FaunaTestCase):
 
   #region Miscellaneous functions
 
-  def test_next_id(self):
-    self.assertIsNotNone(self._q(query.next_id()))
+  def test_new_id(self):
+    self.assertIsNotNone(self._q(query.new_id()))
 
   def test_database(self):
     self.assertEqual(self._q(query.database("db-name")), Ref("db-name", Native.DATABASES))

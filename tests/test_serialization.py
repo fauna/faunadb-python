@@ -287,8 +287,8 @@ class SerializationTest(TestCase):
 
   #region Miscellaneous functions
 
-  def test_next_id(self):
-    self.assertJson(query.next_id(), '{"next_id":null}')
+  def test_new_id(self):
+    self.assertJson(query.new_id(), '{"new_id":null}')
 
   def test_database(self):
     self.assertJson(query.database("db-name"), '{"database":"db-name"}')

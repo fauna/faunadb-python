@@ -3,6 +3,8 @@
 - Added support for recursive references
 - Added `abort` function
 - Added `normalizer` argument to `casefold` function
+- Added `new_id` function
+- Deprecated `next_id` function in favor of `new_id`
 
 ## 1.1.0 (September 12, 2017)
 
