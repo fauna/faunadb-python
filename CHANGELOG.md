@@ -2,6 +2,7 @@
 
 - Added support for recursive references
 - Added `abort` function
+- Added `normalizer` argument to `casefold` function
 
 ## 1.1.0 (September 12, 2017)
 

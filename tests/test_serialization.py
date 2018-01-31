@@ -265,6 +265,7 @@ class SerializationTest(TestCase):
 
   def test_casefold(self):
     self.assertJson(query.casefold("a string"), '{"casefold":"a string"}')
+    self.assertJson(query.casefold("a string", "NFD"), '{"casefold":"a string","normalizer":"NFD"}')
 
   #endregion
 

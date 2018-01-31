@@ -356,9 +356,9 @@ def concat(strings, separator=None):
   return _params({"concat": strings}, {"separator": separator})
 
 
-def casefold(string):
+def casefold(string, normalizer=None):
   """See the `docs <https://fauna.com/documentation/queries#string_functions>`__."""
-  return _fn({"casefold": string})
+  return _params({"casefold": string}, {"normalizer": normalizer})
 
 #endregion
 

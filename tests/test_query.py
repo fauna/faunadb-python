@@ -417,6 +417,14 @@ class QueryTest(FaunaTestCase):
   def test_casefold(self):
     self.assertEqual(self._q(query.casefold("Hen Wen")), "hen wen")
 
+    # https://unicode.org/reports/tr15/
+    self.assertEqual(self._q(query.casefold(u'\u212B', "NFD")), u'A\u030A')
+    self.assertEqual(self._q(query.casefold(u'\u212B', "NFC")), u'\u00C5')
+    self.assertEqual(self._q(query.casefold(u'\u1E9B\u0323', "NFKD")), u'\u0073\u0323\u0307')
+    self.assertEqual(self._q(query.casefold(u'\u1E9B\u0323', "NFKC")), u'\u1E69')
+
+    self.assertEqual(self._q(query.casefold(u'\u212B', "NFKCCaseFold")), u'\u00E5')
+
   #endregion
 
   #region Time and date functions
