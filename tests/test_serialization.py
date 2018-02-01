@@ -255,6 +255,12 @@ class SerializationTest(TestCase):
     self.assertJson(query.identify(query.ref(query.class_("widget"), "1"), "abracadabra"),
                     '{"identify":{"id":"1","ref":{"class":"widget"}},"password":"abracadabra"}')
 
+  def test_identity(self):
+    self.assertJson(query.identity(), '{"identity":null}')
+
+  def test_has_identity(self):
+    self.assertJson(query.has_identity(), '{"has_identity":null}')
+
   #endregion
 
   #region String functions

@@ -405,6 +405,16 @@ class QueryTest(FaunaTestCase):
       query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     self.assertTrue(self.client.query(query.identify(instance_ref, "sekrit")))
 
+  def test_identity_has_identity(self):
+    instance_ref = self.client.query(
+      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
+    secret = self.client.query(
+      query.login(instance_ref, {"password": "sekrit"}))["secret"]
+    instance_client = self.client.new_session_client(secret=secret)
+
+    self.assertTrue(instance_client.query(query.has_identity()))
+    self.assertEqual(instance_client.query(query.identity()), instance_ref)
+
   #endregion
 
   #region String functions

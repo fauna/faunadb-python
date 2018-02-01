@@ -5,6 +5,7 @@
 - Added `normalizer` argument to `casefold` function
 - Added `new_id` function
 - Deprecated `next_id` function in favor of `new_id`
+- Added `identity` and `has_identity` functions
 
 ## 1.1.0 (September 12, 2017)
 

@@ -347,6 +347,16 @@ def identify(ref_, password):
   """See the `docs <https://fauna.com/documentation/queries#auth_functions>`__."""
   return _fn({"identify": ref_, "password": password})
 
+
+def identity():
+  """See the `docs <https://fauna.com/documentation/queries#auth_functions>`__."""
+  return _fn({"identity": None})
+
+
+def has_identity():
+  """See the `docs <https://fauna.com/documentation/queries#auth_functions>`__."""
+  return _fn({"has_identity": None})
+
 #endregion
 
 #region String functions
