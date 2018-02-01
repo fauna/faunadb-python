@@ -205,6 +205,16 @@ class SerializationTest(TestCase):
 
   #region Sets
 
+  def test_singleton(self):
+    self.assertJson(query.singleton(query.ref(query.class_("widget"), "1")),
+                    '{"singleton":{"id":"1","ref":{"class":"widget"}}}')
+
+  def test_events(self):
+    self.assertJson(query.events(query.ref(query.class_("widget"), "1")),
+                    '{"events":{"id":"1","ref":{"class":"widget"}}}')
+    self.assertJson(query.events(query.match(query.index("widget"))),
+                    '{"events":{"match":{"index":"widget"}}}')
+
   def test_match(self):
     self.assertJson(query.match(query.index("widget")), '{"match":{"index":"widget"}}')
     self.assertJson(query.match(query.index("widget"), "Laptop"),

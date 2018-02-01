@@ -217,6 +217,7 @@ def paginate(
   You may want to convert the result of this to a :any:`Page`.
   """
   # pylint: disable=too-many-arguments
+  # pylint: disable=redefined-outer-name
   opts = {
     "size": size,
     "ts": ts,
@@ -293,6 +294,16 @@ def create_key(key_params):
 #endregion
 
 #region Sets
+
+def singleton(ref_):
+  """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
+  return _fn({"singleton": ref_})
+
+
+def events(ref_set):
+  """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
+  return _fn({"events": ref_set})
+
 
 def match(index, *terms):
   """See the `docs <https://fauna.com/documentation/queries#sets>`__."""

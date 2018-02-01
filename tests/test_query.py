@@ -319,6 +319,42 @@ class QueryTest(FaunaTestCase):
 
   #region Sets
 
+  def test_events(self):
+    instance_ref = self._create(n=1000)["ref"]
+
+    self._q(query.update(instance_ref, {"data": {"n": 1001}}))
+    self._q(query.delete(instance_ref))
+
+    events = self._q(query.paginate(query.events(instance_ref)))["data"]
+
+    self.assertEqual(len(events), 3)
+
+    self.assertEqual(events[0]["action"], "create")
+    self.assertEqual(events[0]["instance"], instance_ref)
+
+    self.assertEqual(events[1]["action"], "update")
+    self.assertEqual(events[1]["instance"], instance_ref)
+
+    self.assertEqual(events[2]["action"], "delete")
+    self.assertEqual(events[2]["instance"], instance_ref)
+
+  def test_singleton_events(self):
+    instance_ref = self._create(n=1000)["ref"]
+
+    self._q(query.update(instance_ref, {"data": {"n": 1001}}))
+    self._q(query.delete(instance_ref))
+
+    events = self._q(query.paginate(query.events(query.singleton(instance_ref))))["data"]
+
+    self.assertEqual(len(events), 2)
+
+    self.assertEqual(events[0]["action"], "add")
+    self.assertEqual(events[0]["instance"], instance_ref)
+
+    self.assertEqual(events[1]["action"], "remove")
+    self.assertEqual(events[1]["instance"], instance_ref)
+
+
   def test_match(self):
     n_value = 100
     m_value = 200
