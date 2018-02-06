@@ -63,6 +63,9 @@ class QueryTest(FaunaTestCase):
 
   #region Basic forms
 
+  def test_abort(self):
+    self._assert_bad_query(query.abort("aborting"))
+
   def test_at(self):
     instance = self._create(n=1)
     ref = instance["ref"]
@@ -316,6 +319,42 @@ class QueryTest(FaunaTestCase):
 
   #region Sets
 
+  def test_events(self):
+    instance_ref = self._create(n=1000)["ref"]
+
+    self._q(query.update(instance_ref, {"data": {"n": 1001}}))
+    self._q(query.delete(instance_ref))
+
+    events = self._q(query.paginate(query.events(instance_ref)))["data"]
+
+    self.assertEqual(len(events), 3)
+
+    self.assertEqual(events[0]["action"], "create")
+    self.assertEqual(events[0]["instance"], instance_ref)
+
+    self.assertEqual(events[1]["action"], "update")
+    self.assertEqual(events[1]["instance"], instance_ref)
+
+    self.assertEqual(events[2]["action"], "delete")
+    self.assertEqual(events[2]["instance"], instance_ref)
+
+  def test_singleton_events(self):
+    instance_ref = self._create(n=1000)["ref"]
+
+    self._q(query.update(instance_ref, {"data": {"n": 1001}}))
+    self._q(query.delete(instance_ref))
+
+    events = self._q(query.paginate(query.events(query.singleton(instance_ref))))["data"]
+
+    self.assertEqual(len(events), 2)
+
+    self.assertEqual(events[0]["action"], "add")
+    self.assertEqual(events[0]["instance"], instance_ref)
+
+    self.assertEqual(events[1]["action"], "remove")
+    self.assertEqual(events[1]["instance"], instance_ref)
+
+
   def test_match(self):
     n_value = 100
     m_value = 200
@@ -402,6 +441,16 @@ class QueryTest(FaunaTestCase):
       query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     self.assertTrue(self.client.query(query.identify(instance_ref, "sekrit")))
 
+  def test_identity_has_identity(self):
+    instance_ref = self.client.query(
+      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
+    secret = self.client.query(
+      query.login(instance_ref, {"password": "sekrit"}))["secret"]
+    instance_client = self.client.new_session_client(secret=secret)
+
+    self.assertTrue(instance_client.query(query.has_identity()))
+    self.assertEqual(instance_client.query(query.identity()), instance_ref)
+
   #endregion
 
   #region String functions
@@ -413,6 +462,14 @@ class QueryTest(FaunaTestCase):
 
   def test_casefold(self):
     self.assertEqual(self._q(query.casefold("Hen Wen")), "hen wen")
+
+    # https://unicode.org/reports/tr15/
+    self.assertEqual(self._q(query.casefold(u'\u212B', "NFD")), u'A\u030A')
+    self.assertEqual(self._q(query.casefold(u'\u212B', "NFC")), u'\u00C5')
+    self.assertEqual(self._q(query.casefold(u'\u1E9B\u0323', "NFKD")), u'\u0073\u0323\u0307')
+    self.assertEqual(self._q(query.casefold(u'\u1E9B\u0323', "NFKC")), u'\u1E69')
+
+    self.assertEqual(self._q(query.casefold(u'\u212B', "NFKCCaseFold")), u'\u00E5')
 
   #endregion
 
@@ -437,8 +494,8 @@ class QueryTest(FaunaTestCase):
 
   #region Miscellaneous functions
 
-  def test_next_id(self):
-    self.assertIsNotNone(self._q(query.next_id()))
+  def test_new_id(self):
+    self.assertIsNotNone(self._q(query.new_id()))
 
   def test_database(self):
     self.assertEqual(self._q(query.database("db-name")), Ref("db-name", Native.DATABASES))

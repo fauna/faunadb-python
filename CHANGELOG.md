@@ -1,6 +1,12 @@
 ## 2.0.0.dev1 (Future release)
 
 - Added support for recursive references
+- Added `abort` function
+- Added `normalizer` argument to `casefold` function
+- Added `new_id` function
+- Deprecated `next_id` function in favor of `new_id`
+- Added `identity` and `has_identity` functions
+- Added `singleton` and `events` functions
 
 ## 1.1.0 (September 12, 2017)
 

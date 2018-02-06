@@ -21,6 +21,10 @@ from faunadb.deprecated import deprecated
 
 #region Basic forms
 
+def abort(msg):
+  """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
+  return _fn({"abort": msg})
+
 def ref(class_ref, id=None):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
   if id is None:
@@ -213,6 +217,7 @@ def paginate(
   You may want to convert the result of this to a :any:`Page`.
   """
   # pylint: disable=too-many-arguments
+  # pylint: disable=redefined-outer-name
   opts = {
     "size": size,
     "ts": ts,
@@ -290,6 +295,16 @@ def create_key(key_params):
 
 #region Sets
 
+def singleton(ref_):
+  """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
+  return _fn({"singleton": ref_})
+
+
+def events(ref_set):
+  """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
+  return _fn({"events": ref_set})
+
+
 def match(index, *terms):
   """See the `docs <https://fauna.com/documentation/queries#sets>`__."""
   # pylint: disable=redefined-outer-name
@@ -343,6 +358,16 @@ def identify(ref_, password):
   """See the `docs <https://fauna.com/documentation/queries#auth_functions>`__."""
   return _fn({"identify": ref_, "password": password})
 
+
+def identity():
+  """See the `docs <https://fauna.com/documentation/queries#auth_functions>`__."""
+  return _fn({"identity": None})
+
+
+def has_identity():
+  """See the `docs <https://fauna.com/documentation/queries#auth_functions>`__."""
+  return _fn({"has_identity": None})
+
 #endregion
 
 #region String functions
@@ -352,9 +377,9 @@ def concat(strings, separator=None):
   return _params({"concat": strings}, {"separator": separator})
 
 
-def casefold(string):
+def casefold(string, normalizer=None):
   """See the `docs <https://fauna.com/documentation/queries#string_functions>`__."""
-  return _fn({"casefold": string})
+  return _params({"casefold": string}, {"normalizer": normalizer})
 
 #endregion
 
@@ -378,9 +403,15 @@ def date(string):
 
 #region Miscellaneous functions
 
+@deprecated("use new_id instead")
 def next_id():
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"next_id": None})
+
+
+def new_id():
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"new_id": None})
 
 
 def database(db_name, scope=None):

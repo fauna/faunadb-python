@@ -49,6 +49,12 @@ class SerializationTest(TestCase):
 
   #region Basic forms
 
+  def test_abort(self):
+    self.assertJson(
+      query.abort("aborting"),
+      '{"abort":"aborting"}'
+    )
+
   def test_at(self):
     self.assertJson(
       query.at(datetime.fromtimestamp(0, iso8601.UTC), query.get(query.index("widgets"))),
@@ -199,6 +205,16 @@ class SerializationTest(TestCase):
 
   #region Sets
 
+  def test_singleton(self):
+    self.assertJson(query.singleton(query.ref(query.class_("widget"), "1")),
+                    '{"singleton":{"id":"1","ref":{"class":"widget"}}}')
+
+  def test_events(self):
+    self.assertJson(query.events(query.ref(query.class_("widget"), "1")),
+                    '{"events":{"id":"1","ref":{"class":"widget"}}}')
+    self.assertJson(query.events(query.match(query.index("widget"))),
+                    '{"events":{"match":{"index":"widget"}}}')
+
   def test_match(self):
     self.assertJson(query.match(query.index("widget")), '{"match":{"index":"widget"}}')
     self.assertJson(query.match(query.index("widget"), "Laptop"),
@@ -249,6 +265,12 @@ class SerializationTest(TestCase):
     self.assertJson(query.identify(query.ref(query.class_("widget"), "1"), "abracadabra"),
                     '{"identify":{"id":"1","ref":{"class":"widget"}},"password":"abracadabra"}')
 
+  def test_identity(self):
+    self.assertJson(query.identity(), '{"identity":null}')
+
+  def test_has_identity(self):
+    self.assertJson(query.has_identity(), '{"has_identity":null}')
+
   #endregion
 
   #region String functions
@@ -259,6 +281,7 @@ class SerializationTest(TestCase):
 
   def test_casefold(self):
     self.assertJson(query.casefold("a string"), '{"casefold":"a string"}')
+    self.assertJson(query.casefold("a string", "NFD"), '{"casefold":"a string","normalizer":"NFD"}')
 
   #endregion
 
@@ -280,8 +303,8 @@ class SerializationTest(TestCase):
 
   #region Miscellaneous functions
 
-  def test_next_id(self):
-    self.assertJson(query.next_id(), '{"next_id":null}')
+  def test_new_id(self):
+    self.assertJson(query.new_id(), '{"new_id":null}')
 
   def test_database(self):
     self.assertJson(query.database("db-name"), '{"database":"db-name"}')
