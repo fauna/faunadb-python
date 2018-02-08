@@ -56,8 +56,8 @@ class ClientLoggerTest(FaunaTestCase):
     # Ignore the rest
 
   def test_url_query(self):
-    logged = self.get_logged(lambda client: client.ping("all", 250))
-    self.assertEqual(logged.split('\n')[0], "Fauna GET /ping?scope=all&timeout=250")
+    logged = self.get_logged(lambda client: client.ping('node', 250))
+    self.assertEqual(logged.split('\n')[0], "Fauna GET /ping?scope=node&timeout=250")
 
   def get_logged(self, client_action):
     logged_box = []
