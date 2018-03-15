@@ -338,6 +338,10 @@ class SerializationTest(TestCase):
     self.assertJson(query.select_with_default(["favorites", "foods", 0],
                                               {"favorites": {"foods": ["steak"]}}, "no food"), json)
 
+  def test_select_all(self):
+    json = ('{"from":[{"object":{"foo":"bar"}},{"object":{"foo":"baz"}}],"select_all":"foo"}')
+    self.assertJson(query.select_all("foo", [{"foo": "bar"}, {"foo": "baz"}]), json)
+
   def test_add(self):
     self.assertJson(query.add(1), '{"add":1}')
     self.assertJson(query.add(1, 2, 3), '{"add":[1,2,3]}')

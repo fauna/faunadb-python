@@ -462,6 +462,11 @@ def select_with_default(path, from_, default):
   return _fn({"select": path, "from": from_, "default": default})
 
 
+def select_all(path, from_):
+  """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
+  return _fn({"select_all": path, "from": from_})
+
+
 def add(*numbers):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"add": _varargs(numbers)})

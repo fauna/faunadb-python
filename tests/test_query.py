@@ -528,6 +528,17 @@ class QueryTest(FaunaTestCase):
     self.assertIsNone(self._q(query.select_with_default("c", obj, None)))
     self.assertRaises(NotFound, lambda: self._q(query.select("c", obj)))
 
+  def test_select_all(self):
+    self.assertEqual(
+      self._q(query.select_all("foo", [{"foo": "bar"}, {"foo": "baz"}])),
+      ["bar", "baz"]
+    )
+
+    self.assertEqual(
+      self._q(query.select_all(["foo", 0], [{"foo": [0, 1]}, {"foo": [2, 3]}])),
+      [0, 2]
+    )
+
   def test_select_array(self):
     arr = [1, 2, 3]
     self.assertEqual(self._q(query.select(2, arr)), 3)
