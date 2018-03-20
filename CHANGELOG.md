@@ -1,4 +1,6 @@
-## 2.0.0.dev1 (Future release)
+## 2.0.1.dev
+
+## 2.0.0 (March 19, 2018)
 
 - Added support for recursive references
 - Added `abort` function
