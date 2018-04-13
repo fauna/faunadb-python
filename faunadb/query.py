@@ -196,6 +196,14 @@ def append(elements, collection):
   """See the `docs <https://fauna.com/documentation/queries#collection_functions>`__."""
   return _fn({"append": elements, "collection": collection})
 
+def is_empty(collection):
+  """See the `docs <https://fauna.com/documentation/queries#collection_functions>`__."""
+  return _fn({"is_empty": collection})
+
+def is_nonempty(collection):
+  """See the `docs <https://fauna.com/documentation/queries#collection_functions>`__."""
+  return _fn({"is_nonempty": collection})
+
 #endregion
 
 #region Read functions
