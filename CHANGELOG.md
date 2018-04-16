@@ -1,4 +1,5 @@
 ## 2.0.1.dev
+- Added `ngram` function
 
 ## 2.0.0 (March 19, 2018)
 

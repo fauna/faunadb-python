@@ -471,6 +471,19 @@ class QueryTest(FaunaTestCase):
 
     self.assertEqual(self._q(query.casefold(u'\u212B', "NFKCCaseFold")), u'\u00E5')
 
+  def test_ngram(self):
+    self.assertEqual(self._q(query.ngram("what")), ["w", "wh", "h", "ha", "a", "at", "t"])
+    self.assertEqual(self._q(query.ngram("what", min=2, max=3)), ["wh", "wha", "ha", "hat", "at"])
+
+    self.assertEqual(
+      self._q(query.ngram(["john", "doe"])),
+      ["j", "jo", "o", "oh", "h", "hn", "n", "d", "do", "o", "oe", "e"]
+    )
+    self.assertEqual(
+      self._q(query.ngram(["john", "doe"], min=3, max=4)),
+      ["joh", "john", "ohn", "doe"]
+    )
+
   #endregion
 
   #region Time and date functions

@@ -381,6 +381,11 @@ def casefold(string, normalizer=None):
   """See the `docs <https://fauna.com/documentation/queries#string_functions>`__."""
   return _params({"casefold": string}, {"normalizer": normalizer})
 
+
+def ngram(terms, min=None, max=None):
+  """See the `docs <https://fauna.com/documentation/queries#string_functions>`__."""
+  return _params({"ngram": terms}, {"min": min, "max": max})
+
 #endregion
 
 #region Time and date functions
