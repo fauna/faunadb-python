@@ -114,6 +114,12 @@ class SerializationTest(TestCase):
   def test_append(self):
     self.assertJson(query.append([1, 2], [3, 4]), '{"append":[1,2],"collection":[3,4]}')
 
+  def test_is_empty(self):
+    self.assertJson(query.is_empty([1, 2]), '{"is_empty":[1,2]}')
+
+  def test_is_nonempty(self):
+    self.assertJson(query.is_nonempty([1, 2]), '{"is_nonempty":[1,2]}')
+
   #endregion
 
   #region Read functions

@@ -174,6 +174,20 @@ class QueryTest(FaunaTestCase):
   def test_append(self):
     self.assertEqual(self._q(query.append([4, 5, 6], [1, 2, 3])), [1, 2, 3, 4, 5, 6])
 
+  def test_collection_predicates(self):
+    self.assertTrue(self._q(query.is_empty([])))
+    self.assertFalse(self._q(query.is_empty([1, 2, 3])))
+
+    self.assertFalse(self._q(query.is_nonempty([])))
+    self.assertTrue(self._q(query.is_nonempty([1, 2, 3])))
+
+    self._create(n=111)
+    self.assertFalse(self._q(query.is_empty(query.paginate(query.match(self.n_index_ref, 111)))))
+    self.assertTrue(self._q(query.is_empty(query.paginate(query.match(self.n_index_ref, 112)))))
+
+    self.assertTrue(self._q(query.is_nonempty(query.paginate(query.match(self.n_index_ref, 111)))))
+    self.assertFalse(self._q(query.is_nonempty(query.paginate(query.match(self.n_index_ref, 112)))))
+
   #endregion
 
   #region Read functions
