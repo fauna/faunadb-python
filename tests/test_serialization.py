@@ -283,6 +283,12 @@ class SerializationTest(TestCase):
     self.assertJson(query.casefold("a string"), '{"casefold":"a string"}')
     self.assertJson(query.casefold("a string", "NFD"), '{"casefold":"a string","normalizer":"NFD"}')
 
+  def test_ngram(self):
+    self.assertJson(query.ngram("str"), '{"ngram":"str"}')
+    self.assertJson(query.ngram(["str0", "str1"]), '{"ngram":["str0","str1"]}')
+    self.assertJson(query.ngram("str", min=2, max=3), '{"max":3,"min":2,"ngram":"str"}')
+    self.assertJson(query.ngram(["str0", "str1"], min=2, max=3), '{"max":3,"min":2,"ngram":["str0","str1"]}')
+
   #endregion
 
   #region Time and date functions
