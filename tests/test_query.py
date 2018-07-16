@@ -628,6 +628,19 @@ class QueryTest(FaunaTestCase):
     self.assertFalse(self._q(query.not_(True)))
     self.assertTrue(self._q(query.not_(False)))
 
+  def test_to_string(self):
+    self.assertEqual(self._q(query.to_string(42)), "42")
+
+  def test_to_number(self):
+    self.assertEqual(self._q(query.to_number("42")), 42)
+
+  def test_to_time(self):
+    time = "1970-01-01T00:00:00Z"
+    self.assertEqual(self._q(query.to_time(time)), FaunaTime(time))
+
+  def test_to_date(self):
+    self.assertEqual(self._q(query.to_date("1970-01-01")), date(1970, 1, 1))
+
   #endregion
 
   #region Helpers tests

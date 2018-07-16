@@ -293,7 +293,8 @@ class SerializationTest(TestCase):
     self.assertJson(query.ngram("str"), '{"ngram":"str"}')
     self.assertJson(query.ngram(["str0", "str1"]), '{"ngram":["str0","str1"]}')
     self.assertJson(query.ngram("str", min=2, max=3), '{"max":3,"min":2,"ngram":"str"}')
-    self.assertJson(query.ngram(["str0", "str1"], min=2, max=3), '{"max":3,"min":2,"ngram":["str0","str1"]}')
+    self.assertJson(query.ngram(["str0", "str1"], min=2, max=3),
+                    '{"max":3,"min":2,"ngram":["str0","str1"]}')
 
   #endregion
 
@@ -411,6 +412,19 @@ class SerializationTest(TestCase):
 
   def test_not_expr(self):
     self.assertJson(query.not_(False), '{"not":false}')
+
+  def test_to_string_expr(self):
+    self.assertJson(query.to_string(42), '{"to_string":42}')
+
+  def test_to_number_expr(self):
+    self.assertJson(query.to_number("42"), '{"to_number":"42"}')
+
+  def test_to_time_expr(self):
+    self.assertJson(query.to_time("1970-01-01T00:00:00Z"),
+                    '{"to_time":"1970-01-01T00:00:00Z"}')
+
+  def test_to_date_expr(self):
+    self.assertJson(query.to_date("1970-01-01"), '{"to_date":"1970-01-01"}')
 
   #endregion
 

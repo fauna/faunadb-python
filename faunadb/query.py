@@ -557,6 +557,18 @@ def not_(boolean):
   """See the `docs <https://fauna.com/documentation/queries#misc_functions>`__."""
   return _fn({"not": boolean})
 
+def to_string(expr):
+  return _fn({"to_string": expr})
+
+def to_number(expr):
+  return _fn({"to_number": expr})
+
+def to_time(expr):
+  return _fn({"to_time": expr})
+
+def to_date(expr):
+  return _fn({"to_date": expr})
+
 #endregion
 
 #region Helpers
