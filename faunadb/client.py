@@ -12,6 +12,39 @@ from faunadb.query import _wrap
 from faunadb.request_result import RequestResult
 from faunadb._json import parse_json_or_none, to_json
 
+class _LastTxnTime(object):
+  """Wraps tracking the last transaction time supplied from the database."""
+  def __init__(self):
+    self._lock = threading.Lock()
+    self._time = None
+
+  @property
+  def time(self):
+    """Produces the last transaction time, or, None if not yet updated."""
+    with self._lock:
+      return self._time
+
+  @property
+  def request_header(self):
+    """Produces a dictionary with a non-zero `X-Last-Txn-Time` header; or,
+    if one has not yet been set, the empty header dictionary."""
+    t = self.time
+    if t is None:
+      return {}
+    return { "X-Last-Txn-Time" : str(t) }
+
+  def update_from_header(self, resp_header):
+      """Updates the internal transaction time, given a response header.  
+      In order to maintain a monotonically-increasing value, `newTxnTime` 
+      is discarded if it is behind the current timestamp."""
+      if "X-Txn-Time" in resp_header:
+          new_txn_time = int(resp_header["X-Txn-Time"])
+          with self._lock:
+              if self._time is None:
+                  self._time = new_txn_time
+              else:
+                  self._time = max(self._time, new_txn_time)
+
 class _Counter(object):
   def __init__(self, init_value=0):
     self.lock = threading.Lock()
@@ -88,6 +121,8 @@ class FaunaClient(object):
     self.pool_connections = pool_connections
     self.pool_maxsize = pool_maxsize
 
+    self.last_txn_time = kwargs.get('last_txn_time') or _LastTxnTime()
+
     if ('session' not in kwargs) or ('counter' not in kwargs):
       self.session = Session()
       self.session.mount('https://', HTTPAdapter(pool_connections=pool_connections,
@@ -117,7 +152,7 @@ class FaunaClient(object):
     :param expression: A query. See :doc:`query` for information on queries.
     :return: Converted JSON response.
     """
-    return self._execute("POST", "", _wrap(expression))
+    return self._execute("POST", "", _wrap(expression), with_txn_time=True)
 
   def ping(self, scope=None, timeout=None):
     """
@@ -147,18 +182,27 @@ class FaunaClient(object):
                          session=self.session,
                          counter=self.counter,
                          pool_connections=self.pool_connections,
-                         pool_maxsize=self.pool_maxsize)
+                         pool_maxsize=self.pool_maxsize,
+                         last_txn_time=self.last_txn_time)
     else:
       raise UnexpectedError("Cannnot create a session client from a closed session", None)
 
-  def _execute(self, action, path, data=None, query=None):
+  def _execute(self, action, path, data=None, query=None, with_txn_time=False):
     """Performs an HTTP action, logs it, and looks for errors."""
     if query is not None:
       query = {k: v for k, v in query.items() if v is not None}
 
+    headers = {}
+
+    if with_txn_time:
+        headers.update(self.last_txn_time.request_header)
+
     start_time = time()
-    response = self._perform_request(action, path, data, query)
+    response = self._perform_request(action, path, data, query, headers)
     end_time = time()
+
+    if with_txn_time:
+        self.last_txn_time.update_from_header(response.headers)    
 
     response_raw = response.text
     response_content = parse_json_or_none(response_raw)
@@ -177,8 +221,8 @@ class FaunaClient(object):
     FaunaError.raise_for_status_code(request_result)
     return _get_or_raise(request_result, response_content, "resource")
 
-  def _perform_request(self, action, path, data, query):
+  def _perform_request(self, action, path, data, query, headers):
     """Performs an HTTP action."""
     url = self.base_url + "/" + path
-    req = Request(action, url, params=query, data=to_json(data), auth=self.auth)
+    req = Request(action, url, params=query, data=to_json(data), auth=self.auth, headers=headers)
     return self.session.send(self.session.prepare_request(req))

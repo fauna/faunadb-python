@@ -5,7 +5,18 @@ from tests.helpers import FaunaTestCase
 class ClientTest(FaunaTestCase):
 
   def test_ping(self):
+    old_time = self.client.last_txn_time.time
     self.assertEqual(self.client.ping("node"), "Scope node is OK")
+    new_time = self.client.last_txn_time.time
+
+    self.assertEqual(old_time, new_time) # client.ping should not update last-txn-time
+
+  def test_last_txn_time(self):
+    old_time = self.client.last_txn_time.time
+    self.client.query({})
+    new_time = self.client.last_txn_time.time
+
+    self.assertTrue(old_time < new_time) # client.query should update last-txn-time
 
   def test_error_on_closed_client(self):
     client = FaunaClient(secret="secret")
