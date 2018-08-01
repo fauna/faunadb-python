@@ -1,3 +1,5 @@
+## 2.6.0.dev
+
 ## 2.5.0 (August 1, 2018)
 - Added `ngram` function
 - Added `is_empty` and `is_nonempty` functions
