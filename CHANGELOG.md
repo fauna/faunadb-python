@@ -1,4 +1,4 @@
-## 2.0.1.dev
+## 2.5.0 (August 1, 2018)
 - Added `ngram` function
 - Added `is_empty` and `is_nonempty` functions
 - Added `to_string`, `to_number`, `to_time`, and `to_date` functions
