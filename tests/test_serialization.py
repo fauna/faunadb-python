@@ -74,6 +74,9 @@ class SerializationTest(TestCase):
   def test_do(self):
     self.assertJson(query.do(query.add(1, 2), query.var("x")),
                     '{"do":[{"add":[1,2]},{"var":"x"}]}')
+    self.assertJson(query.do(1), '{"do":[1]}')
+    self.assertJson(query.do(1, 2), '{"do":[1,2]}')
+    self.assertJson(query.do([1, 2]), '{"do":[[1,2]]}')
 
   def test_lambda_query(self):
     #pylint: disable=unnecessary-lambda

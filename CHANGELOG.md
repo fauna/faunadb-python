@@ -1,4 +1,5 @@
 ## 2.6.0.dev
+- Fix a bug on `do` function that was preventing expressions with only one statement
 
 ## 2.5.0 (August 1, 2018)
 - Added `ngram` function

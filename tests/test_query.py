@@ -92,6 +92,10 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.do(query.delete(ref), 1)), 1)
     self.assertFalse(self._q(query.exists(ref)))
 
+    self.assertEqual(self._q(query.do(1)), 1)
+    self.assertEqual(self._q(query.do(1, 2)), 2)
+    self.assertEqual(self._q(query.do([1, 2])), [1, 2])
+
   def test_lambda_query(self):
     invalid_lambda = lambda: query.add(1, 2)
     self.assertRaises(ValueError,

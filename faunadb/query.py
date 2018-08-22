@@ -87,7 +87,7 @@ def if_(condition, then, else_):
 
 def do(*expressions):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
-  return _fn({"do": _varargs(expressions)})
+  return _fn({"do": expressions})
 
 
 def lambda_query(func):
