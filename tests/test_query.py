@@ -80,8 +80,9 @@ class QueryTest(FaunaTestCase):
     old = self._q(query.at(prev_ts, query.get(ref)))
     self.assertEqual(old["data"], data)
 
-  def test_let_var(self):
-    self.assertEqual(self._q(query.let({"x": 1}, query.var("x"))), 1)
+  def test_let(self):
+    self.assertEqual(self._q(query.let({"x": 1, "y": 2}, query.var("x"))), 1)
+    self.assertEqual(self._q(query.let(x = 1, y = 2).in_(query.var("x"))), 1)
 
   def test_if(self):
     self.assertEqual(self._q(query.if_(True, "t", "f")), "t")

@@ -63,10 +63,21 @@ def at(timestamp, expr):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
   return _fn({"at": timestamp, "expr": expr})
 
+class LetBindings:
+  def __init__(self, bindings):
+    self._bindings = bindings
+  def in_(self, in_expr):
+    return _fn({"let": self._bindings, "in": in_expr})
 
-def let(vars, in_expr):
+
+def let(*args, **kwargs):
   """See the `docs <https://fauna.com/documentation/queries#basic_forms>`__."""
-  return _fn({"let": _fn(vars), "in": in_expr})
+  if kwargs:
+    return LetBindings([_fn({k: v}) for k, v in kwargs.items()])
+  else:
+    bindings = [_fn({k: v}) for k, v in args[0].items()]
+    in_expr = args[1]
+    return _fn({"let": bindings, "in": in_expr})
 
 
 def var(var_name):

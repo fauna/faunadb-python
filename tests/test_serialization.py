@@ -62,7 +62,7 @@ class SerializationTest(TestCase):
     )
 
   def test_let(self):
-    self.assertJson(query.let({"x": 1}, 1), '{"in":1,"let":{"x":1}}')
+    self.assertJson(query.let({"x": 1}, 1), '{"in":1,"let":[{"x":1}]}')
 
   def test_vars(self):
     self.assertJson(query.var("x"), '{"var":"x"}')
