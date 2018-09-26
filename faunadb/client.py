@@ -34,8 +34,8 @@ class _LastTxnTime(object):
     return { "X-Last-Txn-Time" : str(t) }
 
   def update_from_header(self, resp_header):
-      """Updates the internal transaction time, given a response header.  
-      In order to maintain a monotonically-increasing value, `newTxnTime` 
+      """Updates the internal transaction time, given a response header.
+      In order to maintain a monotonically-increasing value, `newTxnTime`
       is discarded if it is behind the current timestamp."""
       if "X-Txn-Time" in resp_header:
           new_txn_time = int(resp_header["X-Txn-Time"])
@@ -201,7 +201,7 @@ class FaunaClient(object):
     end_time = time()
 
     if with_txn_time:
-        self.last_txn_time.update_from_header(response.headers)    
+        self.last_txn_time.update_from_header(response.headers)
 
     response_raw = response.text
     response_content = parse_json_or_none(response_raw)
