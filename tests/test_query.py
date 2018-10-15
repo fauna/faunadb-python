@@ -679,26 +679,26 @@ class QueryTest(FaunaTestCase):
 
   def test_nested_references(self):
     client1 = self.create_new_database(self.admin_client, "parent-database")
-    self.create_new_database(client1, "child-database")
-
-    key = client1.query(query.create_key({
-      "database": query.database("child-database"),
-      "role": "server"
-    }))
-    client2 = client1.new_session_client(key["secret"])
+    client2 = self.create_new_database(client1, "child-database")
 
     client2.query(query.create_class({"name": "a_class"}))
+    client2.query(query.create_role({"name": "a_role", "privileges":{"resource":query.classes(), "actions": {"read": True}}}))
 
     nested_database_ref = query.database("child-database", query.database("parent-database"))
     nested_class_ref = query.class_("a_class", nested_database_ref)
+    nested_role_ref = query.role("a_role", nested_database_ref)
 
-    self.assertEqual(self._q(query.exists(nested_class_ref)), True)
+    self.assertEqual(self.admin_client.query(query.exists(nested_class_ref)), True)
+    self.assertEqual(self.admin_client.query(query.exists(nested_role_ref)), True)
 
     parent_db_ref = Ref("parent-database", Native.DATABASES)
     child_db_ref = Ref("child-database", Native.DATABASES, parent_db_ref)
 
-    self.assertEqual(self._q(query.paginate(query.classes(nested_database_ref)))["data"],
+    self.assertEqual(self.admin_client.query(query.paginate(query.classes(nested_database_ref)))["data"],
                      [Ref("a_class", Native.CLASSES, child_db_ref)])
+
+    self.assertEqual(self.admin_client.query(query.paginate(query.roles(nested_database_ref)))["data"],
+                     [Ref("a_role", Native.ROLES, child_db_ref)])
 
   def test_nested_keys(self):
     client = self.create_new_database(self.admin_client, "db-for-keys")

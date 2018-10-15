@@ -1,7 +1,7 @@
 ## 2.6.0.dev
 - Fix a bug on `do` function that was preventing expressions with only one statement
 - Support backrefs in `let`. Requires FaunaDB 2.6.0
-- Add CreateRole, and Role functions
+- Add `create_role`, `roles`, and `role` functions
 
 ## 2.5.0 (August 1, 2018)
 - Added `ngram` function

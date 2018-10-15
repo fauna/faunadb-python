@@ -47,6 +47,10 @@ def functions(scope=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#basic-forms>`__."""
   return _fn({"functions": scope})
 
+def roles(scope=None):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#basic-forms>`__."""
+  return _fn({"roles": scope})
+
 def keys(scope=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#basic-forms>`__."""
   return _fn({"keys": scope})
