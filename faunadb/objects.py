@@ -75,6 +75,7 @@ class Native(object):
   KEYS = Ref('keys')
   TOKENS = Ref('tokens')
   CREDENTIALS = Ref('credentials')
+  ROLES = Ref('roles')
 
   def __init__(self):
     raise TypeError

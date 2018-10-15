@@ -306,6 +306,11 @@ def create_function(func_params):
   return _fn({"create_function": func_params})
 
 
+def create_role(func_params):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
+  return _fn({"create_role": func_params})
+
+
 def create_key(key_params):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
   return _fn({"create_key": key_params})
@@ -462,6 +467,11 @@ def class_(class_name, scope=None):
 def function(fn_name, scope=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""
   return _params({"function": fn_name}, {"scope": scope})
+
+
+def role(role_name, scope=None):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""
+  return _params({"role": role_name}, {"scope": scope})
 
 
 def equals(*values):

@@ -210,6 +210,12 @@ class SerializationTest(TestCase):
       '{"create_key":{"object":{"database":{"database":"db-name"},"role":"client"}}}'
     )
 
+  def test_create_role(self):
+    self.assertJson(
+      query.create_role({"name": "a_role", "privileges": {"resource": query.classes(), "actions": {"read": True}}}),
+      '{"create_role":{"object":{"name":"a_role","privileges":{"object":{"actions":{"object":{"read":true}},"resource":{"classes":null}}}}}}'
+    )
+
   #endregion
 
   #region Sets
@@ -330,6 +336,9 @@ class SerializationTest(TestCase):
 
   def test_class(self):
     self.assertJson(query.class_("class-name"), '{"class":"class-name"}')
+
+  def test_role(self):
+    self.assertJson(query.role("role-name"), '{"role":"role-name"}')
 
   def test_equals(self):
     self.assertJson(query.equals(1), '{"equals":1}')

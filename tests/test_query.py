@@ -334,6 +334,17 @@ class QueryTest(FaunaTestCase):
 
     self.assertTrue(self._q(query.exists(query.function("a_function"))))
 
+  def test_create_role(self):
+    self.admin_client.query(query.create_role({
+      "name": "a_role",
+      "privileges": {
+        "resource": query.classes(),
+        "actions": {"read": True}
+      }
+    }))
+
+    self.assertTrue(self.admin_client.query(query.exists(query.role("a_role"))))
+
   #endregion
 
   #region Sets
@@ -540,6 +551,9 @@ class QueryTest(FaunaTestCase):
 
   def test_function(self):
     self.assertEqual(self._q(query.function("fn-name")), Ref("fn-name", Native.FUNCTIONS))
+
+  def test_role(self):
+    self.assertEqual(self._q(query.role("role-name")), Ref("role-name", Native.ROLES))
 
   def test_equals(self):
     self.assertTrue(self._q(query.equals(1, 1, 1)))
