@@ -121,7 +121,7 @@ class FaunaClient(object):
     self.pool_connections = pool_connections
     self.pool_maxsize = pool_maxsize
 
-    self.last_txn_time = kwargs.get('last_txn_time') or _LastTxnTime()
+    self._last_txn_time = kwargs.get('last_txn_time') or _LastTxnTime()
 
     if ('session' not in kwargs) or ('counter' not in kwargs):
       self.session = Session()
@@ -140,6 +140,11 @@ class FaunaClient(object):
     else:
       self.session = kwargs['session']
       self.counter = kwargs['counter']
+
+  @property
+  def last_txn(self):
+    """Get the last seen txn time"""
+    return self._last_txn_time.time
 
   def __del__(self):
     if self.counter.decrement() == 0:
@@ -182,7 +187,7 @@ class FaunaClient(object):
                          counter=self.counter,
                          pool_connections=self.pool_connections,
                          pool_maxsize=self.pool_maxsize,
-                         last_txn_time=self.last_txn_time)
+                         last_txn_time=self._last_txn_time)
     else:
       raise UnexpectedError("Cannnot create a session client from a closed session", None)
 
@@ -194,14 +199,14 @@ class FaunaClient(object):
     headers = {}
 
     if with_txn_time:
-        headers.update(self.last_txn_time.request_header)
+        headers.update(self._last_txn_time.request_header)
 
     start_time = time()
     response = self._perform_request(action, path, data, query, headers)
     end_time = time()
 
     if with_txn_time:
-        self.last_txn_time.update_from_header(response.headers)
+        self._last_txn_time.update_from_header(response.headers)
 
     response_raw = response.text
     response_content = parse_json_or_none(response_raw)
