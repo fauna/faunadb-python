@@ -5,16 +5,16 @@ from tests.helpers import FaunaTestCase
 class ClientTest(FaunaTestCase):
 
   def test_ping(self):
-    old_time = self.client.last_txn_time.time
+    old_time = self.client.last_txn
     self.assertEqual(self.client.ping("node"), "Scope node is OK")
-    new_time = self.client.last_txn_time.time
+    new_time = self.client.last_txn
 
     self.assertEqual(old_time, new_time) # client.ping should not update last-txn-time
 
   def test_last_txn_time(self):
-    old_time = self.client.last_txn_time.time
+    old_time = self.client.last_txn
     self.client.query({})
-    new_time = self.client.last_txn_time.time
+    new_time = self.client.last_txn
 
     self.assertTrue(old_time < new_time) # client.query should update last-txn-time
 
