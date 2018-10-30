@@ -33,17 +33,15 @@ class _LastTxnTime(object):
       return {}
     return { "X-Last-Txn-Time" : str(t) }
 
-  def update_from_header(self, resp_header):
-      """Updates the internal transaction time, given a response header.
+  def update_txn_time(self, new_txn_time):
+      """Updates the internal transaction time.
       In order to maintain a monotonically-increasing value, `newTxnTime`
       is discarded if it is behind the current timestamp."""
-      if "X-Txn-Time" in resp_header:
-          new_txn_time = int(resp_header["X-Txn-Time"])
-          with self._lock:
-              if self._time is None:
-                  self._time = new_txn_time
-              else:
-                  self._time = max(self._time, new_txn_time)
+      with self._lock:
+          if self._time is None:
+              self._time = new_txn_time
+          else:
+              self._time = max(self._time, new_txn_time)
 
 class _Counter(object):
   def __init__(self, init_value=0):
@@ -141,9 +139,24 @@ class FaunaClient(object):
       self.session = kwargs['session']
       self.counter = kwargs['counter']
 
-  @property
-  def last_txn(self):
-    """Get the last seen txn time"""
+  def sync_last_txn_time(self, new_txn_time):
+    """
+    Sync the freshest timestamp seen by this client.
+
+    This has no effect if staler than currently stored timestamp.
+    WARNING: This should be used only when coordinating timestamps across
+            multiple clients. Moving the timestamp arbitrarily forward into
+            the future will cause transactions to stall.
+    
+    :param new_txn_time: the new seen transaction time.
+    """
+    self._last_txn_time.update_txn_time(new_txn_time)
+
+  def get_last_txn_time(self):
+    """
+    Get the freshest timestamp reported to this client.
+    :return:
+    """
     return self._last_txn_time.time
 
   def __del__(self):
@@ -206,7 +219,9 @@ class FaunaClient(object):
     end_time = time()
 
     if with_txn_time:
-        self._last_txn_time.update_from_header(response.headers)
+      if "X-Txn-Time" in response.headers:
+        new_txn_time = int(response.headers["X-Txn-Time"])
+        self.sync_last_txn_time(new_txn_time)
 
     response_raw = response.text
     response_content = parse_json_or_none(response_raw)
