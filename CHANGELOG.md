@@ -1,4 +1,5 @@
-## 2.5.1
+## 2.6.0
+- Expose last seen txn via `get_last_txn_time`
 - Update documentation links
 
 ## 2.5.0 (August 1, 2018)
