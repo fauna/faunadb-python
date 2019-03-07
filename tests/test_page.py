@@ -15,6 +15,7 @@ class PageTest(FaunaTestCase):
     class_ref = self.client.query(query.create_class({"name": "gadgets"}))["ref"]
     index_ref = self.client.query(query.create_index({
       "name": "gadgets_by_n",
+      "active": True,
       "source": class_ref,
       "terms": [{"field": ["data", "n"]}]
     }))["ref"]

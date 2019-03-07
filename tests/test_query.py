@@ -16,31 +16,26 @@ class QueryTest(FaunaTestCase):
 
     cls.n_index_ref = cls.client.query(query.create_index({
       "name": "widgets_by_n",
+      "active": True,
       "source": cls.class_ref,
       "terms": [{"field": ["data", "n"]}]
     }))["ref"]
 
     cls.m_index_ref = cls.client.query(query.create_index({
       "name": "widgets_by_m",
+      "active": True,
       "source": cls.class_ref,
       "terms": [{"field": ["data", "m"]}]
     }))["ref"]
 
     cls.z_index_ref = cls._q(query.create_index({
       "name": "widgets_by_z",
+      "active": True,
       "source": cls.class_ref,
       "values": [{"field": ["data", "z"]}]
     }))["ref"]
 
-    cls._wait_for_index(cls.m_index_ref, cls.n_index_ref, cls.z_index_ref)
-
   #region Helpers
-
-  @classmethod
-  def _wait_for_index(cls, *refs):
-    expr = query.map_(lambda ref: query.select(["active"], query.get(ref)), refs)
-    while not all(active for active in cls._q(expr)):
-      sleep(1)
 
   @classmethod
   def _create(cls, n=0, **data):
@@ -312,6 +307,7 @@ class QueryTest(FaunaTestCase):
   def test_create_index(self):
     self._q(query.create_index({
       "name": "index_for_test",
+      "active": True,
       "source": query.class_("widgets")}))
 
     self.assertTrue(self._q(query.exists(query.index("index_for_test"))))
