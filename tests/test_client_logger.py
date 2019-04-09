@@ -1,14 +1,14 @@
 from io import StringIO
 
 from faunadb.client_logger import logger
-from faunadb.query import create, create_class
+from faunadb.query import create, create_collection
 from tests.helpers import FaunaTestCase
 
 class ClientLoggerTest(FaunaTestCase):
   @classmethod
   def setUpClass(cls):
     super(ClientLoggerTest, cls).setUpClass()
-    cls.class_ref = cls.client.query(create_class({"name": "logging_tests"}))["ref"]
+    cls.collection_ref = cls.client.query(create_collection({"name": "logging_tests"}))["ref"]
 
   def test_logging(self):
     logged = self.get_logged(lambda client: client.ping())
@@ -30,7 +30,7 @@ class ClientLoggerTest(FaunaTestCase):
       r"^  Response \(200\): Network latency \d+ms\n$")
 
   def test_request_content(self):
-    logged = self.get_logged(lambda client: client.query(create(self.class_ref, {"data": {}})))
+    logged = self.get_logged(lambda client: client.query(create(self.collection_ref, {"data": {}})))
 
     read_line = StringIO(logged).readline
     self.assertEqual(read_line(), "Fauna POST /\n")

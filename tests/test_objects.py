@@ -42,7 +42,7 @@ class ObjectsTest(FaunaTestCase):
 
     self.assertNotEqual(
       match,
-      SetRef(query.match(index, query.ref(query.class_("frogs"), "456")))
+      SetRef(query.match(index, query.ref(query.collection("frogs"), "456")))
     )
 
   def test_time_conversion(self):

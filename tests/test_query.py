@@ -12,26 +12,25 @@ class QueryTest(FaunaTestCase):
   def setUpClass(cls):
     super(QueryTest, cls).setUpClass()
 
-    cls.class_ref = cls.client.query(query.create_class({"name": "widgets"}))["ref"]
-
+    cls.collection_ref = cls.client.query(query.create_collection({"name": "widgets"}))["ref"]
     cls.n_index_ref = cls.client.query(query.create_index({
       "name": "widgets_by_n",
       "active": True,
-      "source": cls.class_ref,
+      "source": cls.collection_ref,
       "terms": [{"field": ["data", "n"]}]
     }))["ref"]
 
     cls.m_index_ref = cls.client.query(query.create_index({
       "name": "widgets_by_m",
       "active": True,
-      "source": cls.class_ref,
+      "source": cls.collection_ref,
       "terms": [{"field": ["data", "m"]}]
     }))["ref"]
 
     cls.z_index_ref = cls._q(query.create_index({
       "name": "widgets_by_z",
       "active": True,
-      "source": cls.class_ref,
+      "source": cls.collection_ref,
       "values": [{"field": ["data", "z"]}]
     }))["ref"]
 
@@ -41,7 +40,7 @@ class QueryTest(FaunaTestCase):
   def _create(cls, n=0, **data):
     data["n"] = n
 
-    return cls._q(query.create(cls.class_ref, {"data": data}))
+    return cls._q(query.create(cls.collection_ref, {"data": data}))
 
   @classmethod
   def _q(cls, query_json):
@@ -249,7 +248,7 @@ class QueryTest(FaunaTestCase):
     instance = self._create()
     self.assertIn("ref", instance)
     self.assertIn("ts", instance)
-    self.assertEqual(instance["ref"].class_(), self.class_ref)
+    self.assertEqual(instance["ref"].class_(), self.collection_ref)
 
   def test_update(self):
     ref = self._create()["ref"]
@@ -294,10 +293,10 @@ class QueryTest(FaunaTestCase):
     # Assert that it was undone
     self.assertEqual(self._q(query.get(ref)), instance)
 
-  def test_create_class(self):
-    self._q(query.create_class({"name": "class_for_test"}))
+  def test_create_collection(self):
+    self._q(query.create_collection({"name": "collection_for_test"}))
 
-    self.assertTrue(self._q(query.exists(query.class_("class_for_test"))))
+    self.assertTrue(self._q(query.exists(query.collection("collection_for_test"))))
 
   def test_create_database(self):
     self.admin_client.query(query.create_database({"name": "database_for_test"}))
@@ -308,7 +307,7 @@ class QueryTest(FaunaTestCase):
     self._q(query.create_index({
       "name": "index_for_test",
       "active": True,
-      "source": query.class_("widgets")}))
+      "source": query.collection("widgets")}))
 
     self.assertTrue(self._q(query.exists(query.index("index_for_test"))))
 
@@ -321,9 +320,9 @@ class QueryTest(FaunaTestCase):
 
     new_client = self.admin_client.new_session_client(secret=resource["secret"])
 
-    new_client.query(query.create_class({"name": "class_for_test"}))
+    new_client.query(query.create_collection({"name": "collection_for_test"}))
 
-    self.assertTrue(new_client.query(query.exists(query.class_("class_for_test"))))
+    self.assertTrue(new_client.query(query.exists(query.collection("collection_for_test"))))
 
   def test_create_function(self):
     self._q(query.create_function({"name": "a_function", "body": query.query(lambda x: x)}))
@@ -334,7 +333,7 @@ class QueryTest(FaunaTestCase):
     self.admin_client.query(query.create_role({
       "name": "a_role",
       "privileges": {
-        "resource": query.classes(),
+        "resource": query.collections(),
         "actions": {"read": True}
       }
     }))
@@ -452,7 +451,7 @@ class QueryTest(FaunaTestCase):
 
   def test_login_logout(self):
     instance_ref = self.client.query(
-      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
+      query.create(self.collection_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     secret = self.client.query(
       query.login(instance_ref, {"password": "sekrit"}))["secret"]
     instance_client = self.client.new_session_client(secret=secret)
@@ -464,12 +463,12 @@ class QueryTest(FaunaTestCase):
 
   def test_identify(self):
     instance_ref = self.client.query(
-      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
+      query.create(self.collection_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     self.assertTrue(self.client.query(query.identify(instance_ref, "sekrit")))
 
   def test_identity_has_identity(self):
     instance_ref = self.client.query(
-      query.create(self.class_ref, {"credentials": {"password": "sekrit"}}))["ref"]
+      query.create(self.collection_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     secret = self.client.query(
       query.login(instance_ref, {"password": "sekrit"}))["secret"]
     instance_client = self.client.new_session_client(secret=secret)
@@ -542,8 +541,8 @@ class QueryTest(FaunaTestCase):
   def test_index(self):
     self.assertEqual(self._q(query.index("idx-name")), Ref("idx-name", Native.INDEXES))
 
-  def test_class(self):
-    self.assertEqual(self._q(query.class_("cls-name")), Ref("cls-name", Native.CLASSES))
+  def test_collection(self):
+    self.assertEqual(self._q(query.collection("cls-name")), Ref("cls-name", Native.CLASSES))
 
   def test_function(self):
     self.assertEqual(self._q(query.function("fn-name")), Ref("fn-name", Native.FUNCTIONS))
@@ -677,21 +676,21 @@ class QueryTest(FaunaTestCase):
     client1 = self.create_new_database(self.admin_client, "parent-database")
     client2 = self.create_new_database(client1, "child-database")
 
-    client2.query(query.create_class({"name": "a_class"}))
-    client2.query(query.create_role({"name": "a_role", "privileges":{"resource":query.classes(), "actions": {"read": True}}}))
+    client2.query(query.create_collection({"name": "a_collection"}))
+    client2.query(query.create_role({"name": "a_role", "privileges":{"resource":query.collections(), "actions": {"read": True}}}))
 
     nested_database_ref = query.database("child-database", query.database("parent-database"))
-    nested_class_ref = query.class_("a_class", nested_database_ref)
+    nested_collection_ref = query.collection("a_collection", nested_database_ref)
     nested_role_ref = query.role("a_role", nested_database_ref)
 
-    self.assertEqual(self.admin_client.query(query.exists(nested_class_ref)), True)
+    self.assertEqual(self.admin_client.query(query.exists(nested_collection_ref)), True)
     self.assertEqual(self.admin_client.query(query.exists(nested_role_ref)), True)
 
     parent_db_ref = Ref("parent-database", Native.DATABASES)
     child_db_ref = Ref("child-database", Native.DATABASES, parent_db_ref)
 
-    self.assertEqual(self.admin_client.query(query.paginate(query.classes(nested_database_ref)))["data"],
-                     [Ref("a_class", Native.CLASSES, child_db_ref)])
+    self.assertEqual(self.admin_client.query(query.paginate(query.collections(nested_database_ref)))["data"],
+                     [Ref("a_collection", Native.CLASSES, child_db_ref)])
 
     self.assertEqual(self.admin_client.query(query.paginate(query.roles(nested_database_ref)))["data"],
                      [Ref("a_role", Native.ROLES, child_db_ref)])
@@ -734,6 +733,6 @@ class QueryTest(FaunaTestCase):
 
   def test_repr(self):
     self.assertRegexCompat(repr(query.var("x")), r"Expr\({u?'var': u?'x'}\)")
-    self.assertRegexCompat(repr(Ref("classes")), r"Ref\(id=classes\)")
+    self.assertRegexCompat(repr(Ref("collections")), r"Ref\(id=collections\)")
     self.assertRegexCompat(repr(SetRef(query.match(query.index("widgets")))),
                            r"SetRef\({u?'match': Expr\({u?'index': u?'widgets'}\)}\)")

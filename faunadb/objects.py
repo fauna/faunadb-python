@@ -69,6 +69,7 @@ class Ref(_Expr):
 
 class Native(object):
   CLASSES = Ref('classes')
+  COLLECTIONS = Ref('collections')
   INDEXES = Ref('indexes')
   DATABASES = Ref('databases')
   FUNCTIONS = Ref('functions')

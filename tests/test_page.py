@@ -12,16 +12,16 @@ class PageTest(FaunaTestCase):
       Page([2, 3, 4], 2, 3))
 
   def test_set_iterator(self):
-    class_ref = self.client.query(query.create_class({"name": "gadgets"}))["ref"]
+    collection_ref = self.client.query(query.create_collection({"name": "gadgets"}))["ref"]
     index_ref = self.client.query(query.create_index({
       "name": "gadgets_by_n",
       "active": True,
-      "source": class_ref,
+      "source": collection_ref,
       "terms": [{"field": ["data", "n"]}]
     }))["ref"]
 
     def create(n):
-      q = query.create(class_ref, {"data": {"n": n}})
+      q = query.create(collection_ref, {"data": {"n": n}})
       return self.client.query(q)["ref"]
 
     a = create(0)

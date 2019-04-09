@@ -25,15 +25,21 @@ def abort(msg):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#basic-forms>`__."""
   return _fn({"abort": msg})
 
-def ref(class_ref, id=None):
+def ref(collection_ref, id=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#basic-forms>`__."""
   if id is None:
-    return _fn({"@ref": class_ref})
-  return _fn({"ref": class_ref, "id": id})
+    return _fn({"@ref": collection_ref})
+  return _fn({"ref": collection_ref, "id": id})
 
+
+@deprecated("use collections instead")
 def classes(scope=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#basic-forms>`__."""
   return _fn({"classes": scope})
+
+def collections(scope=None):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#basic-forms>`__."""
+  return _fn({"collections": scope})
 
 def databases(scope=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#basic-forms>`__."""
@@ -260,9 +266,9 @@ def exists(ref_, ts=None):
 
 #region Write functions
 
-def create(class_ref, params):
+def create(collection_ref, params):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
-  return _fn({"create": class_ref, "params": params})
+  return _fn({"create": collection_ref, "params": params})
 
 
 def update(ref_, params):
@@ -289,11 +295,14 @@ def remove(ref_, ts, action):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
   return _fn({"remove": ref_, "ts": ts, "action": action})
 
-
+@deprecated("use create_collection instead")
 def create_class(class_params):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
   return _fn({"create_class": class_params})
 
+def create_collection(collection_params):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
+  return _fn({"create_collection": collection_params})
 
 def create_database(db_params):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
@@ -457,16 +466,19 @@ def index(index_name, scope=None):
   return _params({"index": index_name}, {"scope": scope})
 
 
-@deprecated("use class_ instead")
+@deprecated("use collection instead")
 def class_expr(class_name, scope=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""
   return class_(class_name, scope)
 
-
+@deprecated("use collection instead")
 def class_(class_name, scope=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""
   return _params({"class": class_name}, {"scope": scope})
 
+def collection(collection_name, scope=None):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""
+  return _params({"collection": collection_name}, {"scope": scope})
 
 def function(fn_name, scope=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""

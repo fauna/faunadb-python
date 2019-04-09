@@ -4,7 +4,7 @@ from faunadb import query
 from faunadb.errors import ErrorData, Failure, BadRequest, InternalError, \
   NotFound, PermissionDenied, Unauthorized, UnavailableError, UnexpectedError
 from faunadb.objects import Native
-from faunadb.query import create, create_class, create_key, class_, add, get, var, ref, _Expr
+from faunadb.query import create, create_collection, create_key, collection, add, get, var, ref, _Expr
 
 from tests.helpers import FaunaTestCase, mock_client
 
@@ -92,10 +92,10 @@ class ErrorsTest(FaunaTestCase):
     self._assert_query_error(add([1, "two"]), BadRequest, "invalid argument", ["add", 1])
 
   def test_instance_not_found(self):
-    # Must be a reference to a real class or else we get InvalidExpression
-    self.client.query(create_class({"name": "foofaws"}))
+    # Must be a reference to a real collection or else we get InvalidExpression
+    self.client.query(create_collection({"name": "foofaws"}))
     self._assert_query_error(
-      get(ref(class_("foofaws"), "123")),
+      get(ref(collection("foofaws"), "123")),
       NotFound,
       "instance not found")
 
@@ -103,15 +103,15 @@ class ErrorsTest(FaunaTestCase):
     self._assert_query_error(query.select("a", {}), NotFound, "value not found")
 
   def test_instance_already_exists(self):
-    self.client.query(create_class({"name": "duplicates"}))
-    r = self.client.query(create(class_("duplicates"), {}))["ref"]
+    self.client.query(create_collection({"name": "duplicates"}))
+    r = self.client.query(create(collection("duplicates"), {}))["ref"]
     self._assert_query_error(create(r, {}), BadRequest, "instance already exists", ["create"])
   #endregion
 
   #region InvalidData
   def test_invalid_type(self):
     exception = self.assert_raises(BadRequest,
-                                   lambda: self.client.query(create_class({"name": 123})))
+                                   lambda: self.client.query(create_collection({"name": 123})))
     self._assert_error(exception, "validation failed", [])
     failures = exception.errors[0].failures
     self.assertEqual(len(failures), 1)
