@@ -1,5 +1,5 @@
 from __future__ import division
-from datetime import date
+from datetime import date, datetime
 from time import sleep
 
 from faunadb.errors import BadRequest, NotFound
@@ -652,6 +652,50 @@ class QueryTest(FaunaTestCase):
     time = "1970-01-01T00:00:00Z"
     self.assertEqual(self._q(query.to_time(time)), FaunaTime(time))
 
+  def test_to_seconds(self):
+    expected = (0)
+    self.assertEqual(self._q(query.to_seconds(query.epoch(0, "second"))), expected)
+
+  def test_to_millis(self):
+    expected = 1552733214259000
+    self.assertEqual(self._q(query.to_millis(query.epoch(1552733214259, "second"))), expected)
+
+  def test_to_micros(self):
+    expected = 1552733214259000000
+    self.assertEqual(self._q(query.to_micros(query.epoch(1552733214259, "second"))), expected)
+
+  def test_day_of_year(self):
+    now = datetime.now()
+    self.assertEqual(self._q(query.day_of_year(query.time(now.isoformat() + 'Z'))), now.timetuple().tm_yday)
+
+  def test_day_of_month(self):
+    now = datetime.now()
+    self.assertEqual(self._q(query.day_of_month(query.time(now.isoformat() + 'Z'))), now.day)
+
+  def test_day_of_week(self):
+    now = datetime.now()
+    self.assertEqual(self._q(query.day_of_week(query.time(now.isoformat() + 'Z'))), now.weekday()+1)
+
+  def test_year(self):
+    now = datetime.now()
+    self.assertEqual(self._q(query.year(query.time(now.isoformat() + 'Z'))), now.year)
+
+  def test_month(self):
+    now = datetime.now()
+    self.assertEqual(self._q(query.month(query.time(now.isoformat() + 'Z'))), now.month)
+
+  def test_hour(self):
+    expected = 0
+    self.assertEqual(self._q(query.hour(query.epoch(0, "second"))), expected)
+
+  def test_minute(self):
+    now = datetime.now()
+    self.assertEqual(self._q(query.minute(query.time(now.isoformat() + 'Z'))), now.minute)
+
+  def test_second(self):
+    now = datetime.now()
+    self.assertEqual(self._q(query.second(query.time(now.isoformat() + 'Z'))), now.second)
+  
   def test_to_date(self):
     self.assertEqual(self._q(query.to_date("1970-01-01")), date(1970, 1, 1))
 

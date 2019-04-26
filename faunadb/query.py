@@ -598,12 +598,59 @@ def to_string(expr):
   return _fn({"to_string": expr})
 
 def to_number(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
   return _fn({"to_number": expr})
 
 def to_time(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
   return _fn({"to_time": expr})
 
+def to_seconds(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"to_seconds": expr})
+
+def to_millis(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"to_millis": expr})
+
+def to_micros(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"to_micros": expr})
+
+def day_of_month(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"day_of_month": expr})
+
+def day_of_week(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"day_of_week": expr})
+
+def day_of_year(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"day_of_year": expr})
+
+def year(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"year": expr})
+
+def month(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"month": expr})
+
+def hour(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"hour": expr})
+
+def minute(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"minute": expr})
+
+def second(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
+  return _fn({"second": expr})
+
 def to_date(expr):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#time-and-date>`__."""
   return _fn({"to_date": expr})
 
 #endregion
