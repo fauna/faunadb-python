@@ -36,7 +36,7 @@ Documentation
 
 Driver documentation is available at https://faunadb.readthedocs.org/en/latest/.
 
-See the `FaunaDB Documentation <https://fauna.com/documentation>`_ for a complete API reference, or look in `tests`_
+See the `FaunaDB Documentation <https://docs.fauna.com/>`_ for a complete API reference, or look in `tests`_
 for more examples.
 
 
