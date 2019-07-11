@@ -423,6 +423,76 @@ def ngram(terms, min=None, max=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#string-functions>`__."""
   return _params({"ngram": terms}, {"min": min, "max": max})
 
+
+def find_str(value, find, start=None):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _params({"findstr": value, "find": find}, {"start": start})
+
+
+def find_str_regex(value, pattern, start=None, numResults=None):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _params({"findstrregex": value, "pattern": pattern}, {"start": start, "num_results": numResults})
+
+
+def replace_str(value, find, replace):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"replacestr": value, "find": find, "replace": replace})
+
+
+def replace_str_regex(value, pattern, replace, first=None):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _params({"replacestrregex": value, "pattern": pattern, "replace": replace}, {"first": first})
+
+
+def length(value):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"length": value})
+
+
+def lowercase(value):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"lowercase": value})
+
+
+def uppercase(value):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"uppercase": value})
+
+
+def titlecase(value):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"titlecase": value})
+
+
+def trim(value):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"trim": value})
+
+
+def ltrim(value):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"ltrim": value})
+
+
+def rtrim(value):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"rtrim": value})
+
+
+def space(count):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _fn({"space": count})
+
+
+def substring(value, start, length=None):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _params({"substring": value, "start": start}, {"length": length})
+
+
+def repeat(value, number=None):
+  """See the docs <https://app.fauna.com/documentation/reference/queryapi#string-functions> __."""
+  return _params({"repeat": value}, {"number": number})
+
 #endregion
 
 #region Time and date functions

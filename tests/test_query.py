@@ -509,6 +509,80 @@ class QueryTest(FaunaTestCase):
       ["joh", "john", "ohn", "doe"]
     )
 
+  def test_findstr(self):
+    self.assertEqual(self._q(query.find_str("ABC","A")), 0)
+    self.assertEqual(self._q(query.find_str("ABC","A",0)), 0)
+    self.assertEqual(self._q(query.find_str("ABC","A",1)), -1)
+    self.assertEqual(self._q(query.find_str("a big apple","a", 2)), 6)
+
+  def test_findstrregex(self):
+    self.assertEqual(self._q(query.find_str_regex("ABC","A")),[ { "start": 0, "end": 0, "data": 'A' } ])
+    self.assertEqual(self._q(query.find_str_regex("ABCAB","AB")),
+                          [
+                          { 'start': 0, 'end': 1, 'data': 'AB' } ,
+                          { 'start': 3, 'end': 4, 'data': 'AB' }
+                          ]
+                        )
+    self.assertEqual(self._q(query.find_str_regex("one fish two Fish","[fF]ish")),
+                          [
+                          { 'start': 4, 'end': 7, 'data': 'fish' } ,
+                          { 'start': 13, 'end': 16, 'data': 'Fish' }
+                          ]
+    )
+
+  def test_length(self):
+    self.assertEqual(self._q(query.length("")), 0)
+    self.assertEqual(self._q(query.length("A")), 1)
+    self.assertEqual(self._q(query.length("ApPle")), 5)
+    self.assertEqual(self._q(query.length("two words")), 9)
+
+  def test_lowercase(self):
+    self.assertEqual(self._q(query.lowercase("")), "")
+    self.assertEqual(self._q(query.lowercase("A")), "a")
+    self.assertEqual(self._q(query.lowercase("ApPle")), 'apple')
+
+  def test_ltrim(self):
+    self.assertEqual(self._q(query.ltrim("")), "")
+    self.assertEqual(self._q(query.ltrim("    A")), "A")
+    self.assertEqual(self._q(query.ltrim("\t\n\t\n  Apple")), 'Apple')
+    self.assertEqual(self._q(query.ltrim(" A B C")), "A B C")
+
+  def test_repeat(self):
+    self.assertEqual(self._q(query.repeat("A")), "AA")
+    self.assertEqual(self._q(query.repeat("ABC", 3)), "ABCABCABC")
+
+  def test_replacestr(self):
+    self.assertEqual(self._q(query.replace_str("ABCDE","AB","AA")), "AACDE")
+    self.assertEqual(self._q(query.replace_str("One Fish Two Fish","Fish","Cat")), "One Cat Two Cat")
+
+  def test_replacestrregex(self):
+    self.assertEqual(self._q(query.replace_str_regex("ABCDE","AB","AA")), "AACDE")
+    self.assertEqual(self._q(query.replace_str_regex("One Fish Two fish","[Ff]ish","Cat")), "One Cat Two Cat")
+
+  def test_rtrim(self):
+    self.assertEqual(self._q(query.rtrim("A\t\n   ")), "A")
+    self.assertEqual(self._q(query.rtrim("ABC DE F ")), "ABC DE F")
+
+  def test_space(self):
+    self.assertEqual(self._q(query.space(0)), "")
+    self.assertEqual(self._q(query.space(5)), "     ")
+
+  def test_substring(self):
+    self.assertEqual(self._q(query.substring("ABCDEF",-3)), "DEF")
+    self.assertEqual(self._q(query.substring("ABCDEF",0,3)), "ABC")
+
+  def test_titlecase(self):
+    self.assertEqual(self._q(query.titlecase("one fISH tWo FISH")), "One Fish Two Fish")
+    self.assertEqual(self._q(query.titlecase("ABC DEF")), "Abc Def")
+
+  def test_trim(self):
+    self.assertEqual(self._q(query.trim("   A   ")), "A")
+    self.assertEqual(self._q(query.trim("\t\nABC DEF\t\n   ")), "ABC DEF")
+
+  def test_uppercase(self):
+    self.assertEqual(self._q(query.uppercase("a")), "A")
+    self.assertEqual(self._q(query.uppercase("abc def")), "ABC DEF")
+
   #endregion
 
   #region Time and date functions

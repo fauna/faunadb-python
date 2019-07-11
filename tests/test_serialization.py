@@ -307,6 +307,51 @@ class SerializationTest(TestCase):
     self.assertJson(query.ngram(["str0", "str1"], min=2, max=3),
                     '{"max":3,"min":2,"ngram":["str0","str1"]}')
 
+  def test_find_str(self):
+    self.assertJson(query.find_str("ABC", "A"), '{"find":"A","findstr":"ABC"}')
+
+  def test_find_str_regex(self):
+    self.assertJson(query.find_str_regex("one fish two Fish",
+                                         "[fF]ish"), '{"findstrregex":"one fish two Fish","pattern":"[fF]ish"}')
+
+  def test_replace_str(self):
+    self.assertJson(query.replace_str("one fish two Fish",
+                                      "fish", "dog"), '{"find":"fish","replace":"dog","replacestr":"one fish two Fish"}')
+
+  def test_replace_str_regex(self):
+    self.assertJson(query.replace_str_regex("one fish two Fish",
+                                            "[fF]ish", "dog"), '{"pattern":"[fF]ish","replace":"dog","replacestrregex":"one fish two Fish"}')
+
+  def test_length(self):
+    self.assertJson(query.length('hello'), '{"length":"hello"}')
+
+  def test_lowercase(self):
+    self.assertJson(query.lowercase('One more photo'), '{"lowercase":"One more photo"}')
+
+  def test_uppercase(self):
+    self.assertJson(query.uppercase('guns for hands'), '{"uppercase":"guns for hands"}')
+
+  def test_titlecase(self):
+    self.assertJson(query.titlecase("together"), '{"titlecase":"together"}')
+
+  def test_trim(self):
+    self.assertJson(query.trim("chlorine"), '{"trim":"chlorine"}')
+
+  def test_ltrim(self):
+    self.assertJson(query.ltrim(" car radio "), '{"ltrim":" car radio "}')
+
+  def test_rtrim(self):
+    self.assertJson(query.rtrim("mic check "), '{"rtrim":"mic check "}')
+
+  def test_space(self):
+    self.assertJson(query.space(34), '{"space":34}')
+
+  def test_substring(self):
+    self.assertJson(query.substring("bulawayo", 0, 3), '{"length":3,"start":0,"substring":"bulawayo"}')
+
+  def test_repeat(self):
+    self.assertJson(query.repeat("blAH", 5), '{"number":5,"repeat":"blAH"}')
+
   #endregion
 
   #region Time and date functions
