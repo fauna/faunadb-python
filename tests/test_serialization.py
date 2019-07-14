@@ -309,6 +309,11 @@ class SerializationTest(TestCase):
 
   #region String functions
 
+  def test_format(self):
+    self.assertJson(query.format("%s %d and then %.2f", 'Hey there',
+                                 2019, 3.14), '{"format":"%s %d and then %.2f","values":["Hey there",2019,3.14]}')
+    self.assertJson(query.format("always 100%%"), '{"format":"always 100%%","values":[]}')
+
   def test_concat(self):
     self.assertJson(query.concat(["a", "b"]), '{"concat":["a","b"]}')
     self.assertJson(query.concat(["a", "b"], "/"), '{"concat":["a","b"],"separator":"/"}')

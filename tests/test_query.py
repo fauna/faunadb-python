@@ -516,6 +516,11 @@ class QueryTest(FaunaTestCase):
 
   #region String functions
 
+  def test_format(self):
+    self.assertEqual(self._q(query.format("always 100%%")), "always 100%")
+    self.assertEqual(self._q(query.format("Hi there %s, you have %d points", "Tom", 9000)), "Hi there Tom, you have 9000 points")
+    self.assertEqual(self._q(query.format("%.2f %.5f", 3.14159, 3.14159)), "3.14 3.14159")
+
   def test_concat(self):
     self.assertEqual(self._q(query.concat(["a", "b", "c"])), "abc")
     self.assertEqual(self._q(query.concat([])), "")

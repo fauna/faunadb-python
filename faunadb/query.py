@@ -422,6 +422,11 @@ def has_identity():
 
 #region String functions
 
+def format(string, *values):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#string-functions>`__."""
+  return _fn({"format": string, "values": _varargs(values)})
+
+
 def concat(strings, separator=None):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#string-functions>`__."""
   return _params({"concat": strings}, {"separator": separator})
