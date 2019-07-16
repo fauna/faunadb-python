@@ -409,6 +409,7 @@ class QueryTest(FaunaTestCase):
                     query.match(self.m_index_ref, m_value))
     self.assertEqual(self._set_to_list(q), [ref_n, ref_m, ref_nm])
 
+
   def test_reduce(self):
     data1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     data2 = ["Fauna", "DB", " ", "rocks"]
@@ -418,6 +419,18 @@ class QueryTest(FaunaTestCase):
 
     self.assertEqual(self._q(q1), 45)
     self.assertEqual(self._q(q2), "FaunaDB rocks")
+
+  def test_merge(self):
+    q1 = query.merge({"x": 1, "y": 2}, {"z": 3})
+    q2 = query.merge({}, {"a": 1})
+    q3 = query.merge({"a": 1}, [{"b": 2}, {"c": 3}, {"a": 5}])
+    q4 = query.merge({"a": 1, "b": 2, "c": 3}, {
+                     "a": 'a', "b": 'b', "c": 'c'}, lambda key, left, right: right)
+
+    self.assertEqual(self._q(q1), {"x": 1, "y": 2, "z": 3})
+    self.assertEqual(self._q(q2), {"a": 1})
+    self.assertEqual(self._q(q3), {"a": 5, "b": 2, "c": 3})
+    self.assertEqual(self._q(q4), {"a": 'a', "b": 'b', "c": 'c'})
 
   def test_intersection(self):
     n_value = 102

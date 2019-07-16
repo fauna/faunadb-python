@@ -357,6 +357,10 @@ def match(index, *terms):
   return _fn(m)
 
 
+def merge(merge, with_, lambda_=None):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#sets>`__."""
+  return _params({"merge": merge, "with": with_}, {"lambda": lambda_})
+
 def union(*sets):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#sets>`__."""
   return _fn({"union": _varargs(sets)})
