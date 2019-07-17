@@ -1,3 +1,11 @@
+## 2.7.0
+- Support new schema names: Class -> Collection; Instance -> Document
+  Deprecated `create_class`, `class_expr`, `class_`, `classes`
+  Added `create_collection`, `collection`, `collections`
+- Added `to_seconds`, `to_millis`, `to_micros`, `day_of_week`, `day_of_month`, `day_of_year`, `month`, `hour`, `minute`, `second`.
+- Added `create_role`, `role`, `roles`
+- Added `find_str`, `find_str_regex`, `replace_str`, `replace_str_regex`,   `length`, `lowercase`, `uppercase`, `titlecase`, `ltrim`, `rtrim`, `space`, `substring`, `repeat`
+
 ## 2.6.0
 - Expose last seen txn via `get_last_txn_time`
 - Update documentation links
