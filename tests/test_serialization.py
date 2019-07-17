@@ -10,25 +10,23 @@ from faunadb._json import to_json
 class SerializationTest(TestCase):
 
   def test_native(self):
-    self.assertJson(Native.CLASSES, '{"@ref":{"id":"classes"}}')
+    self.assertJson(Native.COLLECTIONS, '{"@ref":{"id":"collections"}}')
     self.assertJson(Native.INDEXES, '{"@ref":{"id":"indexes"}}')
     self.assertJson(Native.DATABASES, '{"@ref":{"id":"databases"}}')
     self.assertJson(Native.FUNCTIONS, '{"@ref":{"id":"functions"}}')
     self.assertJson(Native.KEYS, '{"@ref":{"id":"keys"}}')
 
   def test_ref(self):
-    self.assertJson(Ref("classes"),
-                    '{"@ref":{"id":"classes"}}')
     self.assertJson(Ref("collections"),
                     '{"@ref":{"id":"collections"}}')
     self.assertJson(Ref("widgets", Native.COLLECTIONS),
-                    '{"@ref":{"class":{"@ref":{"id":"collections"}},"id":"widgets"}}')
+                    '{"@ref":{"collection":{"@ref":{"id":"collections"}},"id":"widgets"}}')
 
   def test_set_ref(self):
     self.assertJson(SetRef({"match": Ref("widgets", Native.INDEXES), "terms": "Laptop"}),
                     ('{'
                      '"@set":{'
-                     '"match":{"@ref":{"class":{"@ref":{"id":"indexes"}},"id":"widgets"}},'
+                     '"match":{"@ref":{"collection":{"@ref":{"id":"indexes"}},"id":"widgets"}},'
                      '"terms":"Laptop"'
                      '}'
                      '}'))

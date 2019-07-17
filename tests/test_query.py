@@ -61,9 +61,9 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.abort("aborting"))
 
   def test_at(self):
-    instance = self._create(n=1)
-    ref = instance["ref"]
-    ts = instance["ts"]
+    document = self._create(n=1)
+    ref = document["ref"]
+    ts = document["ts"]
     prev_ts = ts - 1
 
     # Add previous event
@@ -192,8 +192,8 @@ class QueryTest(FaunaTestCase):
   #region Read functions
 
   def test_get(self):
-    instance = self._create()
-    self.assertEqual(self._q(query.get(instance["ref"])), instance)
+    document = self._create()
+    self.assertEqual(self._q(query.get(document["ref"])), document)
 
   def test_key_from_secret(self):
     db_ref = self.admin_client.query(
@@ -245,10 +245,10 @@ class QueryTest(FaunaTestCase):
   #region Write functions
 
   def test_create(self):
-    instance = self._create()
-    self.assertIn("ref", instance)
-    self.assertIn("ts", instance)
-    self.assertEqual(instance["ref"].class_(), self.collection_ref)
+    document = self._create()
+    self.assertIn("ref", document)
+    self.assertIn("ts", document)
+    self.assertEqual(document["ref"].collection(), self.collection_ref)
 
   def test_update(self):
     ref = self._create()["ref"]
@@ -266,9 +266,9 @@ class QueryTest(FaunaTestCase):
     self.assertFalse(self._q(query.exists(ref)))
 
   def test_insert(self):
-    instance = self._create(n=1)
-    ref = instance["ref"]
-    ts = instance["ts"]
+    document = self._create(n=1)
+    ref = document["ref"]
+    ts = document["ts"]
     prev_ts = ts - 1
 
     # Add previous event
@@ -280,8 +280,8 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(old["data"], {"n": 0})
 
   def test_remove(self):
-    instance = self._create(n=0)
-    ref = instance["ref"]
+    document = self._create(n=0)
+    ref = document["ref"]
 
     # Change it
     new_instance = self._q(query.replace(ref, {"data": {"n": 1}}))
@@ -291,7 +291,7 @@ class QueryTest(FaunaTestCase):
     self._q(query.remove(ref, new_instance["ts"], "create"))
 
     # Assert that it was undone
-    self.assertEqual(self._q(query.get(ref)), instance)
+    self.assertEqual(self._q(query.get(ref)), document)
 
   def test_create_collection(self):
     self._q(query.create_collection({"name": "collection_for_test"}))
@@ -355,13 +355,13 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(len(events), 3)
 
     self.assertEqual(events[0]["action"], "create")
-    self.assertEqual(events[0]["instance"], instance_ref)
+    self.assertEqual(events[0]["document"], instance_ref)
 
     self.assertEqual(events[1]["action"], "update")
-    self.assertEqual(events[1]["instance"], instance_ref)
+    self.assertEqual(events[1]["document"], instance_ref)
 
     self.assertEqual(events[2]["action"], "delete")
-    self.assertEqual(events[2]["instance"], instance_ref)
+    self.assertEqual(events[2]["document"], instance_ref)
 
   def test_singleton_events(self):
     instance_ref = self._create(n=1000)["ref"]
@@ -374,10 +374,10 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(len(events), 2)
 
     self.assertEqual(events[0]["action"], "add")
-    self.assertEqual(events[0]["instance"], instance_ref)
+    self.assertEqual(events[0]["document"], instance_ref)
 
     self.assertEqual(events[1]["action"], "remove")
-    self.assertEqual(events[1]["instance"], instance_ref)
+    self.assertEqual(events[1]["document"], instance_ref)
 
 
   def test_match(self):
@@ -457,7 +457,7 @@ class QueryTest(FaunaTestCase):
     instance_client = self.client.new_session_client(secret=secret)
 
     self.assertEqual(instance_client.query(
-      query.select("ref", query.get(Ref("self", Ref("widgets", Native.CLASSES))))), instance_ref)
+      query.select("ref", query.get(Ref("self", Ref("widgets", Native.COLLECTIONS))))), instance_ref)
 
     self.assertTrue(instance_client.query(query.logout(True)))
 
@@ -616,7 +616,7 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.index("idx-name")), Ref("idx-name", Native.INDEXES))
 
   def test_collection(self):
-    self.assertEqual(self._q(query.collection("cls-name")), Ref("cls-name", Native.CLASSES))
+    self.assertEqual(self._q(query.collection("cls-name")), Ref("cls-name", Native.COLLECTIONS))
 
   def test_function(self):
     self.assertEqual(self._q(query.function("fn-name")), Ref("fn-name", Native.FUNCTIONS))
@@ -808,7 +808,7 @@ class QueryTest(FaunaTestCase):
     child_db_ref = Ref("child-database", Native.DATABASES, parent_db_ref)
 
     self.assertEqual(self.admin_client.query(query.paginate(query.collections(nested_database_ref)))["data"],
-                     [Ref("a_collection", Native.CLASSES, child_db_ref)])
+                     [Ref("a_collection", Native.COLLECTIONS, child_db_ref)])
 
     self.assertEqual(self.admin_client.query(query.paginate(query.roles(nested_database_ref)))["data"],
                      [Ref("a_role", Native.ROLES, child_db_ref)])

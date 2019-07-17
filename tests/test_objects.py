@@ -9,9 +9,9 @@ class ObjectsTest(FaunaTestCase):
   @classmethod
   def setUpClass(cls):
     super(ObjectsTest, cls).setUpClass()
-    cls.ref = Ref("123", Ref("frogs", Native.CLASSES))
+    cls.ref = Ref("123", Ref("frogs", Native.COLLECTIONS))
     cls.json_ref = ('{"@ref":{'
-                    '"class":{"@ref":{"class":{"@ref":{"id":"classes"}},"id":"frogs"}},'
+                    '"collection":{"@ref":{"collection":{"@ref":{"id":"collections"}},"id":"frogs"}},'
                     '"id":"123"'
                     '}}')
 
@@ -25,17 +25,17 @@ class ObjectsTest(FaunaTestCase):
 
     ref = Ref("123", Native.KEYS)
     self.assertEqual(ref.id(), "123")
-    self.assertEqual(ref.class_(), Native.KEYS)
+    self.assertEqual(ref.collection(), Native.KEYS)
     self.assertEqual(ref.database(), None)
 
     self.assertRegexCompat(
       repr(ref),
-      r"Ref\(id=123, class=Ref\(id=keys\)\)"
+      r"Ref\(id=123, collection=Ref\(id=keys\)\)"
     )
 
   def test_set(self):
     index = Ref("frogs_by_size", Native.INDEXES)
-    json_index = '{"@ref":{"class":{"@ref":{"id":"indexes"}},"id":"frogs_by_size"}}'
+    json_index = '{"@ref":{"collection":{"@ref":{"id":"indexes"}},"id":"frogs_by_size"}}'
     match = SetRef(query.match(index, self.ref))
     json_match = '{"@set":{"match":%s,"terms":%s}}' % (json_index, self.json_ref)
     self.assertJson(match, json_match)

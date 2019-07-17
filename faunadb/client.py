@@ -12,6 +12,8 @@ from faunadb.query import _wrap
 from faunadb.request_result import RequestResult
 from faunadb._json import parse_json_or_none, to_json
 
+API_VERSION = "2.7"
+
 class _LastTxnTime(object):
   """Wraps tracking the last transaction time supplied from the database."""
   def __init__(self):
@@ -132,7 +134,7 @@ class FaunaClient(object):
       self.session.headers.update({
         "Accept-Encoding": "gzip",
         "Content-Type": "application/json;charset=utf-8",
-        "X-FaunaDB-API-Version": "2.1"
+        "X-FaunaDB-API-Version": API_VERSION
       })
       self.session.timeout = timeout
     else:

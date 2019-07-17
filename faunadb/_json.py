@@ -31,10 +31,10 @@ def _parse_json_hook(dct):
   if "@ref" in dct:
     ref = dct["@ref"]
 
-    if (not "class" in ref) and (not "database" in ref):
+    if (not "collection" in ref) and (not "database" in ref):
       return Native.from_name(ref["id"])
 
-    return Ref(ref["id"], ref.get("class"), ref.get("database"))
+    return Ref(ref["id"], ref.get("collection"), ref.get("database"))
   if "@obj" in dct:
     return dct["@obj"]
   if "@set" in dct:

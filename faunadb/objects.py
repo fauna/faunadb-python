@@ -5,6 +5,7 @@ See the `docs <https://app.fauna.com/documentation/reference/queryapi#simple-typ
 from datetime import datetime
 # pylint: disable=redefined-builtin
 from iso8601 import parse_date
+from faunadb.deprecated import deprecated
 from faunadb.query import _Expr
 
 class Ref(_Expr):
@@ -22,18 +23,25 @@ class Ref(_Expr):
     value = {"id": id}
 
     if cls != None:
-      value["class"] = cls
+      value["collection"] = cls
 
     if db != None:
       value["database"] = db
 
     super(Ref, self).__init__(value)
 
+  def collection(self):
+    """
+    Gets the collection part out of the Ref.
+    """
+    return self.value.get("collection")
+
+  @deprecated("use collection instead")
   def class_(self):
     """
     Gets the class part out of the Ref.
     """
-    return self.value.get("class")
+    return self.value.get("collection")
 
   def database(self):
     """
@@ -51,14 +59,14 @@ class Ref(_Expr):
     return {"@ref": self.value}
 
   def __str__(self):
-    cls = ", class=%s" % self.value["class"] if "class" in self.value else ""
+    col = ", collection=%s" % self.value["collection"] if "collection" in self.value else ""
     db = ", database=%s" % self.value["database"] if "database" in self.value else ""
-    return "Ref(id=%s%s%s)" % (self.value["id"], cls, db)
+    return "Ref(id=%s%s%s)" % (self.value["id"], col, db)
 
   def __repr__(self):
-    cls = ", class=%r" % self.value["class"] if "class" in self.value else ""
+    col = ", collection=%s" % self.value["collection"] if "collection" in self.value else ""
     db = ", database=%r" % self.value["database"] if "database" in self.value else ""
-    return "Ref(id=%s%s%s)" % (self.value["id"], cls, db)
+    return "Ref(id=%s%s%s)" % (self.value["id"], col, db)
 
   def __eq__(self, other):
     return isinstance(other, Ref) and self.value == other.value
@@ -68,7 +76,6 @@ class Ref(_Expr):
     return not self == other
 
 class Native(object):
-  CLASSES = Ref('classes')
   COLLECTIONS = Ref('collections')
   INDEXES = Ref('indexes')
   DATABASES = Ref('databases')

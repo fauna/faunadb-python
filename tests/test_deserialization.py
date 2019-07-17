@@ -7,34 +7,34 @@ from faunadb._json import parse_json
 class DeserializationTest(TestCase):
 
   def test_ref(self):
-    self.assertJson('{"@ref":{"id":"classes"}}',
-                    Native.CLASSES)
+    self.assertJson('{"@ref":{"id":"collections"}}',
+                    Native.COLLECTIONS)
 
-    self.assertJson('{"@ref":{"id":"widgets","class":{"@ref":{"id":"classes"}}}}',
-                    Ref("widgets", Native.CLASSES))
+    self.assertJson('{"@ref":{"id":"widgets","collection":{"@ref":{"id":"collections"}}}}',
+                    Ref("widgets", Native.COLLECTIONS))
 
     self.assertJson("""{
                       "@ref":{
                         "id":"widgets",
-                         "class":{"@ref":{"id":"classes"}},
+                         "collection":{"@ref":{"id":"collections"}},
                          "database":{
                            "@ref":{
                              "id":"db",
-                             "class":{"@ref":{"id":"databases"}}
+                             "collection":{"@ref":{"id":"databases"}}
                            }
                          }
                       }
                     }""",
-                    Ref("widgets", Native.CLASSES, Ref("db", Native.DATABASES)))
+                    Ref("widgets", Native.COLLECTIONS, Ref("db", Native.DATABASES)))
 
   def test_set_ref(self):
     self.assertJson("""{
                       "@set":{
-                        "match":{"@ref":{"id":"widgets","class":{"@ref":{"id":"classes"}}}},
+                        "match":{"@ref":{"id":"widgets","collection":{"@ref":{"id":"collections"}}}},
                         "terms":"Laptop"
                       }
                     }""",
-                    SetRef({"match": Ref("widgets", Native.CLASSES), "terms": "Laptop"}))
+                    SetRef({"match": Ref("widgets", Native.COLLECTIONS), "terms": "Laptop"}))
 
   def test_fauna_time(self):
     self.assertJson('{"@ts":"1970-01-01T00:00:00.123456789Z"}',
@@ -63,10 +63,10 @@ class DeserializationTest(TestCase):
   def test_array(self):
     self.assertJson('[1, "a string"]', [1, "a string"])
     self.assertJson("""[
-                      {"@ref":{"id":"widgets","class":{"@ref":{"id":"classes"}}}},
+                      {"@ref":{"id":"widgets","collection":{"@ref":{"id":"collections"}}}},
                       {"@date":"1970-01-01"}
                     ]""",
-                    [Ref("widgets", Native.CLASSES), parse_date("1970-01-01").date()])
+                    [Ref("widgets", Native.COLLECTIONS), parse_date("1970-01-01").date()])
 
   def test_empty_object(self):
     self.assertJson('{}', {})
@@ -80,8 +80,8 @@ class DeserializationTest(TestCase):
   def test_complex_object(self):
     self.maxDiff = None
     json = """{
-      "ref": {"@ref":{"class":{"@ref":{"id":"classes"}},"id":"widget"}},
-      "set_ref": {"@set":{"match":{"@ref":{"class":{"@ref":{"id":"classes"}},"id":"widget"}},"terms":"Laptop"}},
+      "ref": {"@ref":{"collection":{"@ref":{"id":"collections"}},"id":"widget"}},
+      "set_ref": {"@set":{"match":{"@ref":{"collection":{"@ref":{"id":"collections"}},"id":"widget"}},"terms":"Laptop"}},
       "date": {"@date":"1970-01-01"},
       "time": {"@ts":"1970-01-01T00:00:00.123456789Z"},
       "object": {"@obj":{"key":"value"}},
@@ -91,8 +91,8 @@ class DeserializationTest(TestCase):
     }"""
 
     self.assertJson(json, {
-      "ref": Ref("widget", Native.CLASSES),
-      "set_ref": SetRef({"match": Ref("widget", Native.CLASSES), "terms": "Laptop"}),
+      "ref": Ref("widget", Native.COLLECTIONS),
+      "set_ref": SetRef({"match": Ref("widget", Native.COLLECTIONS), "terms": "Laptop"}),
       "date": parse_date("1970-01-01").date(),
       "time": FaunaTime("1970-01-01T00:00:00.123456789Z"),
       "object": {"key": "value"},
