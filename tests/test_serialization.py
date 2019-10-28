@@ -263,6 +263,14 @@ class SerializationTest(TestCase):
     self.assertJson(query.join(query.match(query.index("widget")), query.index("things")),
                     '{"join":{"match":{"index":"widget"}},"with":{"index":"things"}}')
 
+  def test_range(self):
+    self.assertJson(query.range(
+			query.match(query.ref("indexes/spellbooks_by_owner"), query.ref("collections/characters/104979509695139637")),
+			10,
+			50,
+		),
+		'{"from":10,"range":{"match":{"@ref":"indexes/spellbooks_by_owner"},"terms":{"@ref":"collections/characters/104979509695139637"}},"to":50}')
+
   #endregion
 
   #region Authentication
