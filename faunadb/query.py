@@ -377,6 +377,11 @@ def join(source, target):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#sets>`__."""
   return _fn({"join": source, "with": target})
 
+def range(set, from_, to):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#sets>`__."""
+  return _fn({"range": set, "from": from_, "to": to})
+
+
 #endregion
 
 #region Authentication

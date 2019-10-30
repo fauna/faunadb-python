@@ -445,6 +445,24 @@ class QueryTest(FaunaTestCase):
     joined = query.join(source, lambda a: query.match(self.m_index_ref, a))
     self.assertEqual(self._set_to_list(joined), assoc_refs)
 
+  def test_range(self):
+    data = list(range(1, 20))
+
+    self._q(query.create_collection({"name": "range_test"}))
+    self._q(query.create_index({"name": "range_idx", "source": query.collection("range_test"), "active": True, "values": [{"field": ["data", "value"]}]}))
+    self._q(query.foreach(query.lambda_query( lambda x:
+    query.create(query.collection("range_test"), {"data": {"value": x}})), data)
+    )
+    m = query.match(query.index("range_idx"))
+
+    q1 = query.select("data", query.paginate(query.range(m, 3, 8)))
+    q2 = query.select("data", query.paginate(query.range(m, 17, 18)))
+    q3 = query.select("data", query.paginate(query.range(m, 19, 0)))
+
+    self.assertEqual(self._q(q1), [3, 4, 5, 6, 7, 8])
+    self.assertEqual(self._q(q2), [17, 18])
+    self.assertEqual(self._q(q3), [])
+
   #endregion
 
   #region Authentication
