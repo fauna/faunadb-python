@@ -134,6 +134,7 @@ class FaunaClient(object):
       self.session.headers.update({
         "Accept-Encoding": "gzip",
         "Content-Type": "application/json;charset=utf-8",
+        "X-Fauna-Driver": "python",
         "X-FaunaDB-API-Version": API_VERSION
       })
       self.session.timeout = timeout
