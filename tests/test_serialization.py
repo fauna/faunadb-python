@@ -216,6 +216,10 @@ class SerializationTest(TestCase):
       '{"create_role":{"object":{"name":"a_role","privileges":{"object":{"actions":{"object":{"read":true}},"resource":{"collections":null}}}}}}'
     )
 
+  def test_move_database(self):
+    q = query.move_database(query.database("src-db"), query.database("dest-db"))
+    self.assertJson(q,'{"move_database":{"database":"src-db"},"to":{"database":"dest-db"}}')
+
   #endregion
 
   #region Sets
