@@ -357,6 +357,10 @@ def union(*sets):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#sets>`__."""
   return _fn({"union": _varargs(sets)})
 
+def reduce(lambda_, initial, collection):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#sets>` __."""
+  return _fn({"reduce": lambda_, "initial": initial, "collection": collection})
+
 
 def intersection(*sets):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#sets>`__."""
