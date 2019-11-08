@@ -340,6 +340,14 @@ class QueryTest(FaunaTestCase):
 
     self.assertTrue(self.admin_client.query(query.exists(query.role("a_role"))))
 
+  def test_move_database(self):
+    self.admin_client.query(query.create_database({"name": "mvdb_src"}))
+    self.admin_client.query(query.create_database({"name": "mvdb_dst"}))
+    self.admin_client.query(query.move_database(query.database("mvdb_src"), query.database("mvdb_dst")))
+    self.assertEqual(self.admin_client.query(
+        query.exists(query.database("mvdb_src"))), False)
+    self.assertEqual(self.admin_client.query(query.exists(query.database("mvdb_src", query.database("mvdb_dst")))), True)
+
   #endregion
 
   #region Sets

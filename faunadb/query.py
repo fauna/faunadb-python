@@ -323,6 +323,10 @@ def create_role(func_params):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
   return _fn({"create_role": func_params})
 
+def move_database(from_, to):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
+  return _fn({"move_database": from_, "to": to})
+
 
 def create_key(key_params):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#write-functions>`__."""
