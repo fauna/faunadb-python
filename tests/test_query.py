@@ -409,6 +409,16 @@ class QueryTest(FaunaTestCase):
                     query.match(self.m_index_ref, m_value))
     self.assertEqual(self._set_to_list(q), [ref_n, ref_m, ref_nm])
 
+  def test_reduce(self):
+    data1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    data2 = ["Fauna", "DB", " ", "rocks"]
+
+    q1 = query.reduce(query.lambda_query(lambda accum, value: query.add(query.var("accum"), query.var("value"))), 0, data1)
+    q2 = query.reduce(query.lambda_query(lambda accum, value: query.concat([query.var("accum"), query.var("value")])), "", data2)
+
+    self.assertEqual(self._q(q1), 45)
+    self.assertEqual(self._q(q2), "FaunaDB rocks")
+
   def test_intersection(self):
     n_value = 102
     m_value = 202

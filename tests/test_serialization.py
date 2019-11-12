@@ -245,6 +245,13 @@ class SerializationTest(TestCase):
     self.assertJson(query.union(query.index("widget"), query.index("things")),
                     '{"union":[{"index":"widget"},{"index":"things"}]}')
 
+  def test_reduce(self):
+    expected = '{"collection":[1,2,3,4,5,6,7,8,9],"initial":0,"reduce":{"expr":{"add":[{"var":"accum"},{"var":"val"}]},"lambda":["accum","val"]}}'
+    col = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    lambda_ = query.lambda_query(lambda accum, val: query.add(accum, val))
+    initial = 0
+    self.assertJson(query.reduce(lambda_, initial, col), expected)
+
   def test_intersection(self):
     self.assertJson(query.intersection(), '{"intersection":[]}')
     self.assertJson(query.intersection(query.index("widget")),
