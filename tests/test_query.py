@@ -659,6 +659,14 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.select(2, arr)), 3)
     self.assertRaises(NotFound, lambda: self._q(query.select(3, arr)))
 
+  def test_select_as_index(self):
+    obj1 = {'foo': 'bar'}
+    obj2 = {'foo': 'baz'}
+    obj3 = {'foo': [0, 1]}
+    obj4 = {'foo': [2, 3]}
+    self.assertEqual(self._q(query.select_as_index('foo', [obj1, obj2])), ['bar', 'baz'])
+    self.assertEqual(self._q(query.select_as_index(['foo', 0], [obj3, obj4])), [0, 2])
+
   def test_add(self):
     self.assertEqual(self._q(query.add(2, 3, 5)), 10)
     self._assert_bad_query(query.add())

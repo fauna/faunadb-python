@@ -586,6 +586,9 @@ def select_all(path, from_):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""
   return _fn({"select_all": path, "from": from_})
 
+def select_as_index(path, from_):
+  """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""
+  return _fn({"select_as_index": path, "from": from_})
 
 def add(*numbers):
   """See the `docs <https://app.fauna.com/documentation/reference/queryapi#miscellaneous-functions>`__."""

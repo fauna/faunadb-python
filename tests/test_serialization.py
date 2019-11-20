@@ -412,6 +412,10 @@ class SerializationTest(TestCase):
     json = ('{"from":[{"object":{"foo":"bar"}},{"object":{"foo":"baz"}}],"select_all":"foo"}')
     self.assertJson(query.select_all("foo", [{"foo": "bar"}, {"foo": "baz"}]), json)
 
+  def test_select_as_index(self):
+    json = ('{"from":[{"object":{"foo":"bar"}},{"object":{"foo":"baz"}}],"select_as_index":"foo"}')
+    self.assertJson(query.select_as_index("foo", [{"foo": "bar"}, {"foo": "baz"}]), json)
+
   def test_add(self):
     self.assertJson(query.add(1), '{"add":1}')
     self.assertJson(query.add(1, 2, 3), '{"add":[1,2,3]}')
