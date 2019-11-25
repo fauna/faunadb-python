@@ -239,6 +239,17 @@ class SerializationTest(TestCase):
     self.assertJson(query.match(query.index("widget"), "Laptop"),
                     '{"match":{"index":"widget"},"terms":"Laptop"}')
 
+  def test_merge(self):
+      self.assertJson(query.merge({"x": 24}, {
+                      "y": 25}), '{"merge":{"object":{"x":24}},"with":{"object":{"y":25}}}')
+      self.assertJson(query.merge({"points": 900}, {
+                      "name": "Trevor"}), '{"merge":{"object":{"points":900}},"with":{"object":{"name":"Trevor"}}}')
+      self.assertJson(query.merge({}, {
+                      "id": 9}), '{"merge":{"object":{}},"with":{"object":{"id":9}}}')
+      self.assertJson(query.merge({"x": 24}, {
+                      "y": 25}, lambda key, left, right: right),
+                      '{"lambda":{"expr":{"var":"right"},"lambda":["key","left","right"]},"merge":{"object":{"x":24}},"with":{"object":{"y":25}}}')
+
   def test_union(self):
     self.assertJson(query.union(), '{"union":[]}')
     self.assertJson(query.union(query.index("widget")), '{"union":{"index":"widget"}}')
@@ -308,6 +319,11 @@ class SerializationTest(TestCase):
   #endregion
 
   #region String functions
+
+  def test_format(self):
+    self.assertJson(query.format("%s %d and then %.2f", 'Hey there',
+                                 2019, 3.14), '{"format":"%s %d and then %.2f","values":["Hey there",2019,3.14]}')
+    self.assertJson(query.format("always 100%%"), '{"format":"always 100%%","values":[]}')
 
   def test_concat(self):
     self.assertJson(query.concat(["a", "b"]), '{"concat":["a","b"]}')
