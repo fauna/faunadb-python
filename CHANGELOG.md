@@ -1,3 +1,8 @@
+## 2.10.0
+- Added `merge`, `format`, `reduce`
+- Send X-Fauna-Driver with HTTP requests
+- Added `move_database`, `range`
+
 ## 2.7.0
 - Support new schema names: Class -> Collection; Instance -> Document
   Deprecated `create_class`, `class_expr`, `class_`, `classes`
