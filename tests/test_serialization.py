@@ -507,6 +507,12 @@ class SerializationTest(TestCase):
     self.assertJson(query.divide(1, 2, 3), '{"divide":[1,2,3]}')
     self.assertJson(query.divide([1, 2, 3]), '{"divide":[1,2,3]}')
 
+  def test_any(self):
+    self.assertJson(query.any([True, True, True]), '{"any":[true,true,true]}')
+
+  def test_all(self):
+    self.assertJson(query.all([True, True, True]), '{"all":[true,true,true]}')
+
   def test_modulo(self):
     self.assertJson(query.modulo(1), '{"modulo":1}')
     self.assertJson(query.modulo(1, 2, 3), '{"modulo":[1,2,3]}')

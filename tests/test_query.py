@@ -820,6 +820,16 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.divide(1, 0))
     self._assert_bad_query(query.divide())
 
+  def test_any_all(self):
+    expected = [True, True, False, False]
+    self.assertEqual(self._q([
+        query.any([True, True, False]),
+        query.all([True, True, True]),
+        query.any([False, False, False]),
+        query.all([True, True, False])
+    ]), expected)
+
+
   def test_modulo(self):
     self.assertEqual(self._q(query.modulo(5, 2)), 1)
     # This is (15 % 10) % 2

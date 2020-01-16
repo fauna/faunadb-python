@@ -691,6 +691,16 @@ def divide(*numbers):
   return _fn({"divide": _varargs(numbers)})
 
 
+def any(collection):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/any>`__."""
+  return _fn({"any": collection})
+
+
+def all(collection):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/all>`__."""
+  return _fn({"all": collection})
+
+
 def modulo(*numbers):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/modulo>`__."""
   return _fn({"modulo": _varargs(numbers)})
