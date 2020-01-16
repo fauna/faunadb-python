@@ -407,6 +407,10 @@ class SerializationTest(TestCase):
   def test_time(self):
     self.assertJson(query.time("1970-01-01T00:00:00+00:00"), '{"time":"1970-01-01T00:00:00+00:00"}')
 
+  def test_now(self):
+    self.assertJson(query.now(), '{"now":null}')
+
+
   def test_epoch(self):
     self.assertJson(query.epoch(1, "second"), '{"epoch":1,"unit":"second"}')
     self.assertJson(query.epoch(1, "milisecond"), '{"epoch":1,"unit":"milisecond"}')

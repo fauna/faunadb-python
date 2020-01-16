@@ -675,6 +675,15 @@ class QueryTest(FaunaTestCase):
     # "now" refers to the current time.
     self.assertIsInstance(self._q(query.time("now")), FaunaTime)
 
+
+  def test_now(self):
+    t1 = self._q(query.now())
+    self.assertIsInstance(t1, FaunaTime)
+
+    self.assertEqual(self._q(query.equals(
+        query.now(), query.time("now"))), True)
+
+
   def test_epoch(self):
     self.assertEqual(self._q(query.epoch(12, "second")), FaunaTime("1970-01-01T00:00:12Z"))
     nano_time = FaunaTime("1970-01-01T00:00:00.123456789Z")

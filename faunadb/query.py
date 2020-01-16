@@ -554,6 +554,10 @@ def epoch(number, unit):
   return _fn({"epoch": number, "unit": unit})
 
 
+def now():
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/date>`__."""
+  return _fn({"now": None})
+
 def date(string):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/date>`__."""
   return _fn({"date": string})
