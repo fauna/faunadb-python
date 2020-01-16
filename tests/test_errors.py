@@ -86,7 +86,7 @@ class ErrorsTest(FaunaTestCase):
     self._assert_query_error(_Expr({"foo": "bar"}), BadRequest, "invalid expression")
 
   def test_unbound_variable(self):
-    self._assert_query_error(var("x"), BadRequest, "unbound variable")
+    self._assert_query_error(var("x"), BadRequest, "invalid expression")
 
   def test_invalid_argument(self):
     self._assert_query_error(add([1, "two"]), BadRequest, "invalid argument", ["add", 1])
@@ -112,7 +112,7 @@ class ErrorsTest(FaunaTestCase):
   def test_invalid_type(self):
     exception = self.assert_raises(BadRequest,
                                    lambda: self.client.query(create_collection({"name": 123})))
-    self._assert_error(exception, "validation failed", [])
+    self._assert_error(exception, "validation failed", ['create_collection'])
     failures = exception.errors[0].failures
     self.assertEqual(len(failures), 1)
     failure = failures[0]
