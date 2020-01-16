@@ -689,6 +689,39 @@ class QueryTest(FaunaTestCase):
     nano_time = FaunaTime("1970-01-01T00:00:00.123456789Z")
     self.assertEqual(self._q(query.epoch(123456789, "nanosecond")), nano_time)
 
+
+  def test_time_add(self):
+    time = "1970-01-25T02:00:00Z"
+    q1 = query.time_add(query.epoch(1, "hour"), 577, "hour")
+    q2 = query.time_add(query.epoch(2, "hour"), 24, "days")
+
+    self.assertIsInstance(self._q(q1), FaunaTime)
+    self.assertEqual(self._q(q1), FaunaTime(time))
+
+    self.assertIsInstance(self._q(q2), FaunaTime)
+    self.assertEqual(self._q(q2), FaunaTime(time))
+
+
+  def test_time_subtract(self):
+    time = "1970-01-01T00:00:00Z"
+    qry1 = query.time_subtract(query.epoch(1, "hour"), 1, "hour")
+    qry2 = query.time_subtract(query.epoch(1, "day"), 24, "hour")
+
+    self.assertIsInstance(self._q(qry1), FaunaTime)
+    self.assertEqual(self._q(qry1), FaunaTime(time))
+
+    self.assertIsInstance(self._q(qry2), FaunaTime)
+    self.assertEqual(self._q(qry2), FaunaTime(time))
+
+
+  def test_time_diff(self):
+    qry1 = query.equals(1, query.time_diff(query.epoch(0, "second"), query.epoch(1, "second"), "second"))
+    qry2 = query.equals(0, query.time_diff(query.epoch(24, "hour"), query.epoch(1, "day"), "day"))
+
+    self.assertEqual(self._q(qry1), True)
+    self.assertEqual(self._q(qry2), True)
+
+
   def test_date(self):
     self.assertEqual(self._q(query.date("1970-01-01")), date(1970, 1, 1))
 

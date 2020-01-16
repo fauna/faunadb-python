@@ -562,6 +562,33 @@ def date(string):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/date>`__."""
   return _fn({"date": string})
 
+
+def time_add(base, offset, unit):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/timeadd>`__."""
+  return _fn({
+		"time_add": base,
+		"offset": offset,
+		"unit": unit
+  })
+
+
+def time_subtract(base, offset, unit):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/timesubtract>`__."""
+  return _fn({
+    "time_subtract": base,
+    "offset": offset,
+    "unit": unit,
+  })
+
+
+def time_diff(start, finish, unit):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/timediff>`__."""
+  return _fn({
+		"time_diff": start,
+		"other": finish,
+		"unit": unit,
+  })
+
 #endregion
 
 #region Miscellaneous functions

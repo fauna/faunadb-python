@@ -417,6 +417,24 @@ class SerializationTest(TestCase):
     self.assertJson(query.epoch(1, "microsecond"), '{"epoch":1,"unit":"microsecond"}')
     self.assertJson(query.epoch(1, "nanosecond"), '{"epoch":1,"unit":"nanosecond"}')
 
+
+  def test_time_add(self):
+    self.assertJson(query.time_add("1970-01-01T00:00:00+00:00", 1, "hour"),
+                    '{"offset":1,"time_add":"1970-01-01T00:00:00+00:00","unit":"hour"}'
+                )
+
+  def test_time_subtract(self):
+    self.assertJson(
+      query.time_subtract("1970-01-01T00:00:00+00:00", 1, "day"),
+      '{"offset":1,"time_subtract":"1970-01-01T00:00:00+00:00","unit":"day"}'
+    )
+
+  def test_time_diff(self):
+    self.assertJson(
+      query.time_diff("1970-01-01T00:00:00+00:00", query.epoch(1, "second"), "second"),
+      '{"other":{"epoch":1,"unit":"second"},"time_diff":"1970-01-01T00:00:00+00:00","unit":"second"}'
+    )
+
   def test_date(self):
     self.assertJson(query.date("1970-01-01"), '{"date":"1970-01-01"}')
 
