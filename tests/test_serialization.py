@@ -333,6 +333,21 @@ class SerializationTest(TestCase):
     self.assertJson(query.casefold("a string"), '{"casefold":"a string"}')
     self.assertJson(query.casefold("a string", "NFD"), '{"casefold":"a string","normalizer":"NFD"}')
 
+  def test_starts_with(self):
+    self.assertJson(query.starts_with("faunadb", "fauna"), '{"search":"fauna","startswith":"faunadb"}')
+
+  def test_ends_with(self):
+    self.assertJson(query.ends_with("faunadb", "db"), '{"endswith":"faunadb","search":"db"}')
+
+  def test_contains_str(self):
+    self.assertJson(query.contains_str("faunadb", "db"), '{"containsstr":"faunadb","search":"db"}')
+
+  def test_contains_str_regex(self): 
+    self.assertJson(query.contains_str_regex("faunadb", "f(.*)db"), '{"containsstrregex":"faunadb","pattern":"f(.*)db"}')
+
+  def regex_escape(self):
+    self.assertJson(query.regex_escape("f[a](.*)db"), '{"regexescape":"f[a](.*)db"}')
+
   def test_ngram(self):
     self.assertJson(query.ngram("str"), '{"ngram":"str"}')
     self.assertJson(query.ngram(["str0", "str1"]), '{"ngram":["str0","str1"]}')

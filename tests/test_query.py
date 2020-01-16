@@ -550,6 +550,33 @@ class QueryTest(FaunaTestCase):
 
     self.assertEqual(self._q(query.casefold(u'\u212B', "NFKCCaseFold")), u'\u00E5')
 
+
+  def test_starts_with(self):
+    self.assertEqual(self._q(query.starts_with("faunadb", "fauna")), True)
+    self.assertEqual(self._q(query.starts_with("faunadb", "F")), False)
+
+  def test_ends_with(self):
+    self.assertEqual(self._q(query.ends_with("faunadb", "fauna")), False)
+    self.assertEqual(self._q(query.ends_with("faunadb", "db")), True)
+    self.assertEqual(self._q(query.ends_with("faunadb", "")), True)
+
+
+  def test_contains_str(self):
+    self.assertEqual(self._q(query.contains_str("faunadb", "fauna")), True)
+    self.assertEqual(self._q(query.contains_str("garbage", "bge")), False)
+
+
+  def test_contains_str_regex(self):
+    self.assertEqual(self._q(query.contains_str_regex("faunadb", "f(\w+)a")), True)
+    self.assertEqual(self._q(query.contains_str_regex("test\tdata", "\\s")), True)
+    self.assertEqual(
+        self._q(query.contains_str_regex("faunadb", "/^\\d*\\.\\d+$/")), False)
+
+
+  def test_regex_escape(self):
+    self.assertEqual(self._q(query.regex_escape("f(\\w+)a")), '\\Qf(\\w+)a\\E')
+
+
   def test_ngram(self):
     self.assertEqual(self._q(query.ngram("what")), ["w", "wh", "h", "ha", "a", "at", "t"])
     self.assertEqual(self._q(query.ngram("what", min=2, max=3)), ["wh", "wha", "ha", "hat", "at"])

@@ -441,6 +441,31 @@ def casefold(string, normalizer=None):
   return _params({"casefold": string}, {"normalizer": normalizer})
 
 
+def starts_with(value, search):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/startswith>`__."""
+  return _fn({"startswith": value, "search": search})
+
+
+def ends_with(value, search):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/endswith>`__."""
+  return _fn({"endswith": value, "search": search})
+
+
+def contains_str(value, search):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/containsstr>`__."""
+  return _fn({"containsstr": value, "search": search})
+
+
+def contains_str_regex(value, pattern):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/containsstrregex>`__."""
+  return _fn({"containsstrregex": value, "pattern": pattern})
+
+
+def regex_escape(value):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/regexescape>`__."""
+  return _fn({"regexescape": value})
+
+
 def ngram(terms, min=None, max=None):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/ngram>`__."""
   return _params({"ngram": terms}, {"min": min, "max": max})
