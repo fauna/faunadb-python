@@ -454,6 +454,9 @@ class SerializationTest(TestCase):
   def test_collection(self):
     self.assertJson(query.collection("collection-name"), '{"collection":"collection-name"}')
 
+  def test_documents(self):
+    self.assertJson(query.documents(query.collection("users")), '{"documents":{"collection":"users"}}')
+
   def test_role(self):
     self.assertJson(query.role("role-name"), '{"role":"role-name"}')
 

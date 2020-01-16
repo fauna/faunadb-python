@@ -41,6 +41,12 @@ def collections(scope=None):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/collections>`__."""
   return _fn({"collections": scope})
 
+
+def documents(collections):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/documents>`__."""
+  return _fn({"documents": collections})
+
+
 def databases(scope=None):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/databases>`__."""
   return _fn({"databases": scope})

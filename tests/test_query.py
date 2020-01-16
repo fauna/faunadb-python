@@ -741,6 +741,25 @@ class QueryTest(FaunaTestCase):
   def test_collection(self):
     self.assertEqual(self._q(query.collection("cls-name")), Ref("cls-name", Native.COLLECTIONS))
 
+
+  def test_documents(self):
+    aCollection = "col_test_documents"
+    anIndex = "idx_test_documents"
+
+    self._q(query.create_collection({"name": aCollection}))
+    self._q(query.create_index(
+        {"name": anIndex, "source": query.collection(aCollection), "active": True}))
+
+    count = 56
+    data = [ {} for x in range(count)]
+    self._q(query.foreach(query.lambda_("x", query.create(
+        query.collection(aCollection), {"data": query.var("x")})), data))
+
+    self.assertEqual(self._q(query.select([0], query.count(
+        query.paginate(query.documents(query.collection(aCollection)))))), count)
+    self.assertEqual(self._q(query.count(query.documents(query.collection(aCollection)))), count)
+
+
   def test_function(self):
     self.assertEqual(self._q(query.function("fn-name")), Ref("fn-name", Native.FUNCTIONS))
 
