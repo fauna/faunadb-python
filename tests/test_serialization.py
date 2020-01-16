@@ -512,6 +512,15 @@ class SerializationTest(TestCase):
     self.assertJson(query.modulo(1, 2, 3), '{"modulo":[1,2,3]}')
     self.assertJson(query.modulo([1, 2, 3]), '{"modulo":[1,2,3]}')
 
+  def test_count(self):
+    self.assertJson(query.count([1, 2, 3, 4, 5]), '{"count":[1,2,3,4,5]}')
+
+  def test_sum(self):
+    self.assertJson(query.sum([1, 2, 3, 4, 5]), '{"sum":[1,2,3,4,5]}')
+
+  def test_mean(self):
+    self.assertJson(query.mean([1, 2, 3, 4, 5]), '{"mean":[1,2,3,4,5]}')
+
   def test_lt(self):
     self.assertJson(query.lt(1), '{"lt":1}')
     self.assertJson(query.lt(1, 2, 3), '{"lt":[1,2,3]}')

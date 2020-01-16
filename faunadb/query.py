@@ -696,6 +696,19 @@ def modulo(*numbers):
   return _fn({"modulo": _varargs(numbers)})
 
 
+def count(collection):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/count>`__."""
+  return _fn({"count": collection})
+
+def sum(collection):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/sum>`__."""
+  return _fn({"sum": collection})
+
+def mean(collection):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/mean>`__."""
+  return _fn({"mean": collection})
+
+
 def lt(*values):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/lt>`__."""
   return _fn({"lt": _varargs(values)})

@@ -828,6 +828,27 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.modulo(1, 0))
     self._assert_bad_query(query.modulo())
 
+  def test_count_mean_sum(self):
+    data = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    self._q(query.create_collection({"name": "countmeansum_test"}))
+    self._q(query.create_index({"name": "countmeansum_idx", "source": query.collection("countmeansum_test"), "active": True, "values": [{"field": ["data", "value"]}]}))
+    self._q(
+      query.foreach(query.lambda_("x", query.create(query.collection("countmeansum_test"), {"data": {"value": query.add(query.var("x"), 2)}})), data)
+    )
+
+    m = query.match(query.index("countmeansum_idx"))
+    expected = [9,5.0,45,9,7.0,63]
+
+    self.assertEqual(self._q([
+      query.count(data),
+      query.mean(data),
+      query.sum(data),
+      query.count(m),
+      query.mean(m),
+      query.sum(m)
+    ]), expected)
+
+
   def test_lt(self):
     self.assertTrue(self._q(query.lt(1, 2)))
 
