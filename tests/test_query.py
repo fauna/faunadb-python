@@ -550,6 +550,33 @@ class QueryTest(FaunaTestCase):
 
     self.assertEqual(self._q(query.casefold(u'\u212B', "NFKCCaseFold")), u'\u00E5')
 
+
+  def test_starts_with(self):
+    self.assertEqual(self._q(query.starts_with("faunadb", "fauna")), True)
+    self.assertEqual(self._q(query.starts_with("faunadb", "F")), False)
+
+  def test_ends_with(self):
+    self.assertEqual(self._q(query.ends_with("faunadb", "fauna")), False)
+    self.assertEqual(self._q(query.ends_with("faunadb", "db")), True)
+    self.assertEqual(self._q(query.ends_with("faunadb", "")), True)
+
+
+  def test_contains_str(self):
+    self.assertEqual(self._q(query.contains_str("faunadb", "fauna")), True)
+    self.assertEqual(self._q(query.contains_str("garbage", "bge")), False)
+
+
+  def test_contains_str_regex(self):
+    self.assertEqual(self._q(query.contains_str_regex("faunadb", "f(\w+)a")), True)
+    self.assertEqual(self._q(query.contains_str_regex("test\tdata", "\\s")), True)
+    self.assertEqual(
+        self._q(query.contains_str_regex("faunadb", "/^\\d*\\.\\d+$/")), False)
+
+
+  def test_regex_escape(self):
+    self.assertEqual(self._q(query.regex_escape("f(\\w+)a")), '\\Qf(\\w+)a\\E')
+
+
   def test_ngram(self):
     self.assertEqual(self._q(query.ngram("what")), ["w", "wh", "h", "ha", "a", "at", "t"])
     self.assertEqual(self._q(query.ngram("what", min=2, max=3)), ["wh", "wha", "ha", "hat", "at"])
@@ -648,10 +675,52 @@ class QueryTest(FaunaTestCase):
     # "now" refers to the current time.
     self.assertIsInstance(self._q(query.time("now")), FaunaTime)
 
+
+  def test_now(self):
+    t1 = self._q(query.now())
+    self.assertIsInstance(t1, FaunaTime)
+
+    self.assertEqual(self._q(query.equals(
+        query.now(), query.time("now"))), True)
+
+
   def test_epoch(self):
     self.assertEqual(self._q(query.epoch(12, "second")), FaunaTime("1970-01-01T00:00:12Z"))
     nano_time = FaunaTime("1970-01-01T00:00:00.123456789Z")
     self.assertEqual(self._q(query.epoch(123456789, "nanosecond")), nano_time)
+
+
+  def test_time_add(self):
+    time = "1970-01-25T02:00:00Z"
+    q1 = query.time_add(query.epoch(1, "hour"), 577, "hour")
+    q2 = query.time_add(query.epoch(2, "hour"), 24, "days")
+
+    self.assertIsInstance(self._q(q1), FaunaTime)
+    self.assertEqual(self._q(q1), FaunaTime(time))
+
+    self.assertIsInstance(self._q(q2), FaunaTime)
+    self.assertEqual(self._q(q2), FaunaTime(time))
+
+
+  def test_time_subtract(self):
+    time = "1970-01-01T00:00:00Z"
+    qry1 = query.time_subtract(query.epoch(1, "hour"), 1, "hour")
+    qry2 = query.time_subtract(query.epoch(1, "day"), 24, "hour")
+
+    self.assertIsInstance(self._q(qry1), FaunaTime)
+    self.assertEqual(self._q(qry1), FaunaTime(time))
+
+    self.assertIsInstance(self._q(qry2), FaunaTime)
+    self.assertEqual(self._q(qry2), FaunaTime(time))
+
+
+  def test_time_diff(self):
+    qry1 = query.equals(1, query.time_diff(query.epoch(0, "second"), query.epoch(1, "second"), "second"))
+    qry2 = query.equals(0, query.time_diff(query.epoch(24, "hour"), query.epoch(1, "day"), "day"))
+
+    self.assertEqual(self._q(qry1), True)
+    self.assertEqual(self._q(qry2), True)
+
 
   def test_date(self):
     self.assertEqual(self._q(query.date("1970-01-01")), date(1970, 1, 1))
@@ -671,6 +740,25 @@ class QueryTest(FaunaTestCase):
 
   def test_collection(self):
     self.assertEqual(self._q(query.collection("cls-name")), Ref("cls-name", Native.COLLECTIONS))
+
+
+  def test_documents(self):
+    aCollection = "col_test_documents"
+    anIndex = "idx_test_documents"
+
+    self._q(query.create_collection({"name": aCollection}))
+    self._q(query.create_index(
+        {"name": anIndex, "source": query.collection(aCollection), "active": True}))
+
+    count = 56
+    data = [ {} for x in range(count)]
+    self._q(query.foreach(query.lambda_("x", query.create(
+        query.collection(aCollection), {"data": query.var("x")})), data))
+
+    self.assertEqual(self._q(query.select([0], query.count(
+        query.paginate(query.documents(query.collection(aCollection)))))), count)
+    self.assertEqual(self._q(query.count(query.documents(query.collection(aCollection)))), count)
+
 
   def test_function(self):
     self.assertEqual(self._q(query.function("fn-name")), Ref("fn-name", Native.FUNCTIONS))
@@ -732,6 +820,16 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.divide(1, 0))
     self._assert_bad_query(query.divide())
 
+  def test_any_all(self):
+    expected = [True, True, False, False]
+    self.assertEqual(self._q([
+        query.any([True, True, False]),
+        query.all([True, True, True]),
+        query.any([False, False, False]),
+        query.all([True, True, False])
+    ]), expected)
+
+
   def test_modulo(self):
     self.assertEqual(self._q(query.modulo(5, 2)), 1)
     # This is (15 % 10) % 2
@@ -739,6 +837,27 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.modulo(2)), 2)
     self._assert_bad_query(query.modulo(1, 0))
     self._assert_bad_query(query.modulo())
+
+  def test_count_mean_sum(self):
+    data = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    self._q(query.create_collection({"name": "countmeansum_test"}))
+    self._q(query.create_index({"name": "countmeansum_idx", "source": query.collection("countmeansum_test"), "active": True, "values": [{"field": ["data", "value"]}]}))
+    self._q(
+      query.foreach(query.lambda_("x", query.create(query.collection("countmeansum_test"), {"data": {"value": query.add(query.var("x"), 2)}})), data)
+    )
+
+    m = query.match(query.index("countmeansum_idx"))
+    expected = [9,5.0,45,9,7.0,63]
+
+    self.assertEqual(self._q([
+      query.count(data),
+      query.mean(data),
+      query.sum(data),
+      query.count(m),
+      query.mean(m),
+      query.sum(m)
+    ]), expected)
+
 
   def test_lt(self):
     self.assertTrue(self._q(query.lt(1, 2)))

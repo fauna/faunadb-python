@@ -333,6 +333,21 @@ class SerializationTest(TestCase):
     self.assertJson(query.casefold("a string"), '{"casefold":"a string"}')
     self.assertJson(query.casefold("a string", "NFD"), '{"casefold":"a string","normalizer":"NFD"}')
 
+  def test_starts_with(self):
+    self.assertJson(query.starts_with("faunadb", "fauna"), '{"search":"fauna","startswith":"faunadb"}')
+
+  def test_ends_with(self):
+    self.assertJson(query.ends_with("faunadb", "db"), '{"endswith":"faunadb","search":"db"}')
+
+  def test_contains_str(self):
+    self.assertJson(query.contains_str("faunadb", "db"), '{"containsstr":"faunadb","search":"db"}')
+
+  def test_contains_str_regex(self): 
+    self.assertJson(query.contains_str_regex("faunadb", "f(.*)db"), '{"containsstrregex":"faunadb","pattern":"f(.*)db"}')
+
+  def regex_escape(self):
+    self.assertJson(query.regex_escape("f[a](.*)db"), '{"regexescape":"f[a](.*)db"}')
+
   def test_ngram(self):
     self.assertJson(query.ngram("str"), '{"ngram":"str"}')
     self.assertJson(query.ngram(["str0", "str1"]), '{"ngram":["str0","str1"]}')
@@ -392,11 +407,33 @@ class SerializationTest(TestCase):
   def test_time(self):
     self.assertJson(query.time("1970-01-01T00:00:00+00:00"), '{"time":"1970-01-01T00:00:00+00:00"}')
 
+  def test_now(self):
+    self.assertJson(query.now(), '{"now":null}')
+
+
   def test_epoch(self):
     self.assertJson(query.epoch(1, "second"), '{"epoch":1,"unit":"second"}')
     self.assertJson(query.epoch(1, "milisecond"), '{"epoch":1,"unit":"milisecond"}')
     self.assertJson(query.epoch(1, "microsecond"), '{"epoch":1,"unit":"microsecond"}')
     self.assertJson(query.epoch(1, "nanosecond"), '{"epoch":1,"unit":"nanosecond"}')
+
+
+  def test_time_add(self):
+    self.assertJson(query.time_add("1970-01-01T00:00:00+00:00", 1, "hour"),
+                    '{"offset":1,"time_add":"1970-01-01T00:00:00+00:00","unit":"hour"}'
+                )
+
+  def test_time_subtract(self):
+    self.assertJson(
+      query.time_subtract("1970-01-01T00:00:00+00:00", 1, "day"),
+      '{"offset":1,"time_subtract":"1970-01-01T00:00:00+00:00","unit":"day"}'
+    )
+
+  def test_time_diff(self):
+    self.assertJson(
+      query.time_diff("1970-01-01T00:00:00+00:00", query.epoch(1, "second"), "second"),
+      '{"other":{"epoch":1,"unit":"second"},"time_diff":"1970-01-01T00:00:00+00:00","unit":"second"}'
+    )
 
   def test_date(self):
     self.assertJson(query.date("1970-01-01"), '{"date":"1970-01-01"}')
@@ -416,6 +453,9 @@ class SerializationTest(TestCase):
 
   def test_collection(self):
     self.assertJson(query.collection("collection-name"), '{"collection":"collection-name"}')
+
+  def test_documents(self):
+    self.assertJson(query.documents(query.collection("users")), '{"documents":{"collection":"users"}}')
 
   def test_role(self):
     self.assertJson(query.role("role-name"), '{"role":"role-name"}')
@@ -467,10 +507,25 @@ class SerializationTest(TestCase):
     self.assertJson(query.divide(1, 2, 3), '{"divide":[1,2,3]}')
     self.assertJson(query.divide([1, 2, 3]), '{"divide":[1,2,3]}')
 
+  def test_any(self):
+    self.assertJson(query.any([True, True, True]), '{"any":[true,true,true]}')
+
+  def test_all(self):
+    self.assertJson(query.all([True, True, True]), '{"all":[true,true,true]}')
+
   def test_modulo(self):
     self.assertJson(query.modulo(1), '{"modulo":1}')
     self.assertJson(query.modulo(1, 2, 3), '{"modulo":[1,2,3]}')
     self.assertJson(query.modulo([1, 2, 3]), '{"modulo":[1,2,3]}')
+
+  def test_count(self):
+    self.assertJson(query.count([1, 2, 3, 4, 5]), '{"count":[1,2,3,4,5]}')
+
+  def test_sum(self):
+    self.assertJson(query.sum([1, 2, 3, 4, 5]), '{"sum":[1,2,3,4,5]}')
+
+  def test_mean(self):
+    self.assertJson(query.mean([1, 2, 3, 4, 5]), '{"mean":[1,2,3,4,5]}')
 
   def test_lt(self):
     self.assertJson(query.lt(1), '{"lt":1}')
