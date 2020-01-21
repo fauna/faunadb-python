@@ -1,3 +1,12 @@
+## 2.11.0
+
+- Added `documents`, `now`
+- Added `any` , `all`
+- Added `count`, `sum`, `mean`
+- Added `time_add`, `time_subtract`, `time_diff`
+- Added `starts_with`, `ends_with`, `contains_str`, `contains_str_regex`, `regex_escape`
+- Updated references to documentation
+
 ## 2.10.0
 - Added `merge`, `format`, `reduce`
 - Send X-Fauna-Driver with HTTP requests
