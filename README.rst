@@ -76,6 +76,9 @@ To run the tests you must have a FaunaDB database available.
 Then set the environment variable ``FAUNA_ROOT_KEY`` to your database's root key.
 If you use FaunaDB cloud, this is the password you log in with.
 
+Tip: Setting the ``FAUNA_QUERY_TIMEOUT_MS`` environment variable will
+set a timeout in milliseconds for all queries.
+
 Then run ``make test``.
 To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTest.test_ping``.
 
