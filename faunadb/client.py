@@ -122,6 +122,9 @@ class FaunaClient(object):
     self.pool_maxsize = pool_maxsize
 
     self._last_txn_time = kwargs.get('last_txn_time') or _LastTxnTime()
+    self._query_timeout_ms = kwargs.get('query_timeout_ms')
+    if self._query_timeout_ms is not None:
+      self._query_timeout_ms = int(self._query_timeout_ms)
 
     if ('session' not in kwargs) or ('counter' not in kwargs):
       self.session = Session()
@@ -135,7 +138,8 @@ class FaunaClient(object):
         "Accept-Encoding": "gzip",
         "Content-Type": "application/json;charset=utf-8",
         "X-Fauna-Driver": "python",
-        "X-FaunaDB-API-Version": API_VERSION
+        "X-FaunaDB-API-Version": API_VERSION,
+        "X-Query-Timeout": str(self._query_timeout_ms)
       })
       self.session.timeout = timeout
     else:
@@ -162,18 +166,25 @@ class FaunaClient(object):
     """
     return self._last_txn_time.time
 
+  def get_query_timeout(self):
+    """
+    Get the query timeout for all queries.
+    """
+    return self._query_timeout_ms
+
   def __del__(self):
     if self.counter.decrement() == 0:
       self.session.close()
 
-  def query(self, expression):
+  def query(self, expression, timeout_millis=None):
     """
     Use the FaunaDB query API.
 
     :param expression: A query. See :doc:`query` for information on queries.
+    :param timeout_millis: Query timeout in milliseconds.
     :return: Converted JSON response.
     """
-    return self._execute("POST", "", _wrap(expression), with_txn_time=True)
+    return self._execute("POST", "", _wrap(expression), with_txn_time=True, query_timeout_ms=timeout_millis)
 
   def ping(self, scope=None, timeout=None):
     """
@@ -203,16 +214,20 @@ class FaunaClient(object):
                          counter=self.counter,
                          pool_connections=self.pool_connections,
                          pool_maxsize=self.pool_maxsize,
-                         last_txn_time=self._last_txn_time)
+                         last_txn_time=self._last_txn_time,
+                         query_timeout_ms=self._query_timeout_ms)
     else:
       raise UnexpectedError("Cannnot create a session client from a closed session", None)
 
-  def _execute(self, action, path, data=None, query=None, with_txn_time=False):
+  def _execute(self, action, path, data=None, query=None, with_txn_time=False, query_timeout_ms=None):
     """Performs an HTTP action, logs it, and looks for errors."""
     if query is not None:
       query = {k: v for k, v in query.items() if v is not None}
 
     headers = {}
+
+    if query_timeout_ms is not None:
+      headers.add("X-Query-Timeout", str(query_timeout_ms))
 
     if with_txn_time:
         headers.update(self._last_txn_time.request_header)

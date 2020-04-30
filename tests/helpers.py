@@ -19,6 +19,8 @@ _FAUNA_DOMAIN = environ.get("FAUNA_DOMAIN")
 _FAUNA_SCHEME = environ.get("FAUNA_SCHEME")
 _FAUNA_PORT = environ.get("FAUNA_PORT")
 
+_FAUNA_QUERY_TIMEOUT_MS = environ.get("FAUNA_QUERY_TIMEOUT_MS")
+
 class FaunaTestCase(TestCase):
   @classmethod
   def setUpClass(cls):
@@ -76,7 +78,12 @@ class FaunaTestCase(TestCase):
 
   @classmethod
   def _get_client(cls):
-    args = {"domain": _FAUNA_DOMAIN, "scheme": _FAUNA_SCHEME, "port": _FAUNA_PORT}
+    args = {
+      "domain": _FAUNA_DOMAIN,
+      "scheme": _FAUNA_SCHEME,
+      "port": _FAUNA_PORT,
+      "query_timeout_ms": _FAUNA_QUERY_TIMEOUT_MS
+    }
     # If None, use default instead
     non_null_args = {k: v for k, v in args.items() if v is not None}
     return FaunaClient(secret=_FAUNA_ROOT_KEY, **non_null_args)
