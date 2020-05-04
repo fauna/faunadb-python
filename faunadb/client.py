@@ -138,9 +138,10 @@ class FaunaClient(object):
         "Accept-Encoding": "gzip",
         "Content-Type": "application/json;charset=utf-8",
         "X-Fauna-Driver": "python",
-        "X-FaunaDB-API-Version": API_VERSION,
-        "X-Query-Timeout": str(self._query_timeout_ms)
+        "X-FaunaDB-API-Version": API_VERSION
       })
+      if self._query_timeout_ms is not None:
+        self.session.headers["X-Query-Timeout"] = str(self._query_timeout_ms)
       self.session.timeout = timeout
     else:
       self.session = kwargs['session']
@@ -227,7 +228,7 @@ class FaunaClient(object):
     headers = {}
 
     if query_timeout_ms is not None:
-      headers.add("X-Query-Timeout", str(query_timeout_ms))
+      headers["X-Query-Timeout"] = str(query_timeout_ms)
 
     if with_txn_time:
         headers.update(self._last_txn_time.request_header)
