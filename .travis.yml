@@ -6,6 +6,8 @@ python:
 - '3.4'
 - '3.5'
 - '3.6'
+- '3.7'
+- '3.8'
 env:
   global:
   - secure: E+ty+bYNEGq+yi1X/3tt+zPebDSD+EVZtHF7ZgWRGs+8Jis4k0GHM7x4G433l7dQ+iDKQs9AHID8MNbSvibSXOohoybiNLAO2ojCdJKBmqgTVVrZXBUfazrP919sYOIuCtXRJ4slMGqh97pZmtWmdjqtnLtcwtWMeebSD9qzTuPb2gYjXoMMlzfphhwP+l78W+uCdpW2kbcYJBGOOr+7MYaHHJz3BmWO/w7BB9Ei7fb5YZbpsZnOyAdwRBvL0E7vQODnm4VYPpb4UX3gjNRZ8BntRqRC/Vr++71OFJGc6Sjuf33dG7+mWHc/1qvYdMu/sEXOrJMTYLuMwmih0csech/TkrAkHoki33H6CYD8iKj/gY+fC2VkbZr6rjNqJm/qniL3+w3zuD3d8BsMuFLgqDnauGBLEkaAL8eI0xf/GN3Cr0tYB/Zc75IM8xSaRqy6PX2dV2uXOXc+9XA5yb7/tvuEkxONdxRtdjgoXckzjye71SbwDyEld/52c1aErTzs8+gduicsehhW+FBCNtoc3CEU4lPbNsVjDRGyd7wM6X+IK4cdzIn6TGAKh7AU+s52a5fCjxPUKcManrBx1aaKnjaqIFpFKwGIxwUWACNFL2h72ZuArPRhMpWlAoI04xsRcDbtBbhmTV1Qt+6mYWQ79feqQUSj6jTkPFF5mmXJs6o=
