@@ -1,3 +1,8 @@
+## 2.12.0 [current]
+
+- Added client specified query timeout
+- Added Python 3.7 and 3.8 to CI
+
 ## 2.11.0
 
 - Added `documents`, `now`
