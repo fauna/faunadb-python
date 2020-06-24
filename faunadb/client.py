@@ -12,7 +12,7 @@ from faunadb.query import _wrap
 from faunadb.request_result import RequestResult
 from faunadb._json import parse_json_or_none, to_json
 
-API_VERSION = "2.7"
+API_VERSION = "3"
 
 class _LastTxnTime(object):
   """Wraps tracking the last transaction time supplied from the database."""
