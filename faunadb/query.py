@@ -63,6 +63,10 @@ def roles(scope=None):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/roles>`__."""
   return _fn({"roles": scope})
 
+def access_providers(scope=None):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/access_providers>`__."""
+  return _fn({"access_providers": scope})
+
 def keys(scope=None):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/keys>`__."""
   return _fn({"keys": scope})
@@ -425,6 +429,10 @@ def create_role(func_params):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/createrole>`__."""
   return _fn({"create_role": func_params})
 
+def create_access_provider(provider_params):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/createaccessprovider>`__."""
+  return _fn({"create_access_provider": provider_params})
+
 def move_database(from_, to):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/movedatabase>`__."""
   return _fn({"move_database": from_, "to": to})
@@ -742,6 +750,11 @@ def function(fn_name, scope=None):
 def role(role_name, scope=None):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/role>`__."""
   return _params({"role": role_name}, {"scope": scope})
+
+
+def access_provider(access_provider_name, scope=None):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/access_provider>`__."""
+  return _params({"access_provider": access_provider_name}, {"scope": scope})
 
 
 def equals(*values):

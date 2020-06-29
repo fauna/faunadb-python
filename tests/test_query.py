@@ -2,8 +2,8 @@ from __future__ import division
 from datetime import date, datetime
 from time import sleep
 
-from faunadb.errors import BadRequest, NotFound
-from faunadb.objects import FaunaTime, Ref, SetRef, _Expr, Native, Query
+from faunadb.errors import BadRequest, NotFound, PermissionDenied
+from faunadb.objects import FaunaTime, Ref, SetRef, _Expr, Native
 from faunadb import query
 from tests.helpers import FaunaTestCase
 
@@ -52,6 +52,9 @@ class QueryTest(FaunaTestCase):
 
   def _assert_bad_query(self, q):
     self.assertRaises(BadRequest, lambda: self._q(q))
+
+  def _assert_insufficient_permissions(self, q):
+    self.assertRaises(PermissionDenied, lambda: self._q(q))
 
   #endregion
 
@@ -349,8 +352,16 @@ class QueryTest(FaunaTestCase):
         "actions": {"read": True}
       }
     }))
-
     self.assertTrue(self.admin_client.query(query.exists(query.role("a_role"))))
+
+  def test_create_access_providers(self):
+    providerName = 'provider_'
+    issuerName = 'issuer_'
+    jwksUri = 'https://xxx.auth0.com/somewhere'
+    self.admin_client.query(query.create_access_provider(
+        {"name": providerName, "issuer": issuerName, "jwks_uri": jwksUri}))
+    self.assertTrue(self.admin_client.query(
+        query.exists(query.access_provider(providerName))))
 
   def test_move_database(self):
     self.admin_client.query(query.create_database({"name": "mvdb_src"}))
@@ -800,6 +811,19 @@ class QueryTest(FaunaTestCase):
         query.paginate(query.documents(query.collection(aCollection)))))), count)
     self.assertEqual(self._q(query.count(query.documents(query.collection(aCollection)))), count)
 
+  def test_access_provider(self):
+    self.assertEqual(self._q(query.access_provider("pvd-name")),
+                     Ref("pvd-name", Native.ACCESS_PROVIDERS))
+
+  def test_access_providers(self):
+    for i in range(10):
+      providerName = 'provider_%d'%(i)
+      issuerName = 'issuer_%d'%(i)
+      jwksUri = 'https://xxx.auth0.com/uri%d'%(i)
+      self.admin_client.query(query.create_access_provider(
+        {"name": providerName, "issuer": issuerName, "jwks_uri": jwksUri}))
+    self.assertEqual(self.admin_client.query(query.count(query.access_providers())), 10)
+    self._assert_insufficient_permissions(query.paginate(query.access_providers()))
 
   def test_function(self):
     self.assertEqual(self._q(query.function("fn-name")), Ref("fn-name", Native.FUNCTIONS))

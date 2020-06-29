@@ -15,6 +15,7 @@ class SerializationTest(TestCase):
     self.assertJson(Native.DATABASES, '{"@ref":{"id":"databases"}}')
     self.assertJson(Native.FUNCTIONS, '{"@ref":{"id":"functions"}}')
     self.assertJson(Native.KEYS, '{"@ref":{"id":"keys"}}')
+    self.assertJson(Native.ACCESS_PROVIDERS, '{"@ref":{"id":"access_providers"}}')
 
   def test_ref(self):
     self.assertJson(Ref("collections"),
@@ -217,6 +218,15 @@ class SerializationTest(TestCase):
     self.assertJson(
       query.create_role({"name": "a_role", "privileges": {"resource": query.collections(), "actions": {"read": True}}}),
       '{"create_role":{"object":{"name":"a_role","privileges":{"object":{"actions":{"object":{"read":true}},"resource":{"collections":null}}}}}}'
+    )
+  
+  def test_create_access_provider(self):
+    providerName = 'provider_'
+    issuerName = 'issuer_'
+    jwksUri = 'https://auth.fauna.com/somewhere'
+    self.assertJson(
+        query.create_access_provider({"name": providerName, "issuer": issuerName, "jwks_uri": jwksUri}),
+        '{"create_access_provider":{"object":{"issuer":"'+issuerName+'","jwks_uri":"'+jwksUri+'","name":"'+providerName+'"}}}'
     )
 
   def test_move_database(self):
@@ -465,6 +475,15 @@ class SerializationTest(TestCase):
 
   def test_role(self):
     self.assertJson(query.role("role-name"), '{"role":"role-name"}')
+
+  def test_access_provider(self):
+    self.assertJson(query.access_provider("name", query.database("db1")),
+                    '{"access_provider":"name","scope":{"database":"db1"}}')
+    self.assertJson(query.access_provider("name"), '{"access_provider":"name"}')
+  
+  def test_access_providers(self):
+    self.assertJson(query.access_providers(query.database("db1")),
+                    '{"access_providers":{"database":"db1"}}')
 
   def test_equals(self):
     self.assertJson(query.equals(1), '{"equals":1}')
