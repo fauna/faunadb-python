@@ -471,6 +471,24 @@ class SerializationTest(TestCase):
     self.assertJson(query.contains(["favorites", "foods"],
                                    {"favorites": {"foods": ["steak"]}}), json)
 
+  def test_contains_path(self):
+    json = ('{"contains_path":["favorites","foods"],'
+            '"in":{"object":{"favorites":{"object":{"foods":["steak"]}}}}}')
+    self.assertJson(query.contains_path(["favorites", "foods"],
+                                   {"favorites": {"foods": ["steak"]}}), json)
+
+  def test_contains_value(self):
+    json = ('{"contains_value":"steak",'
+            '"in":{"object":{"favorites":{"object":{"foods":["steak"]}}}}}')
+    self.assertJson(query.contains_value("steak",
+                                   {"favorites": {"foods": ["steak"]}}), json)
+
+  def test_contains_field(self):
+    json = ('{"contains_field":"favorites",'
+            '"in":{"object":{"favorites":{"object":{"foods":["steak"]}}}}}')
+    self.assertJson(query.contains_field("favorites",
+                                   {"favorites": {"foods": ["steak"]}}), json)
+
   def test_select(self):
     json = ('{"from":{"object":{"favorites":{"object":{"foods":["steak"]}}}},'
             '"select":["favorites","foods",0]}')

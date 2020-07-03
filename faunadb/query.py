@@ -648,11 +648,23 @@ def equals(*values):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/equals>`__."""
   return _fn({"equals": _varargs(values)})
 
-
+@deprecated("use `contains_path` instead.")
 def contains(path, in_):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/contains>`__."""
   return _fn({"contains": path, "in": in_})
 
+
+def contains_path(path, in_):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/containspath>`__."""
+  return _fn({"contains_path": path, "in": in_})
+
+def contains_field(field, in_):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/containsfield>`__."""
+  return _fn({"contains_field": field, "in": in_})
+
+def contains_value(value, in_):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/containsvalue>`__."""
+  return _fn({"contains_value": value, "in": in_})
 
 def select(path, from_):
   """

@@ -154,7 +154,7 @@ class QueryTest(FaunaTestCase):
     self._create(n=11)
 
     page = query.paginate(query.match(self.n_index_ref, 11))
-    refs_with_m = query.filter_(lambda a: query.contains(["data", "m"], query.get(a)), page)
+    refs_with_m = query.filter_(lambda a: query.contains_path(["data", "m"], query.get(a)), page)
     self.assertEqual(self._q(refs_with_m), {"data": [ref]})
 
   def test_take(self):
@@ -567,7 +567,7 @@ class QueryTest(FaunaTestCase):
 
 
   def test_contains_str_regex(self):
-    self.assertEqual(self._q(query.contains_str_regex("faunadb", "f(\w+)a")), True)
+    self.assertEqual(self._q(query.contains_str_regex("faunadb", "f(\\w+)a")), True)
     self.assertEqual(self._q(query.contains_str_regex("test\tdata", "\\s")), True)
     self.assertEqual(
         self._q(query.contains_str_regex("faunadb", "/^\\d*\\.\\d+$/")), False)
@@ -777,6 +777,29 @@ class QueryTest(FaunaTestCase):
     self.assertTrue(self._q(query.contains(["a", "b"], obj)))
     self.assertTrue(self._q(query.contains("a", obj)))
     self.assertFalse(self._q(query.contains(["a", "c"], obj)))
+
+  def test_contains_path(self):
+    obj = {"a": {"b": 1}, "c": [{"d": "e"}, "f"]}
+    self.assertTrue(self._q(query.contains_path(["a", "b"], obj)))
+    self.assertTrue(self._q(query.contains_path(["c", 0, "d"], obj)))
+    self.assertTrue(self._q(query.contains_path("a", obj)))
+    self.assertFalse(self._q(query.contains_path(["a", "c"], obj)))
+
+  def test_contains_value(self):
+    obj = {"a": {"b": 1}, "c": [{"d": "e"}, "f"]}
+    self.assertTrue(self._q(query.contains_value({"b": 1}, obj)))
+    self.assertFalse(self._q(query.contains_value("f", obj)))
+    self.assertTrue(self._q(query.contains_value("f", obj["c"])))
+    self.assertFalse(self._q(query.contains_value("a", obj)))
+    self.assertFalse(self._q(query.contains_value(None, obj)))
+
+  def test_contains_field(self):
+    obj = {"a": {"b": 1}, "c": [{"d": "e"}, "f"], "g": None}
+    self.assertTrue(self._q(query.contains_field("b", obj["a"])))
+    self.assertFalse(self._q(query.contains_field("b", obj)))
+    self.assertFalse(self._q(query.contains_field("f", obj)))
+    self.assertFalse(self._q(query.contains_field("g", None)))
+    self.assertTrue(self._q(query.contains_field("a", obj)))
 
   def test_select(self):
     obj = {"a": {"b": 1}}
