@@ -432,6 +432,35 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(q3), {"a": 5, "b": 2, "c": 3})
     self.assertEqual(self._q(q4), {"a": 'a', "b": 'b', "c": 'c'})
 
+  def test_reverse(self):
+    #arrays
+    list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    self.assertEqual(self._q(query.reverse(list)), [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+    self.assertEqual(self._q(query.reverse(query.reverse(list))), list)
+    self.assertEqual(self._q(query.reverse([])), [])
+
+    self._q(query.create_collection({"name": "reverse_collection"}))
+    self._q(query.create_index({
+      "name": "rev_coll_idx",
+      "source": query.collection("reverse_collection"),
+      "values": [{"field": ["data", "val"]}]
+    }))
+    index = query.index("rev_coll_idx")
+    for i in range(100):
+      self._q(query.create(query.collection(
+          "reverse_collection"), {"data": {"val": i}}))
+    assertPaginate = lambda q, expected, size = None : self.assertEqual(self._q(query.select("data", query.paginate(q, size))), expected)
+
+    assertPaginate(query.reverse(query.match(index)), [99, 98, 97, 96, 95], 5)
+    assertPaginate(query.reverse(query.reverse(query.match(index))), list, 11)
+
+    q1 = query.select(["data", 0], query.reverse(query.paginate(query.match(index), size=50)))
+    self.assertEqual(self._q(q1), 49)
+
+    self._assert_bad_query(query.reverse("a string"))
+    self._assert_bad_query(query.reverse(index))
+    self._assert_bad_query(query.reverse({"a": 1, "b": 2}))
+
   def test_intersection(self):
     n_value = 102
     m_value = 202

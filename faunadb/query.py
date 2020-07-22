@@ -363,6 +363,10 @@ def match(index, *terms):
   return _fn(m)
 
 
+def reverse(set_array_or_page):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/reverse>`__."""
+  return _fn({"reverse": set_array_or_page})
+
 def merge(merge, with_, lambda_=None):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/merge>`__."""
   return _params({"merge": merge, "with": with_}, {"lambda": lambda_})

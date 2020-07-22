@@ -250,6 +250,9 @@ class SerializationTest(TestCase):
                       "y": 25}, lambda key, left, right: right),
                       '{"lambda":{"expr":{"var":"right"},"lambda":["key","left","right"]},"merge":{"object":{"x":24}},"with":{"object":{"y":25}}}')
 
+  def test_reverse(self):
+    self.assertJson(query.reverse([1,2,3]), '{"reverse":[1,2,3]}')
+
   def test_union(self):
     self.assertJson(query.union(), '{"union":[]}')
     self.assertJson(query.union(query.index("widget")), '{"union":{"index":"widget"}}')
