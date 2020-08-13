@@ -47,8 +47,14 @@ class DeserializationTest(TestCase):
     self.assertJson('{"@bytes":"AQID"}', bytearray(b'\x01\x02\x03'))
 
   def test_query(self):
+    self.assertJson('{"@query": {"api_version": "3", "lambda": "x", "expr": {"var": "x"}}}',
+                    Query({"api_version":"3", "lambda": "x", "expr": {"var": "x"}}))
     self.assertJson('{"@query": {"lambda": "x", "expr": {"var": "x"}}}',
                     Query({"lambda": "x", "expr": {"var": "x"}}))
+    self.assertJson('{"@query":  {"lambda": "x", "expr": {"var": "x"}}}',
+                    Query({"lambda": "x", "expr": {"var": "x"}}))
+    self.assertJson('{"@query": {"api_version": "2.12", "lambda": "x", "expr": {"var": "x"}}}',
+                    Query({"api_version": "2.12", "lambda": "x", "expr": {"var": "x"}}))
 
   def test_string(self):
     self.assertJson('"a string"', "a string")

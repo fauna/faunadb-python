@@ -44,8 +44,11 @@ class SerializationTest(TestCase):
       self.assertJson(b'\x01\x02\x03', '{"@bytes":"AQID"}')
 
   def test_query(self):
-    self.assertJson(Query({"lambda": "x", "expr": {"var": "x"}}),
-                    '{"@query":{"expr":{"var":"x"},"lambda":"x"}}')
+    expected1 = '{"@query":{"expr":{"var":"x"},"lambda":"x"}}'
+    expected2 = '{"@query":{"api_version":"3","expr":{"var":"x"},"lambda":"x"}}'
+    self.assertJson(Query({"lambda": "x", "expr": {"var": "x"}}), expected1)
+    self.assertJson(Query({"api_version": "3", "lambda": "x", "expr": {"var": "x"}}),
+                    expected2)
 
   #region Basic forms
 
