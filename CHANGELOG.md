@@ -1,4 +1,11 @@
-## 2.12.0 [current]
+## 3.0.0 [current]
+
+- Refactored `contains` into `contains_path`, `contains_value`, `contains_path`
+- Added `reverse` function
+- Bump api version to `3`
+- Add tests for versioned lambdas
+
+## 2.12.0
 
 - Added client specified query timeout
 - Added Python 3.7 and 3.8 to CI
