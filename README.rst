@@ -95,13 +95,6 @@ and then run ``make coverage``. A summary will be displayed to the terminal, and
 will be available at ``htmlcov/index.html``.
 
 
-Documenting
-~~~~~~~~~~~
-
-Run ``pip install .[doc]`` to install the needed packages to generate the docs.
-Then run ``make doc``, then open ``docs/_build/html/index.html`` in a web browser.
-
-
 Contribute
 ----------
 
