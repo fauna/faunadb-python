@@ -25,10 +25,7 @@ ifdef FAUNA_QUERY_TIMEOUT_MS
 DOCKER_RUN_FLAGS += -e FAUNA_QUERY_TIMEOUT_MS=$(FAUNA_QUERY_TIMEOUT_MS)
 endif
 
-all: test lint doc
-
-doc:
-	sphinx-build -E -b html docs docs/_build/html
+all: test lint
 
 test:
 	python -Wd -m nose2
