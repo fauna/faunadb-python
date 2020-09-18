@@ -531,6 +531,99 @@ class SerializationTest(TestCase):
     self.assertJson(query.divide(1, 2, 3), '{"divide":[1,2,3]}')
     self.assertJson(query.divide([1, 2, 3]), '{"divide":[1,2,3]}')
 
+  def test_pow(self):
+    self.assertJson(query.pow(2, 3), '{"exp":3,"pow":2}')
+
+  def test_max(self):
+    self.assertJson(query.max(1, 2), '{"max":[1,2]}')
+    self.assertJson(query.max(1, 2, 3), '{"max":[1,2,3]}')
+    self.assertJson(query.max([1, 2, 3]), '{"max":[1,2,3]}')
+
+  def test_min(self):
+    self.assertJson(query.min(1, 2), '{"min":[1,2]}')
+    self.assertJson(query.min(1, 2, 3), '{"min":[1,2,3]}')
+    self.assertJson(query.min([1, 2, 3]), '{"min":[1,2,3]}')
+
+  def test_abs(self):
+    self.assertJson(query.abs(-10), '{"abs":-10}')
+
+  def test_trunc(self):
+    self.assertJson(query.trunc(45), '{"trunc":45}')
+    self.assertJson(query.trunc(45, 3), '{"precision":3,"trunc":45}')
+
+  def test_bitor(self):
+    self.assertJson(query.bitor(1), '{"bitor":1}')
+    self.assertJson(query.bitor(1, 2, 3), '{"bitor":[1,2,3]}')
+    self.assertJson(query.bitor([1, 2, 3]), '{"bitor":[1,2,3]}')
+
+  def test_degrees(self):
+    self.assertJson(query.degrees(90), '{"degrees":90}')
+
+  def test_cos(self):
+    self.assertJson(query.cos(60), '{"cos":60}')
+
+  def test_sqrt(self):
+    self.assertJson(query.sqrt(9), '{"sqrt":9}')
+
+  def test_tan(self):
+    self.assertJson(query.tan(45), '{"tan":45}')
+
+  def test_tanh(self):
+    self.assertJson(query.tanh(45), '{"tanh":45}')
+
+  def test_acos(self):
+    self.assertJson(query.acos(0), '{"acos":0}')
+
+  def test_cosh(self):
+    self.assertJson(query.cosh(120), '{"cosh":120}')
+
+  def test_hypot(self):
+    self.assertJson(query.hypot(9, 0), '{"b":0,"hypot":9}')
+
+  def test_atan(self):
+    self.assertJson(query.atan(120), '{"atan":120}')
+
+  def test_log(self):
+    self.assertJson(query.log(100), '{"log":100}')
+
+  def test_bitnot(self):
+    self.assertJson(query.bitnot(0), '{"bitnot":0}')
+    self.assertJson(query.bitnot(1), '{"bitnot":1}')
+
+  def test_bitxor(self):
+    self.assertJson(query.bitxor(0, 1), '{"bitxor":[0,1]}')
+    self.assertJson(query.bitxor(1, 2, 4), '{"bitxor":[1,2,4]}')
+
+  def test_bitand(self):
+    self.assertJson(query.bitand(1, 0), '{"bitand":[1,0]}')
+    self.assertJson(query.bitand(7, 3), '{"bitand":[7,3]}')
+
+  def test_ceil(self):
+    self.assertJson(query.ceil(67.789), '{"ceil":67.789}')
+
+  def test_asin(self):
+    self.assertJson(query.asin(0), '{"asin":0}')
+
+  def test_radians(self):
+    self.assertJson(query.radians(45), '{"radians":45}')
+
+  def test_round(self):
+    self.assertJson(query.round(123.456), '{"round":123.456}')
+    self.assertJson(query.round(123.456, 2),
+                    '{"precision":2,"round":123.456}')
+
+  def test_floor(self):
+    self.assertJson(query.floor(89.1234), '{"floor":89.1234}')
+
+  def test_sign(self):
+    self.assertJson(query.sign(-90), '{"sign":-90}')
+
+  def test_exp(self):
+    self.assertJson(query.exp(2.1), '{"exp":2.1}')
+
+  def test_ln(self):
+    self.assertJson(query.ln(900), '{"ln":900}')
+
   def test_any(self):
     self.assertJson(query.any([True, True, True]), '{"any":[true,true,true]}')
 

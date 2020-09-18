@@ -707,6 +707,144 @@ def divide(*numbers):
   return _fn({"divide": _varargs(numbers)})
 
 
+def pow(base, exp):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/pow>` __."""
+  return _fn({"pow": base, "exp": exp})
+
+
+def max(*numbers):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/max>` __."""
+  return _fn({"max": _varargs(numbers)})
+
+
+def min(*numbers):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/min>` __."""
+  return _fn({"min": _varargs(numbers)})
+
+def abs(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/abs>` __."""
+  return _fn({"abs": num})
+
+
+def trunc(num, precision=None):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/trunc>` __."""
+  return _params({"trunc": num}, {"precision": precision})
+
+
+def bitor(*numbers):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/bitor>` __."""
+  return _fn({"bitor": _varargs(numbers)})
+
+
+def cosh(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/cosh>` __."""
+  return _fn({"cosh": num})
+
+
+def hypot(num, b):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/hypot>` __."""
+  return _fn({"hypot": num, "b": b})
+
+
+def atan(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/atan>` __."""
+  return _fn({"atan": num})
+
+
+def log(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/log>` __."""
+  return _fn({"log": num})
+
+
+def bitnot(*num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/bitnot>` __."""
+  return _fn({"bitnot": _varargs(num)})
+
+
+def bitxor(*num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/bitxor>` __."""
+  return _fn({"bitxor": _varargs(num)})
+
+
+def bitand(*num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/bitand>` __."""
+  return _fn({"bitand": _varargs(num)})
+
+
+def ceil(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/ceil>` __."""
+  return _fn({"ceil": num})
+
+
+def degrees(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/degrees>` __."""
+  return _fn({"degrees": num})
+
+
+def cos(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/cos>` __."""
+  return _fn({"cos": num})
+
+
+def acos(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/acos>` __."""
+  return _fn({"acos": num})
+
+
+def sqrt(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/sqrt>` __."""
+  return _fn({"sqrt": num})
+
+
+def tan(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/tan>` __."""
+  return _fn({"tan": num})
+
+
+def tanh(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/tanh>` __."""
+  return _fn({"tanh": num})
+
+
+def sin(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/sin>` __."""
+  return _fn({"sin": num})
+
+
+def asin(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/asin>` __."""
+  return _fn({"asin": num})
+
+
+def round(num, precision=None):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/round>` __."""
+  return _params({"round": num}, {"precision": precision})
+
+
+def radians(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/radians>` __."""
+  return _fn({"radians": num})
+
+def floor(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/floor>` __."""
+  return _fn({"floor": num})
+
+
+def sign(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/sign>` __."""
+  return _fn({"sign": num})
+
+
+def exp(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/exp>` __."""
+  return _fn({"exp": num})
+
+
+def ln(num):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/ln>` __."""
+  return _fn({"ln": num})
+
+
 def any(collection):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/any>`__."""
   return _fn({"any": collection})
