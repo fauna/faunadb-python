@@ -1134,6 +1134,120 @@ class QueryTest(FaunaTestCase):
 
   #endregion
 
+  #region Tycheck functions tests
+  def test_typecheckfns(self):
+    coll = query.collection("typecheck_coll")
+    db = query.database("typecheck_db")
+    fn = query.function("typecheck_fn")
+    index = query.index("typecheck_index")
+    self.admin_client.query(query.create_collection({"name": "typecheck_coll"}))
+    self.admin_client.query(query.create_index(
+        {"name": "typecheck_index", "source": coll, "active": True}))
+    doc = self.admin_client.query(query.create(
+        coll, {"data": {}, "credentials": {"password": "spark2020"}}))
+    self.admin_client.query(query.create_database({"name": "typecheck_db"}))
+    function = self._q(query.create_function(
+        {"name": "typecheck_fn", "body": query.query(query.lambda_("x", query.now()))}))
+
+    key = self.admin_client.query(
+        query.create_key({"database": db, "role": "admin"}))
+    token = self._q(query.login(doc["ref"], {"password": "spark2020"}))
+    credentials = self._q(query.select(['data', 0], query.paginate(query.credentials())))
+    role = self.admin_client.query(query.create_role(
+        {"name": "typecheck_role", "membership": [], "privileges": []}))
+
+    values = [
+        None,
+        bytearray([12,3,4,5]),
+        credentials,
+        90,
+        3.14,
+        True,
+        query.to_date(query.now()),
+        query.date("1970-01-01"),
+        query.now(),
+        query.epoch(1, "second"),
+        query.time("1970-01-01T00:00:00Z"),
+        {"x": 10},
+        query.get(doc["ref"]),
+        query.paginate(query.collections()),
+        [1, 2, 3],
+        "a string",
+        coll,
+        query.collections(),
+        query.match(index),
+        query.union(query.match(index)),
+        doc["ref"],
+        query.get(doc["ref"]),
+        index,
+        db,
+        coll,
+        token["ref"],
+        role["ref"],
+        key["ref"],
+        function["ref"],
+        query.get(function["ref"]),
+        query.query(query.lambda_("x", query.var("x"))),
+    ]
+    pairs = [
+      ["array", query.is_array],
+      ["object", query.is_object],
+      ["string", query.is_string],
+      ["null", query.is_null],
+      ["number", query.is_number],
+      ["bytes", query.is_bytes],
+      ["date", query.is_date],
+      ["timestamp", query.is_timestamp],
+      ["set", query.is_set],
+      ["ref", query.is_ref],
+      ["boolean", query.is_boolean],
+      ["double", query.is_double],
+      ["integer", query.is_integer],
+      ["database", query.is_database],
+      ["index", query.is_index],
+      ["collection", query.is_collection],
+      ["token", query.is_token],
+      ["function", query.is_function],
+      ["collection", query.is_collection],
+      ["role", query.is_role],
+      ["credentials", query.is_credentials],
+      ["key", query.is_key],
+    ]
+    expected = {
+      "array":       1,
+      "boolean":     1,
+      "bytes":       1,
+      "collection":  3,
+      "credentials": 1,
+      "database":    1,
+      "date":        2,
+      "double":      1,
+      "function":    2,
+      "integer":     1,
+      "index":       1,
+      "key":         1,
+      "null":        1,
+      "number":      2,
+      "object":      5,
+      "ref":         11,
+      "role":        1,
+      "set":         3,
+      "string":      1,
+      "timestamp":   3,
+      "token":       1,
+    }
+
+    q = []
+    for p in pairs:
+      d = dict()
+      d[p[0]] = query.count(query.filter_(query.lambda_("v", p[1](query.var("v"))), query.var("vals")))
+      q.append(d)
+
+    actual = self._q(query.let({"vals": values}, query.merge({}, q)))
+    self.assertEqual(actual, expected)
+
+  #endregion
+
   #region Helpers tests
 
   def test_object(self):

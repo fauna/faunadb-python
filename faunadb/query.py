@@ -233,6 +233,102 @@ def is_nonempty(collection):
 
 #endregion
 
+#region Type functions
+
+def is_number(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isnumber>`__."""
+  return _fn({"is_number": expr})
+
+def is_double(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isdouble>`__."""
+  return _fn({"is_double": expr})
+
+def is_integer(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isinteger>`__."""
+  return _fn({"is_integer": expr})
+
+def is_boolean(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isboolean>`__."""
+  return _fn({"is_boolean": expr})
+
+def is_null(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isnull>`__."""
+  return _fn({"is_null": expr})
+
+def is_bytes(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isbytes>`__."""
+  return _fn({"is_bytes": expr})
+
+def is_timestamp(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/istimestamp>`__."""
+  return _fn({"is_timestamp": expr})
+
+def is_date(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isdate>`__."""
+  return _fn({"is_date": expr})
+
+def is_string(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isstring>`__."""
+  return _fn({"is_string": expr})
+
+def is_array(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isarray>`__."""
+  return _fn({"is_array": expr})
+
+def is_object(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isobject>`__."""
+  return _fn({"is_object": expr})
+
+def is_ref(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isref>`__."""
+  return _fn({"is_ref": expr})
+
+def is_set(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isset>`__."""
+  return _fn({"is_set": expr})
+
+def is_doc(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isdoc>`__."""
+  return _fn({"is_doc": expr})
+
+def is_lambda(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/islambda>`__."""
+  return _fn({"is_lambda": expr})
+
+def is_collection(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/iscollection>`__."""
+  return _fn({"is_collection": expr})
+
+def is_database(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isdatabase>`__."""
+  return _fn({"is_database": expr})
+
+def is_index(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isindex>`__."""
+  return _fn({"is_index": expr})
+
+def is_function(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isfunction>`__."""
+  return _fn({"is_function": expr})
+
+def is_key(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/iskey>`__."""
+  return _fn({"is_key": expr})
+
+def is_token(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/istoken>`__."""
+  return _fn({"is_token": expr})
+
+def is_credentials(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/iscredentials>`__."""
+  return _fn({"is_credentials": expr})
+
+def is_role(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/isrole>`__."""
+  return _fn({"is_role": expr})
+
+#endregion
+
 #region Read functions
 
 def get(ref_, ts=None):

@@ -677,6 +677,79 @@ class SerializationTest(TestCase):
   def test_not_expr(self):
     self.assertJson(query.not_(False), '{"not":false}')
 
+#endregion
+
+#region Type functions
+
+  def test_isnumber(self):
+    self.assertJson(query.is_number(query.var("x")), '{"is_number":{"var":"x"}}')
+
+  def test_isdouble(self):
+    self.assertJson(query.is_double(query.var("x")), '{"is_double":{"var":"x"}}')
+
+  def test_isinteger(self):
+    self.assertJson(query.is_integer(query.var("x")), '{"is_integer":{"var":"x"}}')
+
+  def test_isboolean(self):
+    self.assertJson(query.is_boolean(query.var("x")), '{"is_boolean":{"var":"x"}}')
+
+  def test_isnull(self):
+    self.assertJson(query.is_null(query.var("x")), '{"is_null":{"var":"x"}}')
+
+  def test_isbytes(self):
+    self.assertJson(query.is_bytes(query.var("x")), '{"is_bytes":{"var":"x"}}')
+
+  def test_istimestamp(self):
+    self.assertJson(query.is_timestamp(query.var("x")), '{"is_timestamp":{"var":"x"}}')
+
+  def test_isdate(self):
+    self.assertJson(query.is_date(query.var("x")), '{"is_date":{"var":"x"}}')
+
+  def test_isstring(self):
+    self.assertJson(query.is_string(query.var("x")), '{"is_string":{"var":"x"}}')
+
+  def test_isarray(self):
+    self.assertJson(query.is_array(query.var("x")), '{"is_array":{"var":"x"}}')
+
+  def test_isobject(self):
+    self.assertJson(query.is_object(query.var("x")), '{"is_object":{"var":"x"}}')
+
+  def test_isref(self):
+    self.assertJson(query.is_ref(query.var("x")), '{"is_ref":{"var":"x"}}')
+
+  def test_isset(self):
+    self.assertJson(query.is_set(query.var("x")), '{"is_set":{"var":"x"}}')
+
+  def test_isdoc(self):
+    self.assertJson(query.is_doc(query.var("x")), '{"is_doc":{"var":"x"}}')
+
+  def test_islambda(self):
+    self.assertJson(query.is_lambda(query.var("x")), '{"is_lambda":{"var":"x"}}')
+
+  def test_iscollection(self):
+    self.assertJson(query.is_collection(query.var("x")), '{"is_collection":{"var":"x"}}')
+
+  def test_isdatabase(self):
+    self.assertJson(query.is_database(query.var("x")), '{"is_database":{"var":"x"}}')
+
+  def test_isindex(self):
+    self.assertJson(query.is_index(query.var("x")), '{"is_index":{"var":"x"}}')
+
+  def test_isfunction(self):
+    self.assertJson(query.is_function(query.var("x")), '{"is_function":{"var":"x"}}')
+
+  def test_iskey(self):
+    self.assertJson(query.is_key(query.var("x")), '{"is_key":{"var":"x"}}')
+
+  def test_istoken(self):
+    self.assertJson(query.is_token(query.var("x")), '{"is_token":{"var":"x"}}')
+
+  def test_iscredentials(self):
+    self.assertJson(query.is_credentials(query.var("x")), '{"is_credentials":{"var":"x"}}')
+
+  def test_isrole(self):
+    self.assertJson(query.is_role(query.var("x")), '{"is_role":{"var":"x"}}')
+
   def test_to_string_expr(self):
     self.assertJson(query.to_string(42), '{"to_string":42}')
 
