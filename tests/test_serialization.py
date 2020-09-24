@@ -587,6 +587,20 @@ class SerializationTest(TestCase):
   def test_to_string_expr(self):
     self.assertJson(query.to_string(42), '{"to_string":42}')
 
+  def test_to_array_expr(self):
+    self.assertJson(query.to_array(
+        {'x': 0, 'y': 1}), '{"to_array":{"object":{"x":0,"y":1}}}')
+
+  def test_to_object_expr(self):
+    self.assertJson(query.to_object(
+        [['x', 0], ['y', 1]]), '{"to_object":[["x",0],["y",1]]}')
+
+  def test_to_double_expr(self):
+    self.assertJson(query.to_double(42), '{"to_double":42}')
+
+  def test_to_integer_expr(self):
+    self.assertJson(query.to_integer(3.1415), '{"to_integer":3.1415}')
+
   def test_to_number_expr(self):
     self.assertJson(query.to_number("42"), '{"to_number":"42"}')
 

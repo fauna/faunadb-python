@@ -956,6 +956,23 @@ class QueryTest(FaunaTestCase):
   def test_to_string(self):
     self.assertEqual(self._q(query.to_string(42)), "42")
 
+  def test_to_array(self):
+    self.assertEqual(self._q(query.to_array({'x':0,'y':1})), [['x',0], ['y', 1]])
+    self._assert_bad_query(query.to_array(23))
+
+  def test_to_object(self):
+    self.assertEqual(self._q(query.to_object([['x', 0], ['y', 1]])), {'x':0, 'y':1})
+    self._assert_bad_query(query.to_object('hey there'))
+
+  def test_to_integer(self):
+    self.assertEqual(self._q(query.to_integer(4.2343)), 4)
+    self.assertEqual(self._q(query.to_integer(4.8999)), 4)
+    self._assert_bad_query(query.to_integer({'x':1}))
+
+  def test_to_double(self):
+    self.assertEqual(self._q(query.to_double(42)), 42.0)
+    self._assert_bad_query(query.to_double([]))
+
   def test_to_number(self):
     self.assertEqual(self._q(query.to_number("42")), 42)
 

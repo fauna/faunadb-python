@@ -790,6 +790,22 @@ def not_(boolean):
 def to_string(expr):
   return _fn({"to_string": expr})
 
+def to_array(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/toarray>`__."""
+  return _fn({"to_array": expr})
+
+def to_object(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/toobject>`__."""
+  return _fn({"to_object": expr})
+
+def to_double(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/todouble>`__."""
+  return _fn({"to_double": expr})
+
+def to_integer(expr):
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/tointeger>`__."""
+  return _fn({"to_integer": expr})
+
 def to_number(expr):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/tonumber>`__."""
   return _fn({"to_number": expr})
