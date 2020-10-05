@@ -884,6 +884,108 @@ class QueryTest(FaunaTestCase):
     self._assert_bad_query(query.divide(1, 0))
     self._assert_bad_query(query.divide())
 
+  def test_pow(self):
+    self.assertEqual(self._q(query.pow(2, 3)),  8)
+    self.assertEqual(self._q(query.pow(0, 3)),  0)
+    self._assert_bad_query(query.pow(1, 'n'))
+
+  def test_max(self):
+    self.assertEqual(self._q(query.max(1, 2, 3)),  3)
+    self.assertEqual(self._q(query.max([-1, -2, -3])), -1)
+    self._assert_bad_query(query.max(2))
+    self._assert_bad_query(query.max('n'))
+
+  def test_min(self):
+    self.assertEqual(self._q(query.min(1, 2, 3)),  1)
+    self.assertEqual(self._q(query.min([-1, -2, -3])), -3)
+    self._assert_bad_query(query.min(1))
+    self._assert_bad_query(query.min('n'))
+
+  def test_abs(self):
+    self.assertEqual(self._q(query.abs(-10)),  10)
+    self.assertEqual(self._q(query.abs(1)),  1)
+    self._assert_bad_query(query.abs('n'))
+
+  def test_trunc(self):
+    self.assertEqual(self._q(query.trunc(45.56789)),  45.56)
+    self.assertEqual(self._q(query.trunc(45.56789, 3)),  45.567)
+
+  def test_bitor(self):
+    self.assertEqual(self._q(query.bitor(1)),  1)
+    self.assertEqual(self._q(query.bitor(1, 0, 1, 0)),  1)
+    self.assertEqual(self._q(query.bitor([1, 2, 4])),  7)
+    self._assert_bad_query(query.bitor('n'))
+
+  def test_degrees(self):
+    self.assertEqual(self._q(query.degrees(0)),  0)
+
+  def test_cos(self):
+    self.assertEqual(self._q(query.cos(120)),  0.8141809705265618)
+
+  def test_cosh(self):
+    self.assertEqual(self._q(query.cosh(120)), 6.520904391968161e+51)
+  
+  def test_hypot(self):
+    self.assertEqual(self._q(query.hypot(query.hypot(3, 4), 0)), 5)
+
+  def test_atan(self):
+    self.assertEqual(self._q(query.atan(120)),  1.5624631863547607)
+
+  def test_log(self):
+    self.assertEqual(self._q(query.log(100)),  2)
+
+  def test_bitnot(self):
+    self.assertEqual(self._q(query.bitnot(0)), -1)
+    self.assertEqual(self._q(query.bitnot(1)), -2)
+
+  def test_bitxor(self):
+    self.assertEqual(self._q(query.bitxor(0, 1)), 1)
+    self.assertEqual(self._q(query.bitxor(1, 2, 4)), 7)
+
+  def test_bitand(self):
+    self.assertEqual(self._q(query.bitand(1, 0)), 0)
+    self.assertEqual(self._q(query.bitand(7, 3)), 3)
+
+  def test_ceil(self):
+    self.assertEqual(self._q(query.ceil(67.789)), 68)
+
+  def test_sqrt(self):
+    self.assertEqual(self._q(query.sqrt(9)),  3)
+
+  def test_tan(self):
+    self.assertEqual(self._q(query.tan(90)),  -1.995200412208242)
+
+  def test_tanh(self):
+    self.assertEqual(self._q(query.tanh(45)),  1.0)
+    self._assert_bad_query(query.tanh('45.6'))
+
+  def test_acos(self):
+    self.assertEqual(self._q(query.acos(0)),  1.5707963267948966)
+
+  def test_asin(self):
+    self.assertEqual(self._q(query.asin(0)),  0.0)
+
+  def test_radians(self):
+    self.assertEqual(self._q(query.radians(90)),  1.5707963267948966)
+
+  def test_round(self):
+    self.assertEqual(self._q(query.round(123.456)),  123.46)
+    self.assertEqual(self._q(query.round(123.456, 1)),
+                    123.5)
+
+  def test_floor(self):
+    self.assertEqual(self._q(query.floor(89.1234)),  89.0)
+    self._assert_bad_query(query.floor('let the bodies hit the '))
+
+  def test_sign(self):
+    self.assertEqual(self._q(query.sign(-90)),  -1)
+
+  def test_exp(self):
+    self.assertEqual(self._q(query.exp(2)),  7.38905609893065)
+
+  def test_ln(self):
+    self.assertEqual(self._q(query.ln(1)),  0)
+
   def test_any_all(self):
     expected = [True, True, False, False]
     self.assertEqual(self._q([
