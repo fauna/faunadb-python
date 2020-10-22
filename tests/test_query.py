@@ -66,7 +66,7 @@ class QueryTest(FaunaTestCase):
     body212 = self._q(versioned212)
 
     body3 = self._q(query.query(lambda a, b: query.concat([a, b], "/")))
-    versioned3 = Query({"api_version": "3", "lambda": ["a", "b"], "expr": {
+    versioned3 = Query({"api_version": "4", "lambda": ["a", "b"], "expr": {
                        "concat": [{"var": "a"}, {"var": "b"}], "separator": "/"}})
 
     self.assertEqual(body212, versioned212)

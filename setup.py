@@ -12,6 +12,7 @@ requires = [
   "iso8601",
   "requests",
   "future",
+  "hyper"
 ]
 
 tests_requires = [
