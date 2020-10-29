@@ -1059,7 +1059,10 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.to_string(42)), "42")
 
   def test_to_array(self):
-    self.assertEqual(self._q(query.to_array({'x':0,'y':1})), [['x',0], ['y', 1]])
+    arr = self._q(query.to_array({'x': 0, 'y': 1}))
+    self.assertEquals(len(arr), 2)
+    self.assertIn(['x',0], arr)
+    self.assertIn(['y', 1], arr)
     self._assert_bad_query(query.to_array(23))
 
   def test_to_object(self):
@@ -1183,14 +1186,13 @@ class QueryTest(FaunaTestCase):
       "role": "admin"
     }))
 
-    self.assertEqual(
-      client.query(query.paginate(query.keys()))["data"],
-      [server_key["ref"], admin_key["ref"]]
-    )
+    server_key_ref = Ref(server_key["ref"].id(), cls=Ref("keys", db=Ref("db-for-keys", cls=Native.DATABASES)))
+    admin_key_ref = Ref(admin_key["ref"].id(), cls=Ref(
+        "keys", db=Ref("db-for-keys", cls=Native.DATABASES)))
 
     self.assertEqual(
       self.admin_client.query(query.paginate(query.keys(query.database("db-for-keys"))))["data"],
-      [server_key["ref"], admin_key["ref"]]
+      [server_key_ref, admin_key_ref]
     )
 
   def create_new_database(self, client, name):
