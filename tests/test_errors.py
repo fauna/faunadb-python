@@ -100,7 +100,7 @@ class ErrorsTest(FaunaTestCase):
       "instance not found")
 
   def test_value_not_found(self):
-    self._assert_query_error(query.select("a", {}), NotFound, "value not found")
+    self._assert_query_error(query.select("a", {}), NotFound, "value not found", ["from"])
 
   def test_instance_already_exists(self):
     self.client.query(create_collection({"name": "duplicates"}))
