@@ -66,7 +66,7 @@ class QueryTest(FaunaTestCase):
     body212 = self._q(versioned212)
 
     body3 = self._q(query.query(lambda a, b: query.concat([a, b], "/")))
-    versioned3 = Query({"api_version": "3", "lambda": ["a", "b"], "expr": {
+    versioned3 = Query({"api_version": "4", "lambda": ["a", "b"], "expr": {
                        "concat": [{"var": "a"}, {"var": "b"}], "separator": "/"}})
 
     self.assertEqual(body212, versioned212)
@@ -556,15 +556,6 @@ class QueryTest(FaunaTestCase):
       query.create(self.collection_ref, {"credentials": {"password": "sekrit"}}))["ref"]
     self.assertTrue(self.client.query(query.identify(instance_ref, "sekrit")))
 
-  def test_identity_has_identity(self):
-    instance_ref = self.client.query(
-      query.create(self.collection_ref, {"credentials": {"password": "sekrit"}}))["ref"]
-    secret = self.client.query(
-      query.login(instance_ref, {"password": "sekrit"}))["secret"]
-    instance_client = self.client.new_session_client(secret=secret)
-
-    self.assertTrue(instance_client.query(query.has_identity()))
-    self.assertEqual(instance_client.query(query.identity()), instance_ref)
 
   #endregion
 
