@@ -56,6 +56,41 @@ Basic Usage
 
     print(indexes)
 
+Document Streaming
+-----------
+Fauna supports document streaming, where changes to a streamed document are pushed to all clients subscribing to that document.
+
+The following section provides an example for managing a document stream.
+
+The streaming API is blocking by default, the choice and mechanism for handling concurrent streams is left to the application developer:
+
+.. code-block:: python
+
+    from faunadb import query as q
+    from faunadb.objects import Ref
+    from faunadb.client import FaunaClient
+
+    client = FaunaClient(secret="your-secret-here")
+
+    coll = client.query(q.create_collection({"name":"sc"}))
+    doc  = client.query(q.create(coll["ref"], {"data":{"x": 0}}))
+
+    stream = None
+    def on_start(event):
+        print("started stream at %s"%(event.txn))
+        client.query(q.update(doc["ref"], {"data": {"x": "updated"}}))
+    
+    def on_version(event):
+        print("on_version event at %s"%(event.txn))
+        print("    event: %s"%(event.event))
+        stream.close()
+    
+    def on_error(event):
+        print("Received error event %s"%(event))
+    options = {"fields": ["document", "diff"]}
+    stream = client.stream(doc["ref"], options, on_start, on_version, on_error)
+    stream.start()
+
 Building it yourself
 --------------------
 
