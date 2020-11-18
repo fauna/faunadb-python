@@ -1,4 +1,10 @@
-## 3.0.0 [current]
+## 4.0.0  [current]
+- Introduce document streaming api
+- Add third party auth functions
+- Bump api_version to `4`
+- Add nightly and stable CI for Python 2.7, 3.4 and 3.8
+
+## 3.0.0
 
 - Refactored `contains` into `contains_path`, `contains_value`, `contains_path`
 - Added `reverse` function
