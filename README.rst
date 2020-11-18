@@ -57,7 +57,7 @@ Basic Usage
     print(indexes)
 
 Document Streaming
------------
+------------------
 Fauna supports document streaming, where changes to a streamed document are pushed to all clients subscribing to that document.
 
 The following section provides an example for managing a document stream.
@@ -79,12 +79,12 @@ The streaming API is blocking by default, the choice and mechanism for handling 
     def on_start(event):
         print("started stream at %s"%(event.txn))
         client.query(q.update(doc["ref"], {"data": {"x": "updated"}}))
-    
+
     def on_version(event):
         print("on_version event at %s"%(event.txn))
         print("    event: %s"%(event.event))
         stream.close()
-    
+
     def on_error(event):
         print("Received error event %s"%(event))
     options = {"fields": ["document", "diff"]}
