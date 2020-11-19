@@ -1,4 +1,7 @@
-## 4.0.0  [current]
+# 4.0.1  [current]
+- Fixes broken v4.0.0 by adding streams package to setup.py
+
+## 4.0.0 [broken]
 - Introduce document streaming api
 - Add third party auth functions
 - Bump api_version to `4`
