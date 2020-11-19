@@ -52,7 +52,7 @@ setup(
     "Operating System :: Unix",
   ],
   keywords="faunadb fauna",
-  packages=["faunadb"],
+  packages=["faunadb", "faunadb.streams"],
   install_requires=requires,
   extras_require=extras_require,
   tests_require=tests_requires,
