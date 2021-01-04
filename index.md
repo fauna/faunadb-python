@@ -1,37 +1,142 @@
-## Welcome to GitHub Pages
+FaunaDB Python
+==============
 
-You can use the [editor on GitHub](https://github.com/fauna/faunadb-python/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+Python driver for [FaunaDB](https://fauna.com)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+```python
 
-### Markdown
+    from faunadb import query as q
+    from faunadb.objects import Ref
+    from faunadb.client import FaunaClient
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+    client = FaunaClient(secret="your-secret-here")
 
-```markdown
-Syntax highlighted code block
+    indexes = client.query(q.paginate(q.indexes()))
 
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+    print(indexes)
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+Read the [Latest API documentation](/api/) for the Fauna Python driver here.
 
-### Jekyll Themes
+Installation
+------------
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/fauna/faunadb-python/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+```bash
 
-### Support or Contact
+    $ pip install faunadb
+```
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+Document Streaming
+------------------
+Fauna supports document streaming, where changes to a streamed document are pushed to all clients subscribing to that document.
+
+The following section provides an example for managing a document stream.
+
+The streaming API is blocking by default, the choice and mechanism for handling concurrent streams is left to the application developer:
+
+```python
+
+    from faunadb import query as q
+    from faunadb.objects import Ref
+    from faunadb.client import FaunaClient
+
+    client = FaunaClient(secret="your-secret-here")
+
+    coll = client.query(q.create_collection({"name":"sc"}))
+    doc  = client.query(q.create(coll["ref"], {"data":{"x": 0}}))
+
+    stream = None
+    def on_start(event):
+        print("started stream at %s"%(event.txn))
+        client.query(q.update(doc["ref"], {"data": {"x": "updated"}}))
+
+    def on_version(event):
+        print("on_version event at %s"%(event.txn))
+        print("    event: %s"%(event.event))
+        stream.close()
+
+    def on_error(event):
+        print("Received error event %s"%(event))
+    options = {"fields": ["document", "diff"]}
+    stream = client.stream(doc["ref"], options, on_start, on_version, on_error)
+    stream.start()
+```
+
+Compatibility
+-------------
+
+The following versions of Python are supported:
+
+* Python 2.7
+* Python 3.3
+* Python 3.4
+* Python 3.5
+* Python 3.6
+* Python 3.7
+* Python 3.8
+
+
+Building it yourself
+--------------------
+
+
+Setup
+~~~~~
+
+```bash
+
+    $ virtualenv venv
+    $ source venv/bin/activate
+    $ pip install .
+```
+
+Testing
+~~~~~~~
+
+To run the tests you must have a FaunaDB database available.
+Then set the environment variable ``FAUNA_ROOT_KEY`` to your database's root key.
+If you use FaunaDB cloud, this is the password you log in with.
+
+Tip: Setting the ``FAUNA_QUERY_TIMEOUT_MS`` environment variable will
+set a timeout in milliseconds for all queries.
+
+Then run ``make test``.
+To test a single test, use e.g. ``python -m unittest tests.test_client.ClientTest.test_ping``.
+
+Tests can also be run via a Docker container with ``FAUNA_ROOT_KEY="your-cloud-secret" make docker-test``
+(an alternate Alpine-based Python image can be provided via `RUNTIME_IMAGE`).
+
+
+Coverage
+~~~~~~~~
+
+To run the tests with coverage, install the coverage dependencies with ``pip install .[coverage]``,
+and then run ``make coverage``. A summary will be displayed to the terminal, and a detailed coverage report
+will be available at ``htmlcov/index.html``.
+
+
+Contribute
+----------
+
+GitHub pull requests are very welcome.
+
+
+License
+-------
+
+Copyright 2020 `Fauna, Inc. <https://fauna.com>`_
+
+Licensed under the Mozilla Public License, Version 2.0 (the
+"License"); you may not use this software except in compliance with
+the License. You may obtain a copy of the License at
+
+`http://mozilla.org/MPL/2.0/ <http://mozilla.org/MPL/2.0/>`_
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+
+.. _`tests`: https://github.com/fauna/faunadb-python/blob/master/tests/
