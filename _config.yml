@@ -1,1 +1,6 @@
 theme: jekyll-theme-minimal
+title: FaunaDB Python Driver Documentation
+logo: /assets/fauna-logo-new-v2.svg
+description: Documentation for the FaunaDB Python driver.
+show_downloads: true
+google_analytics:
