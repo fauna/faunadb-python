@@ -16,7 +16,7 @@ Python driver for [FaunaDB](https://fauna.com)
     print(indexes)
 ```
 
-Read the [Latest API documentation](/api/) for the Fauna Python driver here.
+Read the [Latest API documentation](./api/) for the Fauna Python driver [here](./api/).
 
 Installation
 ------------
