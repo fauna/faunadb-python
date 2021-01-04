@@ -4,3 +4,6 @@ logo: /assets/fauna-logo-new-v2.svg
 description: Documentation for the FaunaDB Python driver.
 show_downloads: true
 google_analytics:
+fql_docs_url: https://docs.fauna.com/fauna/current
+pypi_url: https://pypi.org/project/faunadb/
+api_docs_url: api/

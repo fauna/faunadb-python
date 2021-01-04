@@ -1,0 +1,25 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+@media print, screen and (max-width: 480px) {
+  body {
+    padding:15px;
+  }
+
+  .downloads {
+    width:99%;
+  }
+
+  .downloads li, .downloads li + li + li {
+    width: -webkit-fill-available;
+  }
+}
+
+.downloads li {
+  width: -webkit-fill-available;
+  float:left;
+  border-right:1px solid #e0e0e0;
+  height:40px;
+}
