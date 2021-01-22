@@ -1,19 +1,38 @@
-from time import time
+import threading
 # pylint: disable=redefined-builtin
 from builtins import object
-import threading
+from time import time
 
 from requests import Request, Session
-from requests.auth import HTTPBasicAuth
 from requests.adapters import HTTPAdapter
+from requests.auth import AuthBase
 
-from faunadb.errors import _get_or_raise, FaunaError, UnexpectedError
+from faunadb._json import parse_json_or_none, to_json
+from faunadb.errors import FaunaError, UnexpectedError, _get_or_raise
 from faunadb.query import _wrap
 from faunadb.request_result import RequestResult
-from faunadb._json import parse_json_or_none, to_json
 from faunadb.streams import Subscription
 
 API_VERSION = "4"
+
+class HTTPBearerAuth(AuthBase):
+    """Creates a bearer base auth object"""
+
+    def auth_header(self):
+        return "Bearer {}".format(self.secret)
+
+    def __init__(self, secret):
+        self.secret = secret
+
+    def __eq__(self, other):
+        return self.secret == getattr(other, 'secret', None)
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __call__(self, r):
+        r.headers['Authorization'] = self.auth_header()
+        return r
 
 class _LastTxnTime(object):
   """Wraps tracking the last transaction time supplied from the database."""
@@ -115,7 +134,7 @@ class FaunaClient(object):
     self.scheme = scheme
     self.port = (443 if scheme == "https" else 80) if port is None else port
 
-    self.auth = HTTPBasicAuth(secret, "")
+    self.auth = HTTPBearerAuth(secret)
     self.base_url = "%s://%s:%s" % (self.scheme, self.domain, self.port)
     self.observer = observer
 
@@ -289,7 +308,3 @@ class FaunaClient(object):
     url = self.base_url + "/" + path
     req = Request(action, url, params=query, data=to_json(data), auth=self.auth, headers=headers)
     return self.session.send(self.session.prepare_request(req))
-
-  def _auth_header(self):
-    """Returns the HTTP authentication header"""
-    return "Bearer {}".format(self.auth.username)

@@ -88,7 +88,7 @@ The streaming API is blocking by default, the choice and mechanism for handling 
     def on_error(event):
         print("Received error event %s"%(event))
     options = {"fields": ["document", "diff"]}
-    stream = client.stream(doc["ref"], options, on_start, on_version, on_error)
+    stream = client.stream(doc["ref"], options, on_start, on_error, on_version)
     stream.start()
 
 Building it yourself

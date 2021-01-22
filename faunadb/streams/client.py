@@ -7,11 +7,12 @@ except ImportError:
     #python3
     from urllib.parse import urlencode
 
-from hyper import HTTP20Connection
-from faunadb._json import to_json, parse_json_or_none
+from faunadb._json import parse_json_or_none, to_json
 from faunadb.request_result import RequestResult
-from .events import parse_stream_request_result_or_none, Error
+from hyper import HTTP20Connection
+
 from .errors import StreamError
+from .events import Error, parse_stream_request_result_or_none
 
 VALID_FIELDS = {"diff", "prev", "document", "action"}
 
@@ -63,7 +64,7 @@ class Connection(object):
         try:
             self._state = 'connecting'
             headers = self._client.session.headers
-            headers["Authorization"] = self._client._auth_header()
+            headers["Authorization"] = self._client.auth.auth_header()
             if self._client._query_timeout_ms is not None:
                     headers["X-Query-Timeout"] = str(self._client._query_timeout_ms)
             headers["X-Last-Seen-Txn"] = str(self._client.get_last_txn_time())
