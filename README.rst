@@ -35,7 +35,7 @@ The following versions of Python are supported:
 Documentation
 -------------
 
-Driver documentation is available at https://faunadb.readthedocs.org/en/latest/.
+Driver documentation is available at https://fauna.github.io/faunadb-python/.
 
 See the `FaunaDB Documentation <https://docs.fauna.com/>`_ for a complete API reference, or look in `tests`_
 for more examples.
