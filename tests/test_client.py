@@ -13,7 +13,7 @@ class ClientTest(FaunaTestCase):
 
   def test_default_query_timeout(self):
     client = FaunaClient(secret="secret")
-    self.assertEqual(client.get_query_timeout(), 60001)
+    self.assertEqual(client.get_query_timeout(), 60000)
 
   def test_query_timeout(self):
     client = FaunaClient(secret="secret", query_timeout_ms=5000)
