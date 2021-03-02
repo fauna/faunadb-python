@@ -1,4 +1,7 @@
 import threading
+import sys
+import os
+import platform
 # pylint: disable=redefined-builtin
 from builtins import object
 from time import time
@@ -12,8 +15,7 @@ from faunadb.errors import FaunaError, UnexpectedError, _get_or_raise
 from faunadb.query import _wrap
 from faunadb.request_result import RequestResult
 from faunadb.streams import Subscription
-
-API_VERSION = "4"
+from faunadb import __version__ as pkg_version, __api_version__ as api_version
 
 class HTTPBearerAuth(AuthBase):
     """Creates a bearer base auth object"""
@@ -158,7 +160,12 @@ class FaunaClient(object):
         "Accept-Encoding": "gzip",
         "Content-Type": "application/json;charset=utf-8",
         "X-Fauna-Driver": "python",
-        "X-FaunaDB-API-Version": API_VERSION
+        "X-Fauna-Driver-Version": pkg_version,
+        "X-FaunaDB-API-Version": api_version,
+        "X-Python-Version": "{0}.{1}.{2}-{3}".format(*sys.version_info),
+        "X-Runtime-Environment": self.getRuntimeEnv(),
+        "X-Runtime-Environment-OS": platform.system().lower()
+
       })
       if self._query_timeout_ms is not None:
         self.session.headers["X-Query-Timeout"] = str(self._query_timeout_ms)
@@ -166,6 +173,53 @@ class FaunaClient(object):
     else:
       self.session = kwargs['session']
       self.counter = kwargs['counter']
+
+  def getRuntimeEnv(self):
+    env = [
+      {
+        "name": "Netlify",
+        "check": lambda : "NETLIFY_IMAGES_CDN_DOMAIN" in os.environ
+      },
+      {
+        "name": "Vercel",
+        "check": lambda : "VERCEL" in os.environ
+      },
+      {
+        "name": "Heroku",
+        "check": lambda : "PATH" in os.environ and ".heroku" in os.environ["PATH"]
+      },
+      {
+        "name": "AWS Lambda",
+        "check": lambda : "AWS_LAMBDA_FUNCTION_VERSION" in os.environ
+      },
+      {
+        "name": "GCP Cloud Functions",
+        "check": lambda : "_" in os.environ and "google" in os.environ["_"]
+      },
+      {
+        "name": "GCP Compute Instances",
+        "check": lambda : "GOOGLE_CLOUD_PROJECT" in os.environ
+      },
+      {
+        "name": "Azure Cloud Functions",
+        "check": lambda : "WEBSITE_FUNCTIONS_AZUREMONITOR_CATEGORIES" in os.environ
+      },
+      {
+        "name": "Azure Compute",
+        "check": lambda : "ORYX_ENV_TYPE" in os.environ and "WEBSITE_INSTANCE_ID" in os.environ and os.environ["ORYX_ENV_TYPE"] == "AppService"
+      }
+    ]
+
+    try:
+      recognized = next(e for e in env if e.get("check")())
+      if recognized is not None:
+          return recognized.get("name")
+    except StopIteration:
+      return "Unknown"
+
+    # for e in env:
+    #   print("check ", e.get("check")())
+
 
   def sync_last_txn_time(self, new_txn_time):
     """
