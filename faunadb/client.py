@@ -145,6 +145,9 @@ class FaunaClient(object):
     self._query_timeout_ms = kwargs.get('query_timeout_ms')
     if self._query_timeout_ms is not None:
       self._query_timeout_ms = int(self._query_timeout_ms)
+    
+    if self._query_timeout_ms is None:
+        self._query_timeout_ms = int(timeout) * 1000
 
     if ('session' not in kwargs) or ('counter' not in kwargs):
       self.session = Session()
