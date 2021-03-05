@@ -1,6 +1,10 @@
+import sys
+import os
+import platform
 from faunadb.client import FaunaClient
 from faunadb.errors import UnexpectedError
 from tests.helpers import FaunaTestCase
+from faunadb import __version__ as pkg_version, __api_version__ as api_version
 
 class ClientTest(FaunaTestCase):
 
@@ -39,3 +43,23 @@ class ClientTest(FaunaTestCase):
     self.assertRaisesRegexCompat(UnexpectedError,
                                  "Cannnot create a session client from a closed session",
                                  lambda: client.new_session_client(secret="new_secret"))
+
+  def test_runtime_env_headers(self):
+    client = FaunaClient(secret="secret")
+    headers = client.session.headers
+    self.assertEqual(headers["X-Fauna-Driver-Version"], pkg_version)
+    self.assertEqual(headers["X-FaunaDB-API-Version"], api_version)
+    self.assertEqual(headers["X-Python-Version"], "{0}.{1}.{2}-{3}".format(*sys.version_info))
+    self.assertEqual(headers["X-Runtime-Environment-OS"], platform.system().lower())
+    self.assertEqual(headers["X-Runtime-Environment"], "Unknown")
+
+  def test_recognized_runtime_env_headers(self):
+    originalPath = os.environ["PATH"]
+    os.environ["PATH"] = originalPath + ".heroku"
+
+    client = FaunaClient(secret="secret")
+    self.assertEqual(client.session.headers["X-Runtime-Environment"], "Heroku")
+
+    os.environ["PATH"] = originalPath
+
+
