@@ -803,12 +803,13 @@ def select(path, from_, default=None):
   """
   See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/select>`__.
   See also :py:func:`select_with_default`."""
+  _dict = {"select": path, "from": from_}
   if default is not None:
-    return select_with_default(path, from_, default)
+    _dict["default"] = default
+  return _fn(_dict)
 
-  return _fn({"select": path, "from": from_})
 
-
+@deprecated("Use `select` instead")
 def select_with_default(path, from_, default):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/select>`__."""
   return _fn({"select": path, "from": from_, "default": default})
