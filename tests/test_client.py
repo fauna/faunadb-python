@@ -46,19 +46,26 @@ class ClientTest(FaunaTestCase):
 
   def test_runtime_env_headers(self):
     client = FaunaClient(secret="secret")
-    headers = client.session.headers
-    self.assertEqual(headers["X-Fauna-Driver-Version"], pkg_version)
-    self.assertEqual(headers["X-FaunaDB-API-Version"], api_version)
-    self.assertEqual(headers["X-Python-Version"], "{0}.{1}.{2}-{3}".format(*sys.version_info))
-    self.assertEqual(headers["X-Runtime-Environment-OS"], platform.system().lower())
-    self.assertEqual(headers["X-Runtime-Environment"], "Unknown")
+    self.assertEqual(
+      client.session.headers['X-Driver-Env'],
+      "driver=python-{0}; runtime=python-{1} env={2}; os={3}".format(
+        pkg_version, "{0}.{1}.{2}-{3}".format(*sys.version_info),
+        "Unknown", "{0}-{1}".format(platform.system(), platform.release())
+      ).lower()
+    )
 
   def test_recognized_runtime_env_headers(self):
     originalPath = os.environ["PATH"]
     os.environ["PATH"] = originalPath + ".heroku"
 
     client = FaunaClient(secret="secret")
-    self.assertEqual(client.session.headers["X-Runtime-Environment"], "Heroku")
+    self.assertEqual(
+      client.session.headers['X-Driver-Env'],
+      "driver=python-{0}; runtime=python-{1} env={2}; os={3}".format(
+        pkg_version, "{0}.{1}.{2}-{3}".format(*sys.version_info),
+        "Heroku", "{0}-{1}".format(platform.system(), platform.release())
+      ).lower()
+    )
 
     os.environ["PATH"] = originalPath
 
