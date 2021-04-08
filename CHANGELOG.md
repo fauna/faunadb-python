@@ -1,4 +1,9 @@
-# 4.0.1  [current]
+## 4.1.0 [current]
+- Bearer auth token support
+- Added runtime environment headers
+- Minor function fixes
+
+## 4.0.1
 - Fixes broken v4.0.0 by adding streams package to setup.py
 
 ## 4.0.0 [broken]
