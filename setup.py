@@ -21,7 +21,6 @@ tests_requires = [
 ]
 
 extras_require = {
-  "doc": ["sphinx", "sphinx_rtd_theme"],
   "test": tests_requires,
   "lint": ["pylint"],
 }
