@@ -62,6 +62,9 @@ class HttpError(FaunaError):
     errors = _get_or_raise(request_result, response, "errors")
     return [ErrorData.from_dict(error, request_result) for error in errors]
 
+  def __str__(self) -> str:
+      return repr(self.errors[0])
+
   def _get_description(self):
     return self.errors[0].description if self.errors else "(empty `errors`)"
 
