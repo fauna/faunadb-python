@@ -25,8 +25,7 @@ message1 = ' '.join(msg_ary[0: len(msg_ary) // 2]).center(width, ' ')
 message2 = ' '.join(msg_ary[len(msg_ary) // 2:]).center(width, ' ')
 
 print('*' * (width + 4))
-print(f'* {message1} *')
-print(f'* {message2} *')
+print(message)
 print('*' * (width + 4))
 
 # def print_msg_box(msg):
