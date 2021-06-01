@@ -106,7 +106,7 @@ class FaunaClient(object):
       domain="db.fauna.com",
       scheme="https",
       port=None,
-      query_timeout_ms=60 * 1000,
+      timeout=60,
       observer=None,
       pool_connections=10,
       pool_maxsize=10,
@@ -120,8 +120,8 @@ class FaunaClient(object):
       ``"http"`` or ``"https"``.
     :param port:
       Port of the FaunaDB server.
-    :param query_timeout_ms:
-      Read query_timeout_ms in milliseconds.
+    :param timeout:
+      Read timeout in seconds.
     :param observer:
       Callback that will be passed a :any:`RequestResult` after every completed request.
     :param pool_connections:
@@ -142,7 +142,7 @@ class FaunaClient(object):
     self.pool_maxsize = pool_maxsize
 
     self._last_txn_time = kwargs.get('last_txn_time') or _LastTxnTime()
-    self._query_timeout_ms = query_timeout_ms
+    self._query_timeout_ms = kwargs.get('query_timeout_ms')
     if self._query_timeout_ms is not None:
       self._query_timeout_ms = int(self._query_timeout_ms)
 
@@ -162,7 +162,7 @@ class FaunaClient(object):
       })
       if self._query_timeout_ms is not None:
         self.session.headers["X-Query-Timeout"] = str(self._query_timeout_ms)
-      self.session.timeout = self._query_timeout_ms
+      self.session.timeout = timeout
     else:
       self.session = kwargs['session']
       self.counter = kwargs['counter']
