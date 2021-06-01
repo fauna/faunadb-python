@@ -18,12 +18,13 @@ for i in range(len(current_version)):
   if latest_version_arr[i] > current_version[i]:
     is_new_version_available = True
 
-width = 30
-message = "This is a test"
-msg_ary = message.split(' ')
-message1 = ' '.join(msg_ary[0: len(msg_ary) // 2]).center(width, ' ')
-message2 = ' '.join(msg_ary[len(msg_ary) // 2:]).center(width, ' ')
 
-print('*' * (width + 4))
-print(message)
-print('*' * (width + 4))
+if True: #is_new_version_available:
+  msg1 = "New fauna version available {} → {}".format(__version__, latest_version)
+  msg2 = "Changelog: https://github.com/fauna/faunadb-python/blob/master/CHANGELOG.md"
+  width = 80
+  print('+' + '-' * width + '+')
+  print('| ' + msg1 + ' ' * (width - len(msg1) - 1) + '|')
+  print('| ' + msg2 + ' ' * (width - len(msg2) - 1) + '|')
+  print('+' + '-' * width + '+')
+
