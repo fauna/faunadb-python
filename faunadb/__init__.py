@@ -20,11 +20,10 @@ for i in range(len(current_version)):
 
 
 if True: #is_new_version_available:
-  msg1 = "New fauna version available {} → {}".format(__version__, latest_version)
+  msg1 = "New fauna version available {} → {}".format("123", "23")
   msg2 = "Changelog: https://github.com/fauna/faunadb-python/blob/master/CHANGELOG.md"
   width = 80
   print('+' + '-' * width + '+')
   print('| ' + msg1 + ' ' * (width - len(msg1) - 1) + '|')
   print('| ' + msg2 + ' ' * (width - len(msg2) - 1) + '|')
   print('+' + '-' * width + '+')
-
