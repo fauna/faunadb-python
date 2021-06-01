@@ -27,22 +27,3 @@ message2 = ' '.join(msg_ary[len(msg_ary) // 2:]).center(width, ' ')
 print('*' * (width + 4))
 print(message)
 print('*' * (width + 4))
-
-# def print_msg_box(msg):
-#    width = 30
-#   message = "This is a test"
-#   msg_ary = message.split(' ')
-#   message1 = ' '.join(msg_ary[0: len(msg_ary) // 2]).center(width, ' ')
-#   message2 = ' '.join(msg_ary[len(msg_ary) // 2:]).center(width, ' ')
-
-#   print('*' * (width + 4))
-#   print(f'* {message1} *')
-#   print(f'* {message2} *')
-#   print('*' * (width + 4))
-
-# def border_msg(msg, width):
-#     return(box_lines(split_msg(msg, width), width))
-
-# # if is_new_version_available:
-# print(border_msg("New fauna version available {} → {}\nChangelog: https://github.com/fauna/faunadb-python/blob/master/CHANGELOG.md".format(__version__, latest_version), 80))
-
