@@ -253,6 +253,7 @@ class FaunaClient(object):
                          domain=self.domain,
                          scheme=self.scheme,
                          port=self.port,
+                         timeout=self.session.timeout,
                          observer=observer or self.observer,
                          session=self.session,
                          counter=self.counter,
