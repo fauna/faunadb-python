@@ -32,6 +32,22 @@ def print_msg_box(msg, indent=2, width=None, title=None):
     box += f'╚{"═" * (width + indent * 2)}╝'  # lower_border
     print(box)
 
-if is_new_version_available:
-  print_msg_box("New fauna version available {} → {}\nChangelog: https://github.com/fauna/faunadb-python/blob/master/CHANGELOG.md".format(__version__, latest_version))
+def box_lines(lines, width):
+    topBottomRow = "+" + "-" * width + "+"
+    middle = "\n".join("|" + x.ljust(width) + "|" for x in lines)
+    return "{0}\n{1}\n{0}".format(topBottomRow, middle)
+
+def split_line(line, width):
+    return [line[i:i+width] for i in range(0, len(line), width)]
+
+def split_msg(msg, width):
+    lines = msg.split("\n")
+    split_lines = [split_line(line, width) for line in lines]
+    return [item for sublist in split_lines for item in sublist] # flatten
+
+def border_msg(msg, width):
+    return(box_lines(split_msg(msg, width), width))
+
+# if is_new_version_available:
+print(border_msg("New fauna version available {} → {}\nChangelog: https://github.com/fauna/faunadb-python/blob/master/CHANGELOG.md".format(__version__, latest_version), 80))
 
