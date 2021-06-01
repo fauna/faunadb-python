@@ -18,36 +18,32 @@ for i in range(len(current_version)):
   if latest_version_arr[i] > current_version[i]:
     is_new_version_available = True
 
-def print_msg_box(msg, indent=2, width=None, title=None):
-    """Print message-box with optional title."""
-    lines = msg.split('\n')
-    space = " " * indent
-    if not width:
-        width = max(map(len, lines))
-    box = '{"═" * (width + indent * 2)}\n'  # upper_border
-    if title:
-        box += '║{space}{title:<{width}}{space}║\n'  # title
-        box += '║{space}{"-" * len(title):<{width}}{space}║\n'  # underscore
-    box += ''.join([f'║{space}{line:<{width}}{space}║\n' for line in lines])
-    box += '{"═" * (width + indent * 2)}'  # lower_border
-    print(box)
+width = 30
+message = "This is a test"
+msg_ary = message.split(' ')
+message1 = ' '.join(msg_ary[0: len(msg_ary) // 2]).center(width, ' ')
+message2 = ' '.join(msg_ary[len(msg_ary) // 2:]).center(width, ' ')
 
-def box_lines(lines, width):
-    topBottomRow = "+" + "-" * width + "+"
-    middle = "\n".join("|" + x.ljust(width) + "|" for x in lines)
-    return "{0}\n{1}\n{0}".format(topBottomRow, middle)
+print('*' * (width + 4))
+print(f'* {message1} *')
+print(f'* {message2} *')
+print('*' * (width + 4))
 
-def split_line(line, width):
-    return [line[i:i+width] for i in range(0, len(line), width)]
+# def print_msg_box(msg):
+#    width = 30
+#   message = "This is a test"
+#   msg_ary = message.split(' ')
+#   message1 = ' '.join(msg_ary[0: len(msg_ary) // 2]).center(width, ' ')
+#   message2 = ' '.join(msg_ary[len(msg_ary) // 2:]).center(width, ' ')
 
-def split_msg(msg, width):
-    lines = msg.split("\n")
-    split_lines = [split_line(line, width) for line in lines]
-    return [item for sublist in split_lines for item in sublist] # flatten
+#   print('*' * (width + 4))
+#   print(f'* {message1} *')
+#   print(f'* {message2} *')
+#   print('*' * (width + 4))
 
-def border_msg(msg, width):
-    return(box_lines(split_msg(msg, width), width))
+# def border_msg(msg, width):
+#     return(box_lines(split_msg(msg, width), width))
 
-# if is_new_version_available:
-print(border_msg("New fauna version available {} → {}\nChangelog: https://github.com/fauna/faunadb-python/blob/master/CHANGELOG.md".format(__version__, latest_version), 80))
+# # if is_new_version_available:
+# print(border_msg("New fauna version available {} → {}\nChangelog: https://github.com/fauna/faunadb-python/blob/master/CHANGELOG.md".format(__version__, latest_version), 80))
 
