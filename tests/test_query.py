@@ -839,6 +839,7 @@ class QueryTest(FaunaTestCase):
     self.assertEqual(self._q(query.select(["a", "b"], obj)), 1)
     self.assertEqual(self._q(query.select(["a", "c"], obj, 'default')), 'default')
     self.assertIsNone(self._q(query.select_with_default("c", obj, None)))
+    self.assertIsNone(self._q(query.select("c", obj, default=None)))
     self.assertRaises(NotFound, lambda: self._q(query.select("c", obj)))
 
   def test_select_all(self):

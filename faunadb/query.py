@@ -799,12 +799,14 @@ def contains_value(value, in_):
   """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/containsvalue>`__."""
   return _fn({"contains_value": value, "in": in_})
 
-def select(path, from_, default=None):
+_NO_DEFAULT = object()
+
+def select(path, from_, default=_NO_DEFAULT):
   """
   See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/select>`__.
   See also :py:func:`select_with_default`."""
   _dict = {"select": path, "from": from_}
-  if default is not None:
+  if default is not _NO_DEFAULT:
     _dict["default"] = default
   return _fn(_dict)
 
