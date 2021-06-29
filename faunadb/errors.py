@@ -62,6 +62,9 @@ class HttpError(FaunaError):
     errors = _get_or_raise(request_result, response, "errors")
     return [ErrorData.from_dict(error, request_result) for error in errors]
 
+  def __str__(self):
+      return repr(self.errors[0])
+
   def _get_description(self):
     return self.errors[0].description if self.errors else "(empty `errors`)"
 
@@ -131,7 +134,7 @@ class ErrorData(object):
     """
 
   def __repr__(self):
-    return "ErrorData(%s, %s, %s, %s)" % \
+    return "ErrorData(code=%s, description=%s, position=%s, failures=%s)" % \
            (repr(self.code), repr(self.description), repr(self.position), repr(self.failures))
 
   def __eq__(self, other):
@@ -166,7 +169,7 @@ class Failure(object):
     """Field of the failure in the instance."""
 
   def __repr__(self):
-    return "Failure(%s, %s, %s)" % (repr(self.code), repr(self.description), repr(self.field))
+    return "Failure(code=%s, description=%s, field=%s)" % (repr(self.code), repr(self.description), repr(self.field))
 
   def __eq__(self, other):
     return self.code == other.code and \
