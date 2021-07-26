@@ -16,7 +16,7 @@ latest_version = response.json().get('info').get('version')
 
 if latest_version > __version__:
   msg1 = "New fauna version available {} => {}".format(__version__, latest_version)
-  msg2 = "Changelog: https://github.com/fauna/faunadb-python/blob/master/CHANGELOG.md"
+  msg2 = "Changelog: https://github.com/fauna/faunadb-python/blob/main/CHANGELOG.md"
   width = 80
   print('+' + '-' * width + '+')
   print('| ' + msg1 + ' ' * (width - len(msg1) - 1) + '|')
