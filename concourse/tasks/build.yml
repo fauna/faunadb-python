@@ -1,0 +1,16 @@
+---
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    repository: python
+    tag: 3.9.5-alpine3.13
+
+inputs:
+  - name: fauna-python-repository
+
+outputs:
+  - name: fauna-python-repository/dist
+
+run:
+  path: ./fauna-python-repository/concourse/scripts/build.sh
