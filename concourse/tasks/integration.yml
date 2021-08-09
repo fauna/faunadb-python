@@ -10,14 +10,78 @@ services:
       timeout: 3s
       retries: 30
 
-  tests:
+  tests-39:
     environment:
       - FAUNA_ROOT_KEY
       - FAUNA_DOMAIN
       - FAUNA_SCHEME
       - FAUNA_PORT
     image: python:3.9.5-alpine3.13
-    container_name: mytests
+    container_name: mytests-39
+    depends_on:
+      - faunadb
+    volumes:
+      - "../../:/tmp/app"
+    working_dir: "/tmp/app"
+    command:
+      - concourse/scripts/integration-tests.sh
+
+  tests-38:
+    environment:
+      - FAUNA_ROOT_KEY
+      - FAUNA_DOMAIN
+      - FAUNA_SCHEME
+      - FAUNA_PORT
+    image: python:3.8.12-alpine3.13
+    container_name: mytests-38
+    depends_on:
+      - faunadb
+    volumes:
+      - "../../:/tmp/app"
+    working_dir: "/tmp/app"
+    command:
+      - concourse/scripts/integration-tests.sh
+
+  tests-37:
+    environment:
+      - FAUNA_ROOT_KEY
+      - FAUNA_DOMAIN
+      - FAUNA_SCHEME
+      - FAUNA_PORT
+    image: python:3.7.11-alpine3.13
+    container_name: mytests-37
+    depends_on:
+      - faunadb
+    volumes:
+      - "../../:/tmp/app"
+    working_dir: "/tmp/app"
+    command:
+      - concourse/scripts/integration-tests.sh
+
+  tests-36:
+    environment:
+      - FAUNA_ROOT_KEY
+      - FAUNA_DOMAIN
+      - FAUNA_SCHEME
+      - FAUNA_PORT
+    image: python:3.6.14-alpine3.13
+    container_name: mytests-36
+    depends_on:
+      - faunadb
+    volumes:
+      - "../../:/tmp/app"
+    working_dir: "/tmp/app"
+    command:
+      - concourse/scripts/integration-tests.sh
+
+  tests-35:
+    environment:
+      - FAUNA_ROOT_KEY
+      - FAUNA_DOMAIN
+      - FAUNA_SCHEME
+      - FAUNA_PORT
+    image: python:3.5.9-alpine3.12
+    container_name: mytests-35
     depends_on:
       - faunadb
     volumes:
