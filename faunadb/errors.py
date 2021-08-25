@@ -201,7 +201,7 @@ class ValidationError(HttpError):
         super(ValidationError, self).__init__(request_result)
         failure = self.errors[0].failures[0]
         self.code = failure.code
-        self.position = failure.position
+        self.position = failure.field
         self.description = failure.description
 
 
@@ -278,7 +278,7 @@ class ErrorData(object):
 
         return None
 
-    def __init__(self, code, description, position, failures, cause):
+    def __init__(self, code, description, position, failures, cause=None):
         self.code = code
         """Error code. See all error codes `here <https://fauna.com/documentation#errors>`__."""
         self.description = description
