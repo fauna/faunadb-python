@@ -143,37 +143,6 @@ jobs:
     steps:
       - build_and_test
 
-  core-stable-33:
-    executor:
-      name: core
-      python_version: "3.3"
-      version: stable
-    steps:
-      - build_and_test
-
-  core-nightly-33:
-    executor:
-      name: core
-      python_version: "3.3"
-      version: nightly
-    steps:
-      - build_and_test
-
-  core-stable-27:
-    executor:
-      name: core
-      python_version: "2.7"
-      version: stable
-    steps:
-      - build_and_test
-
-  core-nightly-27:
-    executor:
-      name: core
-      python_version: "2.7"
-      version: nightly
-    steps:
-      - build_and_test
 
 workflows:
   version: 2
@@ -198,12 +167,4 @@ workflows:
       - core-stable-35:
           context: faunadb-drivers
       - core-nightly-35:
-          context: faunadb-drivers
-      - core-stable-33:
-          context: faunadb-drivers
-      - core-nightly-33:
-          context: faunadb-drivers
-      - core-stable-27:
-          context: faunadb-drivers
-      - core-nightly-27:
           context: faunadb-drivers
