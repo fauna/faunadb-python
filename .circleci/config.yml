@@ -143,22 +143,6 @@ jobs:
     steps:
       - build_and_test
 
-  core-stable-34:
-    executor:
-      name: core
-      python_version: "3.4"
-      version: stable
-    steps:
-      - build_and_test
-
-  core-nightly-34:
-    executor:
-      name: core
-      python_version: "3.4"
-      version: nightly
-    steps:
-      - build_and_test
-
   core-stable-33:
     executor:
       name: core
