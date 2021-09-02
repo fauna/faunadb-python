@@ -199,10 +199,6 @@ workflows:
           context: faunadb-drivers
       - core-nightly-35:
           context: faunadb-drivers
-      - core-stable-34:
-          context: faunadb-drivers
-      - core-nightly-34:
-          context: faunadb-drivers
       - core-stable-33:
           context: faunadb-drivers
       - core-nightly-33:
