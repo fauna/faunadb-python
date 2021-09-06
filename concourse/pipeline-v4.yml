@@ -13,7 +13,7 @@ resources:
     source:
       uri: git@github.com:parkhomenko/faunadb-python.git
       branch: gh-pages
-      private_key: ((fauna/repo.key))
+      private_key: ((repo_key))
 
 jobs:
   - name: release
