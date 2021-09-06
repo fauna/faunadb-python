@@ -41,8 +41,8 @@ git clone fauna-python-repository-docs fauna-python-repository-updated-docs
 
 cd fauna-python-repository-updated-docs
 
-rm -rf ./api/*
-cp -R ../docs/* ./api/
+mkdir ./"$PACKAGE_VERSION"
+cp -R ../docs/* ./"$PACKAGE_VERSION"/api/
 
 git config --global user.email "nobody@fauna.com"
 git config --global user.name "Fauna, Inc"
