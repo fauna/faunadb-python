@@ -9,6 +9,7 @@ PACKAGE_VERSION=$(python setup.py --version)
 apk --no-progress --no-cache add gcc musl-dev python3-dev libffi-dev openssl-dev cargo
 
 pip install .
+pip install requests
 pip install pdoc3
 pdoc faunadb --html -o docs
 
