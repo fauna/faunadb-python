@@ -5,15 +5,15 @@ resources:
     icon: github
     source:
       uri: https://github.com/fauna/faunadb-python
-      branch: release-4.1.1
+      branch: main
 
   - name: fauna-python-repository-docs
     type: git
     icon: github
     source:
-      uri: git@github.com:parkhomenko/faunadb-python.git
+      uri: git@github.com:fauna/faunadb-python.git
       branch: gh-pages
-      private_key: ((repo_key))
+      private_key: ((github_repo_key))
 
 jobs:
   - name: release
@@ -35,11 +35,11 @@ jobs:
       - task: build
         file: fauna-python-repository/concourse/tasks/build.yml
 
-#      - task: publish
-#        file: fauna-python-repository/concourse/tasks/publish.yml
-#        params:
-#          TWINE_USERNAME: ((fauna/twine.username))
-#          TWINE_PASSWORD: ((fauna/twine.password))
+      - task: publish
+        file: fauna-python-repository/concourse/tasks/publish.yml
+        params:
+          TWINE_USERNAME: ((fauna/twine.username))
+          TWINE_PASSWORD: ((fauna/twine.password))
 
       - task: publish-docs
         file: fauna-python-repository/concourse/tasks/publish-docs.yml
