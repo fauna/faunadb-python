@@ -9,6 +9,7 @@ PACKAGE_VERSION=$(python setup.py --version)
 apk --no-progress --no-cache add gcc musl-dev python3-dev libffi-dev openssl-dev cargo
 
 pip install .
+pip install requests
 pip install pdoc3
 pdoc faunadb --html -o docs
 
@@ -41,8 +42,11 @@ git clone fauna-python-repository-docs fauna-python-repository-updated-docs
 
 cd fauna-python-repository-updated-docs
 
-rm -rf ./api/*
-cp -R ../docs/* ./api/
+mkdir "$PACKAGE_VERSION"
+cd "$PACKAGE_VERSION"
+mkdir api
+cd ..
+cp -R ../docs/* ./"$PACKAGE_VERSION"/api/
 
 git config --global user.email "nobody@fauna.com"
 git config --global user.name "Fauna, Inc"

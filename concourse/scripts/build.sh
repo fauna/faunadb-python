@@ -4,4 +4,5 @@ set -eou
 
 cd ./fauna-python-repository
 
-python setup.py bdist_wheel --universal
+pip install codecov
+coverage run setup.py bdist_wheel --universal

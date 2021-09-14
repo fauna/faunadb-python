@@ -1,13 +1,12 @@
 from __future__ import division
-from datetime import date, datetime
-from time import sleep, time
-from threading import Thread
 
-from faunadb.errors import BadRequest, NotFound, FaunaError
-from faunadb.objects import FaunaTime,  Ref, SetRef, _Expr, Native, Query
+from threading import Thread
+from time import sleep
+
 from faunadb import query
-from faunadb.streams import Connection, Subscription, EventDispatcher
+from faunadb.errors import BadRequest, FaunaError
 from tests.helpers import FaunaTestCase
+
 
 def _on_unhandled_error(event):
     if hasattr(event, "data") and isinstance(event.event, Exception):
