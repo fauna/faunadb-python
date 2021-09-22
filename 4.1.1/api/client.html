@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>faunadb.client API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>faunadb.client</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import os
+import platform
+import sys
+import threading
+# pylint: disable=redefined-builtin
+from builtins import object
+from time import time
+
+from requests import Request, Session, get
+from requests.adapters import HTTPAdapter
+from requests.auth import AuthBase
+
+from faunadb import __api_version__ as api_version
+from faunadb import __version__ as pkg_version
+from faunadb._json import parse_json_or_none, to_json
+from faunadb.errors import FaunaError, UnexpectedError, _get_or_raise
+from faunadb.query import _wrap
+from faunadb.request_result import RequestResult
+from faunadb.streams import Subscription
+
+
+class HTTPBearerAuth(AuthBase):
+    &#34;&#34;&#34;Creates a bearer base auth object&#34;&#34;&#34;
+
+    def auth_header(self):
+        return &#34;Bearer {}&#34;.format(self.secret)
+
+    def __init__(self, secret):
+        self.secret = secret
+
+    def __eq__(self, other):
+        return self.secret == getattr(other, &#39;secret&#39;, None)
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __call__(self, r):
+        r.headers[&#39;Authorization&#39;] = self.auth_header()
+        return r
+
+
+class RuntimeEnvHeader:
+    def __init__(self):
+        self.pythonVersion = &#34;{0}.{1}.{2}-{3}&#34;.format(*sys.version_info)
+        self.driverVersion = pkg_version
+        self.env = self.getRuntimeEnv()
+        self.os = &#34;{0}-{1}&#34;.format(platform.system(), platform.release())
+
+    def getRuntimeEnv(self):
+        env = [
+            {
+                &#34;name&#34;: &#34;Netlify&#34;,
+                &#34;check&#34;: lambda: &#34;NETLIFY_IMAGES_CDN_DOMAIN&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;Vercel&#34;,
+                &#34;check&#34;: lambda: &#34;VERCEL&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;Heroku&#34;,
+                &#34;check&#34;: lambda: &#34;PATH&#34; in os.environ and &#34;.heroku&#34; in os.environ[&#34;PATH&#34;]
+            },
+            {
+                &#34;name&#34;: &#34;AWS Lambda&#34;,
+                &#34;check&#34;: lambda: &#34;AWS_LAMBDA_FUNCTION_VERSION&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;GCP Cloud Functions&#34;,
+                &#34;check&#34;: lambda: &#34;_&#34; in os.environ and &#34;google&#34; in os.environ[&#34;_&#34;]
+            },
+            {
+                &#34;name&#34;: &#34;GCP Compute Instances&#34;,
+                &#34;check&#34;: lambda: &#34;GOOGLE_CLOUD_PROJECT&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;Azure Cloud Functions&#34;,
+                &#34;check&#34;: lambda: &#34;WEBSITE_FUNCTIONS_AZUREMONITOR_CATEGORIES&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;Azure Compute&#34;,
+                &#34;check&#34;: lambda: &#34;ORYX_ENV_TYPE&#34; in os.environ and &#34;WEBSITE_INSTANCE_ID&#34; in os.environ and os.environ[&#34;ORYX_ENV_TYPE&#34;] == &#34;AppService&#34;
+            }
+        ]
+
+        try:
+            recognized = next(e for e in env if e.get(&#34;check&#34;)())
+            if recognized is not None:
+                return recognized.get(&#34;name&#34;)
+        except:
+            return &#34;Unknown&#34;
+
+    def __str__(self):
+        return &#34;driver=python-{0}; runtime=python-{1} env={2}; os={3}&#34;.format(
+            self.driverVersion, self.pythonVersion,
+            self.env, self.os
+        ).lower()
+
+
+class _LastTxnTime(object):
+    &#34;&#34;&#34;Wraps tracking the last transaction time supplied from the database.&#34;&#34;&#34;
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._time = None
+
+    @property
+    def time(self):
+        &#34;&#34;&#34;Produces the last transaction time, or, None if not yet updated.&#34;&#34;&#34;
+        with self._lock:
+            return self._time
+
+    @property
+    def request_header(self):
+        &#34;&#34;&#34;Produces a dictionary with a non-zero `X-Last-Txn-Time` header; or,
+        if one has not yet been set, the empty header dictionary.&#34;&#34;&#34;
+        t = self.time
+        if t is None:
+            return {}
+        return {&#34;X-Last-Txn-Time&#34;: str(t)}
+
+    def update_txn_time(self, new_txn_time):
+        &#34;&#34;&#34;Updates the internal transaction time.
+        In order to maintain a monotonically-increasing value, `newTxnTime`
+        is discarded if it is behind the current timestamp.&#34;&#34;&#34;
+        with self._lock:
+            if self._time is None:
+                self._time = new_txn_time
+            else:
+                self._time = max(self._time, new_txn_time)
+
+
+class _Counter(object):
+    def __init__(self, init_value=0):
+        self.lock = threading.Lock()
+        self.counter = init_value
+
+    def __str__(self):
+        return &#34;Counter(%s)&#34; % self.counter
+
+    def get_and_increment(self):
+        with self.lock:
+            counter = self.counter
+            self.counter += 1
+            return counter
+
+    def decrement(self):
+        with self.lock:
+            self.counter -= 1
+            return self.counter
+
+
+class FaunaClient(object):
+    &#34;&#34;&#34;
+    Directly communicates with FaunaDB via JSON.
+
+    For data sent to the server, the ``to_fauna_json`` method will be called on any values.
+    It is encouraged to pass e.g. :any:`Ref` objects instead of raw JSON data.
+
+    All methods return a converted JSON response.
+    This is a dict containing lists, ints, floats, strings, and other dicts.
+    Any :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, or :class:`datetime.date`
+    values in it will also be parsed.
+    (So instead of ``{&#34;@ref&#34;: {&#34;id&#34;: &#34;frogs&#34;, &#34;class&#34;: {&#34;@ref&#34;: {&#34;id&#34;: &#34;classes&#34;}}}}``,
+    you will get ``Ref(&#34;frogs&#34;, Native.CLASSES)``.)
+    &#34;&#34;&#34;
+
+    # pylint: disable=too-many-arguments, too-many-instance-attributes
+    def __init__(
+            self,
+            secret,
+            domain=&#34;db.fauna.com&#34;,
+            scheme=&#34;https&#34;,
+            port=None,
+            timeout=60,
+            observer=None,
+            pool_connections=10,
+            pool_maxsize=10,
+            **kwargs):
+        &#34;&#34;&#34;
+        :param secret:
+          Auth token for the FaunaDB server.
+        :param domain:
+          Base URL for the FaunaDB server.
+        :param scheme:
+          ``&#34;http&#34;`` or ``&#34;https&#34;``.
+        :param port:
+          Port of the FaunaDB server.
+        :param timeout:
+          Read timeout in seconds.
+        :param observer:
+          Callback that will be passed a :any:`RequestResult` after every completed request.
+        :param pool_connections:
+          The number of connection pools to cache.
+        :param pool_maxsize:
+          The maximum number of connections to save in the pool.
+        &#34;&#34;&#34;
+
+        self.check_new_version()
+
+        self.domain = domain
+        self.scheme = scheme
+        self.port = (443 if scheme ==
+                     &#34;https&#34; else 80) if port is None else port
+
+        self.auth = HTTPBearerAuth(secret)
+        self.base_url = &#34;%s://%s:%s&#34; % (self.scheme, self.domain, self.port)
+        self.observer = observer
+
+        self.pool_connections = pool_connections
+        self.pool_maxsize = pool_maxsize
+
+        self._last_txn_time = kwargs.get(&#39;last_txn_time&#39;) or _LastTxnTime()
+        self._query_timeout_ms = kwargs.get(&#39;query_timeout_ms&#39;)
+        if self._query_timeout_ms is not None:
+            self._query_timeout_ms = int(self._query_timeout_ms)
+
+        if (&#39;session&#39; not in kwargs) or (&#39;counter&#39; not in kwargs):
+            self.session = Session()
+            self.session.mount(&#39;https://&#39;, HTTPAdapter(pool_connections=pool_connections,
+                                                       pool_maxsize=pool_maxsize))
+            self.session.mount(&#39;http://&#39;, HTTPAdapter(pool_connections=pool_connections,
+                                                      pool_maxsize=pool_maxsize))
+            self.counter = _Counter(1)
+
+            self.session.headers.update({
+                &#34;Accept-Encoding&#34;: &#34;gzip&#34;,
+                &#34;Content-Type&#34;: &#34;application/json;charset=utf-8&#34;,
+                &#34;X-Fauna-Driver&#34;: &#34;python&#34;,
+                &#34;X-FaunaDB-API-Version&#34;: api_version,
+                &#34;X-Driver-Env&#34;: str(RuntimeEnvHeader())
+            })
+            if self._query_timeout_ms is not None:
+                self.session.headers[&#34;X-Query-Timeout&#34;] = str(
+                    self._query_timeout_ms)
+            self.session.timeout = timeout
+        else:
+            self.session = kwargs[&#39;session&#39;]
+            self.counter = kwargs[&#39;counter&#39;]
+
+    def check_new_version(self):
+        response = get(&#39;https://pypi.org/pypi/faunadb/json&#39;)
+        latest_version = response.json().get(&#39;info&#39;).get(&#39;version&#39;)
+
+        if latest_version &gt; pkg_version:
+            msg1 = &#34;New fauna version available {} =&gt; {}&#34;.format(
+                pkg_version, latest_version)
+            msg2 = &#34;Changelog: https://github.com/fauna/faunadb-python/blob/main/CHANGELOG.md&#34;
+            width = 80
+            print(&#39;+&#39; + &#39;-&#39; * width + &#39;+&#39;)
+            print(&#39;| &#39; + msg1 + &#39; &#39; * (width - len(msg1) - 1) + &#39;|&#39;)
+            print(&#39;| &#39; + msg2 + &#39; &#39; * (width - len(msg2) - 1) + &#39;|&#39;)
+            print(&#39;+&#39; + &#39;-&#39; * width + &#39;+&#39;)
+
+    def sync_last_txn_time(self, new_txn_time):
+        &#34;&#34;&#34;
+        Sync the freshest timestamp seen by this client.
+
+        This has no effect if staler than currently stored timestamp.
+        WARNING: This should be used only when coordinating timestamps across
+                multiple clients. Moving the timestamp arbitrarily forward into
+                the future will cause transactions to stall.
+
+        :param new_txn_time: the new seen transaction time.
+        &#34;&#34;&#34;
+        self._last_txn_time.update_txn_time(new_txn_time)
+
+    def get_last_txn_time(self):
+        &#34;&#34;&#34;
+        Get the freshest timestamp reported to this client.
+        :return:
+        &#34;&#34;&#34;
+        return self._last_txn_time.time
+
+    def get_query_timeout(self):
+        &#34;&#34;&#34;
+        Get the query timeout for all queries.
+        &#34;&#34;&#34;
+        return self._query_timeout_ms
+
+    def __del__(self):
+        if self.counter.decrement() == 0:
+            self.session.close()
+
+    def query(self, expression, timeout_millis=None):
+        &#34;&#34;&#34;
+        Use the FaunaDB query API.
+
+        :param expression: A query. See :doc:`query` for information on queries.
+        :param timeout_millis: Query timeout in milliseconds.
+        :return: Converted JSON response.
+        &#34;&#34;&#34;
+        return self._execute(&#34;POST&#34;, &#34;&#34;, _wrap(expression), with_txn_time=True, query_timeout_ms=timeout_millis)
+
+    def stream(self, expression, options=None, on_start=None, on_error=None, on_version=None, on_history=None):
+        &#34;&#34;&#34;
+        Creates a stream Subscription to the result of the given read-only expression. When
+        executed.
+
+        The subscription returned by this method does not issue any requests until
+        the subscription&#39;s start method is called. Make sure to
+        subscribe to the events of interest, otherwise the received events are simply
+        ignored.
+
+        :param expression:   A read-only expression.
+        :param    options:   Object that configures the stream subscription. E.g set fields to return
+        :param   on_start:   Callback for the stream&#39;s start event.
+        :param   on_error:   Callback for the stream&#39;s error event.
+        :param   on_version: Callback for the stream&#39;s version events.
+        :param   on_history: Callback for the stream&#39;s history_rewrite events.
+        &#34;&#34;&#34;
+        subscription = Subscription(self, expression, options)
+        subscription.on(&#39;start&#39;, on_start)
+        subscription.on(&#39;error&#39;, on_error)
+        subscription.on(&#39;version&#39;, on_version)
+        subscription.on(&#39;history_rewrite&#39;, on_history)
+        return subscription
+
+    def ping(self, scope=None, timeout=None):
+        &#34;&#34;&#34;
+        Ping FaunaDB.
+        &#34;&#34;&#34;
+        return self._execute(&#34;GET&#34;, &#34;ping&#34;, query={&#34;scope&#34;: scope, &#34;timeout&#34;: timeout})
+
+    def new_session_client(self, secret, observer=None):
+        &#34;&#34;&#34;
+        Create a new client from the existing config with a given secret.
+        The returned client share its parent underlying resources.
+
+        :param secret:
+          Credentials to use when sending requests.
+        :param observer:
+          Callback that will be passed a :any:`RequestResult` after every completed request.
+        :return:
+        &#34;&#34;&#34;
+        if self.counter.get_and_increment() &gt; 0:
+            return FaunaClient(secret=secret,
+                               domain=self.domain,
+                               scheme=self.scheme,
+                               port=self.port,
+                               timeout=self.session.timeout,
+                               observer=observer or self.observer,
+                               session=self.session,
+                               counter=self.counter,
+                               pool_connections=self.pool_connections,
+                               pool_maxsize=self.pool_maxsize,
+                               last_txn_time=self._last_txn_time,
+                               query_timeout_ms=self._query_timeout_ms)
+        else:
+            raise UnexpectedError(
+                &#34;Cannnot create a session client from a closed session&#34;, None)
+
+    def _execute(self, action, path, data=None, query=None, with_txn_time=False, query_timeout_ms=None):
+        &#34;&#34;&#34;Performs an HTTP action, logs it, and looks for errors.&#34;&#34;&#34;
+        if query is not None:
+            query = {k: v for k, v in query.items() if v is not None}
+
+        headers = {}
+
+        if query_timeout_ms is not None:
+            headers[&#34;X-Query-Timeout&#34;] = str(query_timeout_ms)
+
+        if with_txn_time:
+            headers.update(self._last_txn_time.request_header)
+
+        start_time = time()
+        response = self._perform_request(action, path, data, query, headers)
+        end_time = time()
+
+        if with_txn_time:
+            if &#34;X-Txn-Time&#34; in response.headers:
+                new_txn_time = int(response.headers[&#34;X-Txn-Time&#34;])
+                self.sync_last_txn_time(new_txn_time)
+
+        response_raw = response.text
+        response_content = parse_json_or_none(response_raw)
+
+        request_result = RequestResult(
+            action, path, query, data,
+            response_raw, response_content, response.status_code, response.headers,
+            start_time, end_time)
+
+        if self.observer is not None:
+            self.observer(request_result)
+
+        if response_content is None:
+            raise UnexpectedError(&#34;Invalid JSON.&#34;, request_result)
+
+        FaunaError.raise_for_status_code(request_result)
+        return _get_or_raise(request_result, response_content, &#34;resource&#34;)
+
+    def _perform_request(self, action, path, data, query, headers):
+        &#34;&#34;&#34;Performs an HTTP action.&#34;&#34;&#34;
+        url = self.base_url + &#34;/&#34; + path
+        req = Request(action, url, params=query, data=to_json(
+            data), auth=self.auth, headers=headers)
+        return self.session.send(self.session.prepare_request(req))</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="faunadb.client.FaunaClient"><code class="flex name class">
+<span>class <span class="ident">FaunaClient</span></span>
+<span>(</span><span>secret, domain='db.fauna.com', scheme='https', port=None, timeout=60, observer=None, pool_connections=10, pool_maxsize=10, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Directly communicates with FaunaDB via JSON.</p>
+<p>For data sent to the server, the <code>to_fauna_json</code> method will be called on any values.
+It is encouraged to pass e.g. :any:<code>Ref</code> objects instead of raw JSON data.</p>
+<p>All methods return a converted JSON response.
+This is a dict containing lists, ints, floats, strings, and other dicts.
+Any :any:<code>Ref</code>, :any:<code>SetRef</code>, :any:<code>FaunaTime</code>, or :class:<code>datetime.date</code>
+values in it will also be parsed.
+(So instead of <code>{"@ref": {"id": "frogs", "class": {"@ref": {"id": "classes"}}}}</code>,
+you will get <code>Ref("frogs", Native.CLASSES)</code>.)</p>
+<p>:param secret:
+Auth token for the FaunaDB server.
+:param domain:
+Base URL for the FaunaDB server.
+:param scheme:
+<code>"http"</code> or <code>"https"</code>.
+:param port:
+Port of the FaunaDB server.
+:param timeout:
+Read timeout in seconds.
+:param observer:
+Callback that will be passed a :any:<code>RequestResult</code> after every completed request.
+:param pool_connections:
+The number of connection pools to cache.
+:param pool_maxsize:
+The maximum number of connections to save in the pool.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FaunaClient(object):
+    &#34;&#34;&#34;
+    Directly communicates with FaunaDB via JSON.
+
+    For data sent to the server, the ``to_fauna_json`` method will be called on any values.
+    It is encouraged to pass e.g. :any:`Ref` objects instead of raw JSON data.
+
+    All methods return a converted JSON response.
+    This is a dict containing lists, ints, floats, strings, and other dicts.
+    Any :any:`Ref`, :any:`SetRef`, :any:`FaunaTime`, or :class:`datetime.date`
+    values in it will also be parsed.
+    (So instead of ``{&#34;@ref&#34;: {&#34;id&#34;: &#34;frogs&#34;, &#34;class&#34;: {&#34;@ref&#34;: {&#34;id&#34;: &#34;classes&#34;}}}}``,
+    you will get ``Ref(&#34;frogs&#34;, Native.CLASSES)``.)
+    &#34;&#34;&#34;
+
+    # pylint: disable=too-many-arguments, too-many-instance-attributes
+    def __init__(
+            self,
+            secret,
+            domain=&#34;db.fauna.com&#34;,
+            scheme=&#34;https&#34;,
+            port=None,
+            timeout=60,
+            observer=None,
+            pool_connections=10,
+            pool_maxsize=10,
+            **kwargs):
+        &#34;&#34;&#34;
+        :param secret:
+          Auth token for the FaunaDB server.
+        :param domain:
+          Base URL for the FaunaDB server.
+        :param scheme:
+          ``&#34;http&#34;`` or ``&#34;https&#34;``.
+        :param port:
+          Port of the FaunaDB server.
+        :param timeout:
+          Read timeout in seconds.
+        :param observer:
+          Callback that will be passed a :any:`RequestResult` after every completed request.
+        :param pool_connections:
+          The number of connection pools to cache.
+        :param pool_maxsize:
+          The maximum number of connections to save in the pool.
+        &#34;&#34;&#34;
+
+        self.check_new_version()
+
+        self.domain = domain
+        self.scheme = scheme
+        self.port = (443 if scheme ==
+                     &#34;https&#34; else 80) if port is None else port
+
+        self.auth = HTTPBearerAuth(secret)
+        self.base_url = &#34;%s://%s:%s&#34; % (self.scheme, self.domain, self.port)
+        self.observer = observer
+
+        self.pool_connections = pool_connections
+        self.pool_maxsize = pool_maxsize
+
+        self._last_txn_time = kwargs.get(&#39;last_txn_time&#39;) or _LastTxnTime()
+        self._query_timeout_ms = kwargs.get(&#39;query_timeout_ms&#39;)
+        if self._query_timeout_ms is not None:
+            self._query_timeout_ms = int(self._query_timeout_ms)
+
+        if (&#39;session&#39; not in kwargs) or (&#39;counter&#39; not in kwargs):
+            self.session = Session()
+            self.session.mount(&#39;https://&#39;, HTTPAdapter(pool_connections=pool_connections,
+                                                       pool_maxsize=pool_maxsize))
+            self.session.mount(&#39;http://&#39;, HTTPAdapter(pool_connections=pool_connections,
+                                                      pool_maxsize=pool_maxsize))
+            self.counter = _Counter(1)
+
+            self.session.headers.update({
+                &#34;Accept-Encoding&#34;: &#34;gzip&#34;,
+                &#34;Content-Type&#34;: &#34;application/json;charset=utf-8&#34;,
+                &#34;X-Fauna-Driver&#34;: &#34;python&#34;,
+                &#34;X-FaunaDB-API-Version&#34;: api_version,
+                &#34;X-Driver-Env&#34;: str(RuntimeEnvHeader())
+            })
+            if self._query_timeout_ms is not None:
+                self.session.headers[&#34;X-Query-Timeout&#34;] = str(
+                    self._query_timeout_ms)
+            self.session.timeout = timeout
+        else:
+            self.session = kwargs[&#39;session&#39;]
+            self.counter = kwargs[&#39;counter&#39;]
+
+    def check_new_version(self):
+        response = get(&#39;https://pypi.org/pypi/faunadb/json&#39;)
+        latest_version = response.json().get(&#39;info&#39;).get(&#39;version&#39;)
+
+        if latest_version &gt; pkg_version:
+            msg1 = &#34;New fauna version available {} =&gt; {}&#34;.format(
+                pkg_version, latest_version)
+            msg2 = &#34;Changelog: https://github.com/fauna/faunadb-python/blob/main/CHANGELOG.md&#34;
+            width = 80
+            print(&#39;+&#39; + &#39;-&#39; * width + &#39;+&#39;)
+            print(&#39;| &#39; + msg1 + &#39; &#39; * (width - len(msg1) - 1) + &#39;|&#39;)
+            print(&#39;| &#39; + msg2 + &#39; &#39; * (width - len(msg2) - 1) + &#39;|&#39;)
+            print(&#39;+&#39; + &#39;-&#39; * width + &#39;+&#39;)
+
+    def sync_last_txn_time(self, new_txn_time):
+        &#34;&#34;&#34;
+        Sync the freshest timestamp seen by this client.
+
+        This has no effect if staler than currently stored timestamp.
+        WARNING: This should be used only when coordinating timestamps across
+                multiple clients. Moving the timestamp arbitrarily forward into
+                the future will cause transactions to stall.
+
+        :param new_txn_time: the new seen transaction time.
+        &#34;&#34;&#34;
+        self._last_txn_time.update_txn_time(new_txn_time)
+
+    def get_last_txn_time(self):
+        &#34;&#34;&#34;
+        Get the freshest timestamp reported to this client.
+        :return:
+        &#34;&#34;&#34;
+        return self._last_txn_time.time
+
+    def get_query_timeout(self):
+        &#34;&#34;&#34;
+        Get the query timeout for all queries.
+        &#34;&#34;&#34;
+        return self._query_timeout_ms
+
+    def __del__(self):
+        if self.counter.decrement() == 0:
+            self.session.close()
+
+    def query(self, expression, timeout_millis=None):
+        &#34;&#34;&#34;
+        Use the FaunaDB query API.
+
+        :param expression: A query. See :doc:`query` for information on queries.
+        :param timeout_millis: Query timeout in milliseconds.
+        :return: Converted JSON response.
+        &#34;&#34;&#34;
+        return self._execute(&#34;POST&#34;, &#34;&#34;, _wrap(expression), with_txn_time=True, query_timeout_ms=timeout_millis)
+
+    def stream(self, expression, options=None, on_start=None, on_error=None, on_version=None, on_history=None):
+        &#34;&#34;&#34;
+        Creates a stream Subscription to the result of the given read-only expression. When
+        executed.
+
+        The subscription returned by this method does not issue any requests until
+        the subscription&#39;s start method is called. Make sure to
+        subscribe to the events of interest, otherwise the received events are simply
+        ignored.
+
+        :param expression:   A read-only expression.
+        :param    options:   Object that configures the stream subscription. E.g set fields to return
+        :param   on_start:   Callback for the stream&#39;s start event.
+        :param   on_error:   Callback for the stream&#39;s error event.
+        :param   on_version: Callback for the stream&#39;s version events.
+        :param   on_history: Callback for the stream&#39;s history_rewrite events.
+        &#34;&#34;&#34;
+        subscription = Subscription(self, expression, options)
+        subscription.on(&#39;start&#39;, on_start)
+        subscription.on(&#39;error&#39;, on_error)
+        subscription.on(&#39;version&#39;, on_version)
+        subscription.on(&#39;history_rewrite&#39;, on_history)
+        return subscription
+
+    def ping(self, scope=None, timeout=None):
+        &#34;&#34;&#34;
+        Ping FaunaDB.
+        &#34;&#34;&#34;
+        return self._execute(&#34;GET&#34;, &#34;ping&#34;, query={&#34;scope&#34;: scope, &#34;timeout&#34;: timeout})
+
+    def new_session_client(self, secret, observer=None):
+        &#34;&#34;&#34;
+        Create a new client from the existing config with a given secret.
+        The returned client share its parent underlying resources.
+
+        :param secret:
+          Credentials to use when sending requests.
+        :param observer:
+          Callback that will be passed a :any:`RequestResult` after every completed request.
+        :return:
+        &#34;&#34;&#34;
+        if self.counter.get_and_increment() &gt; 0:
+            return FaunaClient(secret=secret,
+                               domain=self.domain,
+                               scheme=self.scheme,
+                               port=self.port,
+                               timeout=self.session.timeout,
+                               observer=observer or self.observer,
+                               session=self.session,
+                               counter=self.counter,
+                               pool_connections=self.pool_connections,
+                               pool_maxsize=self.pool_maxsize,
+                               last_txn_time=self._last_txn_time,
+                               query_timeout_ms=self._query_timeout_ms)
+        else:
+            raise UnexpectedError(
+                &#34;Cannnot create a session client from a closed session&#34;, None)
+
+    def _execute(self, action, path, data=None, query=None, with_txn_time=False, query_timeout_ms=None):
+        &#34;&#34;&#34;Performs an HTTP action, logs it, and looks for errors.&#34;&#34;&#34;
+        if query is not None:
+            query = {k: v for k, v in query.items() if v is not None}
+
+        headers = {}
+
+        if query_timeout_ms is not None:
+            headers[&#34;X-Query-Timeout&#34;] = str(query_timeout_ms)
+
+        if with_txn_time:
+            headers.update(self._last_txn_time.request_header)
+
+        start_time = time()
+        response = self._perform_request(action, path, data, query, headers)
+        end_time = time()
+
+        if with_txn_time:
+            if &#34;X-Txn-Time&#34; in response.headers:
+                new_txn_time = int(response.headers[&#34;X-Txn-Time&#34;])
+                self.sync_last_txn_time(new_txn_time)
+
+        response_raw = response.text
+        response_content = parse_json_or_none(response_raw)
+
+        request_result = RequestResult(
+            action, path, query, data,
+            response_raw, response_content, response.status_code, response.headers,
+            start_time, end_time)
+
+        if self.observer is not None:
+            self.observer(request_result)
+
+        if response_content is None:
+            raise UnexpectedError(&#34;Invalid JSON.&#34;, request_result)
+
+        FaunaError.raise_for_status_code(request_result)
+        return _get_or_raise(request_result, response_content, &#34;resource&#34;)
+
+    def _perform_request(self, action, path, data, query, headers):
+        &#34;&#34;&#34;Performs an HTTP action.&#34;&#34;&#34;
+        url = self.base_url + &#34;/&#34; + path
+        req = Request(action, url, params=query, data=to_json(
+            data), auth=self.auth, headers=headers)
+        return self.session.send(self.session.prepare_request(req))</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="faunadb.client.FaunaClient.check_new_version"><code class="name flex">
+<span>def <span class="ident">check_new_version</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_new_version(self):
+    response = get(&#39;https://pypi.org/pypi/faunadb/json&#39;)
+    latest_version = response.json().get(&#39;info&#39;).get(&#39;version&#39;)
+
+    if latest_version &gt; pkg_version:
+        msg1 = &#34;New fauna version available {} =&gt; {}&#34;.format(
+            pkg_version, latest_version)
+        msg2 = &#34;Changelog: https://github.com/fauna/faunadb-python/blob/main/CHANGELOG.md&#34;
+        width = 80
+        print(&#39;+&#39; + &#39;-&#39; * width + &#39;+&#39;)
+        print(&#39;| &#39; + msg1 + &#39; &#39; * (width - len(msg1) - 1) + &#39;|&#39;)
+        print(&#39;| &#39; + msg2 + &#39; &#39; * (width - len(msg2) - 1) + &#39;|&#39;)
+        print(&#39;+&#39; + &#39;-&#39; * width + &#39;+&#39;)</code></pre>
+</details>
+</dd>
+<dt id="faunadb.client.FaunaClient.get_last_txn_time"><code class="name flex">
+<span>def <span class="ident">get_last_txn_time</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the freshest timestamp reported to this client.
+:return:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_last_txn_time(self):
+    &#34;&#34;&#34;
+    Get the freshest timestamp reported to this client.
+    :return:
+    &#34;&#34;&#34;
+    return self._last_txn_time.time</code></pre>
+</details>
+</dd>
+<dt id="faunadb.client.FaunaClient.get_query_timeout"><code class="name flex">
+<span>def <span class="ident">get_query_timeout</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the query timeout for all queries.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_query_timeout(self):
+    &#34;&#34;&#34;
+    Get the query timeout for all queries.
+    &#34;&#34;&#34;
+    return self._query_timeout_ms</code></pre>
+</details>
+</dd>
+<dt id="faunadb.client.FaunaClient.new_session_client"><code class="name flex">
+<span>def <span class="ident">new_session_client</span></span>(<span>self, secret, observer=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new client from the existing config with a given secret.
+The returned client share its parent underlying resources.</p>
+<p>:param secret:
+Credentials to use when sending requests.
+:param observer:
+Callback that will be passed a :any:<code>RequestResult</code> after every completed request.
+:return:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_session_client(self, secret, observer=None):
+    &#34;&#34;&#34;
+    Create a new client from the existing config with a given secret.
+    The returned client share its parent underlying resources.
+
+    :param secret:
+      Credentials to use when sending requests.
+    :param observer:
+      Callback that will be passed a :any:`RequestResult` after every completed request.
+    :return:
+    &#34;&#34;&#34;
+    if self.counter.get_and_increment() &gt; 0:
+        return FaunaClient(secret=secret,
+                           domain=self.domain,
+                           scheme=self.scheme,
+                           port=self.port,
+                           timeout=self.session.timeout,
+                           observer=observer or self.observer,
+                           session=self.session,
+                           counter=self.counter,
+                           pool_connections=self.pool_connections,
+                           pool_maxsize=self.pool_maxsize,
+                           last_txn_time=self._last_txn_time,
+                           query_timeout_ms=self._query_timeout_ms)
+    else:
+        raise UnexpectedError(
+            &#34;Cannnot create a session client from a closed session&#34;, None)</code></pre>
+</details>
+</dd>
+<dt id="faunadb.client.FaunaClient.ping"><code class="name flex">
+<span>def <span class="ident">ping</span></span>(<span>self, scope=None, timeout=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Ping FaunaDB.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ping(self, scope=None, timeout=None):
+    &#34;&#34;&#34;
+    Ping FaunaDB.
+    &#34;&#34;&#34;
+    return self._execute(&#34;GET&#34;, &#34;ping&#34;, query={&#34;scope&#34;: scope, &#34;timeout&#34;: timeout})</code></pre>
+</details>
+</dd>
+<dt id="faunadb.client.FaunaClient.query"><code class="name flex">
+<span>def <span class="ident">query</span></span>(<span>self, expression, timeout_millis=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Use the FaunaDB query API.</p>
+<p>:param expression: A query. See :doc:<code>query</code> for information on queries.
+:param timeout_millis: Query timeout in milliseconds.
+:return: Converted JSON response.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query(self, expression, timeout_millis=None):
+    &#34;&#34;&#34;
+    Use the FaunaDB query API.
+
+    :param expression: A query. See :doc:`query` for information on queries.
+    :param timeout_millis: Query timeout in milliseconds.
+    :return: Converted JSON response.
+    &#34;&#34;&#34;
+    return self._execute(&#34;POST&#34;, &#34;&#34;, _wrap(expression), with_txn_time=True, query_timeout_ms=timeout_millis)</code></pre>
+</details>
+</dd>
+<dt id="faunadb.client.FaunaClient.stream"><code class="name flex">
+<span>def <span class="ident">stream</span></span>(<span>self, expression, options=None, on_start=None, on_error=None, on_version=None, on_history=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a stream Subscription to the result of the given read-only expression. When
+executed.</p>
+<p>The subscription returned by this method does not issue any requests until
+the subscription's start method is called. Make sure to
+subscribe to the events of interest, otherwise the received events are simply
+ignored.</p>
+<p>:param expression:
+A read-only expression.
+:param
+options:
+Object that configures the stream subscription. E.g set fields to return
+:param
+on_start:
+Callback for the stream's start event.
+:param
+on_error:
+Callback for the stream's error event.
+:param
+on_version: Callback for the stream's version events.
+:param
+on_history: Callback for the stream's history_rewrite events.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def stream(self, expression, options=None, on_start=None, on_error=None, on_version=None, on_history=None):
+    &#34;&#34;&#34;
+    Creates a stream Subscription to the result of the given read-only expression. When
+    executed.
+
+    The subscription returned by this method does not issue any requests until
+    the subscription&#39;s start method is called. Make sure to
+    subscribe to the events of interest, otherwise the received events are simply
+    ignored.
+
+    :param expression:   A read-only expression.
+    :param    options:   Object that configures the stream subscription. E.g set fields to return
+    :param   on_start:   Callback for the stream&#39;s start event.
+    :param   on_error:   Callback for the stream&#39;s error event.
+    :param   on_version: Callback for the stream&#39;s version events.
+    :param   on_history: Callback for the stream&#39;s history_rewrite events.
+    &#34;&#34;&#34;
+    subscription = Subscription(self, expression, options)
+    subscription.on(&#39;start&#39;, on_start)
+    subscription.on(&#39;error&#39;, on_error)
+    subscription.on(&#39;version&#39;, on_version)
+    subscription.on(&#39;history_rewrite&#39;, on_history)
+    return subscription</code></pre>
+</details>
+</dd>
+<dt id="faunadb.client.FaunaClient.sync_last_txn_time"><code class="name flex">
+<span>def <span class="ident">sync_last_txn_time</span></span>(<span>self, new_txn_time)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sync the freshest timestamp seen by this client.</p>
+<p>This has no effect if staler than currently stored timestamp.
+WARNING: This should be used only when coordinating timestamps across
+multiple clients. Moving the timestamp arbitrarily forward into
+the future will cause transactions to stall.</p>
+<p>:param new_txn_time: the new seen transaction time.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sync_last_txn_time(self, new_txn_time):
+    &#34;&#34;&#34;
+    Sync the freshest timestamp seen by this client.
+
+    This has no effect if staler than currently stored timestamp.
+    WARNING: This should be used only when coordinating timestamps across
+            multiple clients. Moving the timestamp arbitrarily forward into
+            the future will cause transactions to stall.
+
+    :param new_txn_time: the new seen transaction time.
+    &#34;&#34;&#34;
+    self._last_txn_time.update_txn_time(new_txn_time)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="faunadb.client.HTTPBearerAuth"><code class="flex name class">
+<span>class <span class="ident">HTTPBearerAuth</span></span>
+<span>(</span><span>secret)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a bearer base auth object</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class HTTPBearerAuth(AuthBase):
+    &#34;&#34;&#34;Creates a bearer base auth object&#34;&#34;&#34;
+
+    def auth_header(self):
+        return &#34;Bearer {}&#34;.format(self.secret)
+
+    def __init__(self, secret):
+        self.secret = secret
+
+    def __eq__(self, other):
+        return self.secret == getattr(other, &#39;secret&#39;, None)
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __call__(self, r):
+        r.headers[&#39;Authorization&#39;] = self.auth_header()
+        return r</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>requests.auth.AuthBase</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="faunadb.client.HTTPBearerAuth.auth_header"><code class="name flex">
+<span>def <span class="ident">auth_header</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def auth_header(self):
+    return &#34;Bearer {}&#34;.format(self.secret)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="faunadb.client.RuntimeEnvHeader"><code class="flex name class">
+<span>class <span class="ident">RuntimeEnvHeader</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RuntimeEnvHeader:
+    def __init__(self):
+        self.pythonVersion = &#34;{0}.{1}.{2}-{3}&#34;.format(*sys.version_info)
+        self.driverVersion = pkg_version
+        self.env = self.getRuntimeEnv()
+        self.os = &#34;{0}-{1}&#34;.format(platform.system(), platform.release())
+
+    def getRuntimeEnv(self):
+        env = [
+            {
+                &#34;name&#34;: &#34;Netlify&#34;,
+                &#34;check&#34;: lambda: &#34;NETLIFY_IMAGES_CDN_DOMAIN&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;Vercel&#34;,
+                &#34;check&#34;: lambda: &#34;VERCEL&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;Heroku&#34;,
+                &#34;check&#34;: lambda: &#34;PATH&#34; in os.environ and &#34;.heroku&#34; in os.environ[&#34;PATH&#34;]
+            },
+            {
+                &#34;name&#34;: &#34;AWS Lambda&#34;,
+                &#34;check&#34;: lambda: &#34;AWS_LAMBDA_FUNCTION_VERSION&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;GCP Cloud Functions&#34;,
+                &#34;check&#34;: lambda: &#34;_&#34; in os.environ and &#34;google&#34; in os.environ[&#34;_&#34;]
+            },
+            {
+                &#34;name&#34;: &#34;GCP Compute Instances&#34;,
+                &#34;check&#34;: lambda: &#34;GOOGLE_CLOUD_PROJECT&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;Azure Cloud Functions&#34;,
+                &#34;check&#34;: lambda: &#34;WEBSITE_FUNCTIONS_AZUREMONITOR_CATEGORIES&#34; in os.environ
+            },
+            {
+                &#34;name&#34;: &#34;Azure Compute&#34;,
+                &#34;check&#34;: lambda: &#34;ORYX_ENV_TYPE&#34; in os.environ and &#34;WEBSITE_INSTANCE_ID&#34; in os.environ and os.environ[&#34;ORYX_ENV_TYPE&#34;] == &#34;AppService&#34;
+            }
+        ]
+
+        try:
+            recognized = next(e for e in env if e.get(&#34;check&#34;)())
+            if recognized is not None:
+                return recognized.get(&#34;name&#34;)
+        except:
+            return &#34;Unknown&#34;
+
+    def __str__(self):
+        return &#34;driver=python-{0}; runtime=python-{1} env={2}; os={3}&#34;.format(
+            self.driverVersion, self.pythonVersion,
+            self.env, self.os
+        ).lower()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="faunadb.client.RuntimeEnvHeader.getRuntimeEnv"><code class="name flex">
+<span>def <span class="ident">getRuntimeEnv</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getRuntimeEnv(self):
+    env = [
+        {
+            &#34;name&#34;: &#34;Netlify&#34;,
+            &#34;check&#34;: lambda: &#34;NETLIFY_IMAGES_CDN_DOMAIN&#34; in os.environ
+        },
+        {
+            &#34;name&#34;: &#34;Vercel&#34;,
+            &#34;check&#34;: lambda: &#34;VERCEL&#34; in os.environ
+        },
+        {
+            &#34;name&#34;: &#34;Heroku&#34;,
+            &#34;check&#34;: lambda: &#34;PATH&#34; in os.environ and &#34;.heroku&#34; in os.environ[&#34;PATH&#34;]
+        },
+        {
+            &#34;name&#34;: &#34;AWS Lambda&#34;,
+            &#34;check&#34;: lambda: &#34;AWS_LAMBDA_FUNCTION_VERSION&#34; in os.environ
+        },
+        {
+            &#34;name&#34;: &#34;GCP Cloud Functions&#34;,
+            &#34;check&#34;: lambda: &#34;_&#34; in os.environ and &#34;google&#34; in os.environ[&#34;_&#34;]
+        },
+        {
+            &#34;name&#34;: &#34;GCP Compute Instances&#34;,
+            &#34;check&#34;: lambda: &#34;GOOGLE_CLOUD_PROJECT&#34; in os.environ
+        },
+        {
+            &#34;name&#34;: &#34;Azure Cloud Functions&#34;,
+            &#34;check&#34;: lambda: &#34;WEBSITE_FUNCTIONS_AZUREMONITOR_CATEGORIES&#34; in os.environ
+        },
+        {
+            &#34;name&#34;: &#34;Azure Compute&#34;,
+            &#34;check&#34;: lambda: &#34;ORYX_ENV_TYPE&#34; in os.environ and &#34;WEBSITE_INSTANCE_ID&#34; in os.environ and os.environ[&#34;ORYX_ENV_TYPE&#34;] == &#34;AppService&#34;
+        }
+    ]
+
+    try:
+        recognized = next(e for e in env if e.get(&#34;check&#34;)())
+        if recognized is not None:
+            return recognized.get(&#34;name&#34;)
+    except:
+        return &#34;Unknown&#34;</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="faunadb" href="index.html">faunadb</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="faunadb.client.FaunaClient" href="#faunadb.client.FaunaClient">FaunaClient</a></code></h4>
+<ul class="two-column">
+<li><code><a title="faunadb.client.FaunaClient.check_new_version" href="#faunadb.client.FaunaClient.check_new_version">check_new_version</a></code></li>
+<li><code><a title="faunadb.client.FaunaClient.get_last_txn_time" href="#faunadb.client.FaunaClient.get_last_txn_time">get_last_txn_time</a></code></li>
+<li><code><a title="faunadb.client.FaunaClient.get_query_timeout" href="#faunadb.client.FaunaClient.get_query_timeout">get_query_timeout</a></code></li>
+<li><code><a title="faunadb.client.FaunaClient.new_session_client" href="#faunadb.client.FaunaClient.new_session_client">new_session_client</a></code></li>
+<li><code><a title="faunadb.client.FaunaClient.ping" href="#faunadb.client.FaunaClient.ping">ping</a></code></li>
+<li><code><a title="faunadb.client.FaunaClient.query" href="#faunadb.client.FaunaClient.query">query</a></code></li>
+<li><code><a title="faunadb.client.FaunaClient.stream" href="#faunadb.client.FaunaClient.stream">stream</a></code></li>
+<li><code><a title="faunadb.client.FaunaClient.sync_last_txn_time" href="#faunadb.client.FaunaClient.sync_last_txn_time">sync_last_txn_time</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="faunadb.client.HTTPBearerAuth" href="#faunadb.client.HTTPBearerAuth">HTTPBearerAuth</a></code></h4>
+<ul class="">
+<li><code><a title="faunadb.client.HTTPBearerAuth.auth_header" href="#faunadb.client.HTTPBearerAuth.auth_header">auth_header</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="faunadb.client.RuntimeEnvHeader" href="#faunadb.client.RuntimeEnvHeader">RuntimeEnvHeader</a></code></h4>
+<ul class="">
+<li><code><a title="faunadb.client.RuntimeEnvHeader.getRuntimeEnv" href="#faunadb.client.RuntimeEnvHeader.getRuntimeEnv">getRuntimeEnv</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
