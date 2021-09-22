@@ -38,8 +38,8 @@ jobs:
       - task: publish
         file: fauna-python-repository/concourse/tasks/publish.yml
         params:
-          TWINE_USERNAME: ((fauna/twine.username))
-          TWINE_PASSWORD: ((fauna/twine.password))
+          TWINE_USERNAME: ((pypi-username))
+          TWINE_PASSWORD: ((pypi-password))
 
       - task: publish-docs
         file: fauna-python-repository/concourse/tasks/publish-docs.yml
