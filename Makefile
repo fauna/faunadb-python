@@ -25,6 +25,13 @@ ifdef FAUNA_QUERY_TIMEOUT_MS
 DOCKER_RUN_FLAGS += -e FAUNA_QUERY_TIMEOUT_MS=$(FAUNA_QUERY_TIMEOUT_MS)
 endif
 
+install:
+	pip install .
+	pip install pdoc3
+
+docs:
+	pdoc faunadb --html -o docs
+
 all: test lint
 
 test:

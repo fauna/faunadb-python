@@ -1,4 +1,9 @@
-## 4.1.0 [current]
+## 4.1.1 [current]
+- Exposes all the fields in the `errors` object
+- Allows setting select function's default parameter as None value 
+- Notifies about new package version
+
+## 4.1.0
 - Bearer auth token support
 - Added runtime environment headers
 - Adds support for Select's default parameter
