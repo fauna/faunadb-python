@@ -1,10 +1,14 @@
-import sys
 import os
 import platform
+import sys
+
+from faunadb import __api_version__ as api_version
+from faunadb import __version__ as pkg_version
 from faunadb.client import FaunaClient
 from faunadb.errors import UnexpectedError
+
 from tests.helpers import FaunaTestCase
-from faunadb import __version__ as pkg_version, __api_version__ as api_version
+
 
 class ClientTest(FaunaTestCase):
 
@@ -14,6 +18,10 @@ class ClientTest(FaunaTestCase):
     new_time = self.client.get_last_txn_time()
 
     self.assertEqual(old_time, new_time) # client.ping should not update last-txn-time
+
+  def test_default_query_timeout(self):
+    client = FaunaClient(secret="secret")
+    self.assertEqual(client.get_query_timeout(), 60000)
 
   def test_query_timeout(self):
     client = FaunaClient(secret="secret", query_timeout_ms=5000)
