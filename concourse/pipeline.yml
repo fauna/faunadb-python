@@ -16,7 +16,7 @@ resources:
     icon: github
     source:
       uri: https://github.com/fauna/faunadb-python
-      branch: FE-1409-python
+      branch: v5
 
   - name: fauna-python-repository-docs
     type: git
@@ -34,17 +34,17 @@ jobs:
       - get: fauna-python-repository
       - get: fauna-python-repository-docs
 
-#      - task: integration-tests
-#        file: fauna-python-repository/concourse/tasks/integration-tests.yml
-#        privileged: true
-#        params:
-#          FAUNA_ROOT_KEY: ((fauna.secret))
-#          FAUNA_DOMAIN: ((fauna.domain))
-#          FAUNA_SCHEME: ((fauna.scheme))
-#          FAUNA_PORT: ((fauna.port))
-#
-#      - task: build
-#        file: fauna-python-repository/concourse/tasks/build.yml
+      - task: integration-tests
+        file: fauna-python-repository/concourse/tasks/integration-tests.yml
+        privileged: true
+        params:
+          FAUNA_ROOT_KEY: ((fauna.secret))
+          FAUNA_DOMAIN: ((fauna.domain))
+          FAUNA_SCHEME: ((fauna.scheme))
+          FAUNA_PORT: ((fauna.port))
+
+      - task: build
+        file: fauna-python-repository/concourse/tasks/build.yml
 
       - task: publish
         file: fauna-python-repository/concourse/tasks/publish.yml
@@ -56,9 +56,9 @@ jobs:
           params:
             text_file: slack-message/publish
 
-#      - task: publish-docs
-#        file: fauna-python-repository/concourse/tasks/publish-docs.yml
-#
-#      - put: fauna-python-repository-docs
-#        params:
-#          repository: fauna-python-repository-updated-docs
+      - task: publish-docs
+        file: fauna-python-repository/concourse/tasks/publish-docs.yml
+
+      - put: fauna-python-repository-docs
+        params:
+          repository: fauna-python-repository-updated-docs

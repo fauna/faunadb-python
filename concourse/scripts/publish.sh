@@ -7,12 +7,11 @@ cd ./fauna-python-repository
 PACKAGE_VERSION=$(python setup.py --version)
 echo "Going to publish python package: ${PACKAGE_VERSION}"
 
-#apk --no-progress --no-cache add gcc musl-dev python3-dev libffi-dev openssl-dev cargo
-#
-#pip install twine
-#
-#twine check dist/*
-#twine upload dist/*
+apk --no-progress --no-cache add gcc musl-dev python3-dev libffi-dev openssl-dev cargo
 
-#echo "faunadb-python@$PACKAGE_VERSION has been published to pypi [fyi <@ewan.edwards>]" > ../slack-message/publish
-echo "faunadb-python@$PACKAGE_VERSION test message (don't pay attention)" > ../slack-message/publish
+pip install twine
+
+twine check dist/*
+twine upload dist/*
+
+echo "faunadb-python@$PACKAGE_VERSION has been published to pypi [fyi <@ewan.edwards>]" > ../slack-message/publish
