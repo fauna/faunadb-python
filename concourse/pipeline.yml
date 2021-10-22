@@ -1,11 +1,22 @@
 ---
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+
 resources:
+  - name: notify
+    type: slack-notification
+    source:
+      url: ((slack-webhook))
+
   - name: fauna-python-repository
     type: git
     icon: github
     source:
       uri: https://github.com/fauna/faunadb-python
-      branch: v5
+      branch: FE-1409-python
 
   - name: fauna-python-repository-docs
     type: git
@@ -23,27 +34,31 @@ jobs:
       - get: fauna-python-repository
       - get: fauna-python-repository-docs
 
-      - task: integration-tests
-        file: fauna-python-repository/concourse/tasks/integration-tests.yml
-        privileged: true
-        params:
-          FAUNA_ROOT_KEY: ((fauna.secret))
-          FAUNA_DOMAIN: ((fauna.domain))
-          FAUNA_SCHEME: ((fauna.scheme))
-          FAUNA_PORT: ((fauna.port))
-
-      - task: build
-        file: fauna-python-repository/concourse/tasks/build.yml
+#      - task: integration-tests
+#        file: fauna-python-repository/concourse/tasks/integration-tests.yml
+#        privileged: true
+#        params:
+#          FAUNA_ROOT_KEY: ((fauna.secret))
+#          FAUNA_DOMAIN: ((fauna.domain))
+#          FAUNA_SCHEME: ((fauna.scheme))
+#          FAUNA_PORT: ((fauna.port))
+#
+#      - task: build
+#        file: fauna-python-repository/concourse/tasks/build.yml
 
       - task: publish
         file: fauna-python-repository/concourse/tasks/publish.yml
         params:
           TWINE_USERNAME: ((pypi-username))
           TWINE_PASSWORD: ((pypi-password))
+        on_success:
+          put: notify
+          params:
+            text_file: slack-message/publish
 
-      - task: publish-docs
-        file: fauna-python-repository/concourse/tasks/publish-docs.yml
-
-      - put: fauna-python-repository-docs
-        params:
-          repository: fauna-python-repository-updated-docs
+#      - task: publish-docs
+#        file: fauna-python-repository/concourse/tasks/publish-docs.yml
+#
+#      - put: fauna-python-repository-docs
+#        params:
+#          repository: fauna-python-repository-updated-docs
