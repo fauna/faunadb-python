@@ -14,5 +14,8 @@ inputs:
   - name: fauna-python-repository
   - name: fauna-python-repository/dist
 
+outputs:
+  - name: slack-message
+
 run:
   path: ./fauna-python-repository/concourse/scripts/publish.sh
