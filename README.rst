@@ -54,25 +54,35 @@ Basic Usage
 
     print(indexes)
 
-Errors handling
+Exceptions handling
 ---------------
 
-Since 5.0.0 release, we introduced wrapper types for FaunaError interface,
+Since 5.0.0 release, we introduced children classes for base HttpError class,
 for example:
 ```
-type InvalidReferenceError struct{ FaunaError }
-type MissingIdentityError struct{ FaunaError }
-type InvalidTokenError struct{ FaunaError }
-type StackOverflowError struct{ FaunaError }
-type AuthenticationFailedError struct{ FaunaError }
-```
-where each wrapper type returned from an error result according to the error code from fauna database server,
-you can inspect "errors.go" file for more information on how it is implemented.
+class PayloadTooLarge(HttpError):
+    pass
 
-You should now notice from your error handling code that the error message has slight changes,
-and you are now able to use wrapper names to check the error type,
-take a look at the example of handling an error for non-existent collection
-that are taken from one of the unit tests (you can see more such examples in "client_test.go"):
+
+class InvalidArgumentError(HttpError):
+    pass
+
+
+class InvalidExpressionError(HttpError):
+    pass
+
+
+class InvalidUrlParameterError(HttpError):
+    pass
+
+
+class SchemaNotFoundError(HttpError):
+    pass
+```
+where each class corresponds to the error code from fauna database server,
+you can inspect "errors.py" file for more information on how it is implemented.
+
+Below you can see an example of how you can take advantage of a new exception hierarchy:
 ```
 try:
     self.client.query(add(1, "two"))
