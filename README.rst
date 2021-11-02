@@ -55,7 +55,7 @@ Basic Usage
     print(indexes)
 
 Exceptions handling
----------------
+-------------------
 
 Since 5.0.0 release, we introduced children classes for base HttpError class,
 for example:
