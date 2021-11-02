@@ -54,6 +54,34 @@ Basic Usage
 
     print(indexes)
 
+Errors handling
+---------------
+
+Since 5.0.0 release, we introduced wrapper types for FaunaError interface,
+for example:
+```
+type InvalidReferenceError struct{ FaunaError }
+type MissingIdentityError struct{ FaunaError }
+type InvalidTokenError struct{ FaunaError }
+type StackOverflowError struct{ FaunaError }
+type AuthenticationFailedError struct{ FaunaError }
+```
+where each wrapper type returned from an error result according to the error code from fauna database server,
+you can inspect "errors.go" file for more information on how it is implemented.
+
+You should now notice from your error handling code that the error message has slight changes,
+and you are now able to use wrapper names to check the error type,
+take a look at the example of handling an error for non-existent collection
+that are taken from one of the unit tests (you can see more such examples in "client_test.go"):
+```
+try:
+    self.client.query(add(1, "two"))
+except InvalidArgumentError as e:
+    print("Http status code: ", e.httpStatusCode)
+    print("Description: ", e.description)
+    print("Details: ", e.errors)
+```
+
 Document Streaming
 ------------------
 Fauna supports document streaming, where changes to a streamed document are pushed to all clients subscribing to that document.
