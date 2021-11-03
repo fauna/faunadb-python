@@ -80,7 +80,7 @@ class InvalidUrlParameterError(HttpError):
 class SchemaNotFoundError(HttpError):
     pass
 ```
-where each class corresponds to the error code from fauna database server,
+Each class corresponds to an error code from Fauna.
 you can inspect "errors.py" file for more information on how it is implemented.
 
 Below you can see an example of how you can take advantage of a new exception hierarchy:
