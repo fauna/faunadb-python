@@ -76,7 +76,6 @@ try:
 except InvalidArgumentError as e:
     print("Http status code: ", e.httpStatusCode)
     print("Description: ", e.description)
-    print("Details: ", e.errors)
 ```
 
 Document Streaming
