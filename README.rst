@@ -57,8 +57,9 @@ Basic Usage
 Exceptions handling
 -------------------
 
-Since 5.0.0 release, we introduced children classes for base HttpError class,
-for example:
+With the 5.0.0 release, child classes of the base HttpError class now exist.
+For example:
+
 ```
 class PayloadTooLarge(HttpError):
     pass
