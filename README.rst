@@ -81,7 +81,8 @@ class SchemaNotFoundError(HttpError):
     pass
 ```
 Each class corresponds to an error code from Fauna.
-you can inspect "errors.py" file for more information on how it is implemented.
+Inspect the [`errors.py`](https://github.com/fauna/faunadb-python/blob/v5/faunadb/errors.py)
+file for more information on how it is implemented.
 
 Below you can see an example of how you can take advantage of a new exception hierarchy:
 ```
