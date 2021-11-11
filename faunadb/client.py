@@ -223,6 +223,7 @@ class FaunaClient(object):
             self.counter = _Counter(1)
 
             self.session.headers.update({
+                "Keep-Alive": "timeout=5",
                 "Accept-Encoding": "gzip",
                 "Content-Type": "application/json;charset=utf-8",
                 "X-Fauna-Driver": "python",
