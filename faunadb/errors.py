@@ -29,7 +29,7 @@ class FaunaError(Exception):
         if 200 <= code <= 299:
             pass
         elif code == codes.bad_request:
-            raise HttpError.get_bad_request_error(request_result)
+            raise BadRequest(request_result)
         elif code == codes.unauthorized:
             raise Unauthorized(request_result)
         elif code == codes.forbidden:
@@ -224,8 +224,9 @@ class BadRequest(HttpError):
 
 
 class Unauthorized(HttpError):
-    """HTTP 401 error."""
-    pass
+    def __init__(self, request_result):
+        super(Unauthorized, self).__init__(request_result)
+        self.errors[0].description = "Unauthorized. Check that endpoint, schema, port and secret are correct during client’s instantiation"
 
 
 class PermissionDenied(HttpError):
@@ -294,9 +295,9 @@ class ErrorData(object):
     """
 
     def __repr__(self):
-        return "ErrorData(code=%s, description=%s, position=%s, failures=%s, cause=%s)" % \
+        return "ErrorData(code=%s, description=%s, position=%s, failures=%s)" % \
                (repr(self.code), repr(self.description),
-                repr(self.position), repr(self.failures), repr(self.cause))
+                repr(self.position), repr(self.failures))
 
     def __eq__(self, other):
         return self.__class__ == other.__class__ and \
