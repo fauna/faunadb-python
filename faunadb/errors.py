@@ -224,8 +224,9 @@ class BadRequest(HttpError):
 
 
 class Unauthorized(HttpError):
-    """HTTP 401 error."""
-    pass
+    def __init__(self, request_result):
+        super(Unauthorized, self).__init__(request_result)
+        self.errors[0].description = "Unauthorized. Check that endpoint, schema, port and secret are correct during client’s instantiation"
 
 
 class PermissionDenied(HttpError):
