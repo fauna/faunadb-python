@@ -29,7 +29,7 @@ class FaunaError(Exception):
         if 200 <= code <= 299:
             pass
         elif code == codes.bad_request:
-            raise BadRequest(request_result)
+            raise HttpError.get_bad_request_error(request_result)
         elif code == codes.unauthorized:
             raise Unauthorized(request_result)
         elif code == codes.forbidden:
