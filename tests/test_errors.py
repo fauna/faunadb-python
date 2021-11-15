@@ -1,12 +1,14 @@
 from faunadb import query
-from faunadb.errors import (BadRequest, ErrorData, Failure,
+from faunadb.errors import (BadRequest, ErrorData, Failure, FunctionCallError,
                             InstanceAlreadyExistsError, InternalError,
                             InvalidArgumentError, InvalidExpressionError,
-                            NotFound, PermissionDenied, Unauthorized,
-                            UnavailableError, UnexpectedError, ValidationError)
+                            InvalidTokenError, InvalidWriteTimeError,
+                            MissingIdentityError, NotFound, PermissionDenied,
+                            Unauthorized, UnavailableError, UnexpectedError,
+                            ValidationError)
 from faunadb.objects import Native
 from faunadb.query import (_Expr, add, collection, create, create_collection,
-                           create_key, get, ref, var)
+                           create_function, create_key, get, ref, var)
 from requests import codes
 
 from tests.helpers import FaunaTestCase, mock_client
@@ -113,6 +115,54 @@ class ErrorsTest(FaunaTestCase):
         self._assert_query_error(
             get(ref(collection("foofaws"), "123")),
             NotFound,
+            "instance not found")
+
+    def test_call_error(self):
+        self.client.query(query.create_function({"name": "failed", "body": query.query(
+            query.lambda_("x", query.add(query.var("x"), query.var("x")))
+        )}))
+        self._assert_query_error(
+            query.call(query.function("failed")),
+            FunctionCallError,
+            "instance not found")
+
+    def test_invalid_currenct_identity(self):
+        self._assert_query_error(
+            query.current_identity(),
+            MissingIdentityError,
+            "instance not found")
+
+    def test_invalid_token(self):
+        self._assert_query_error(
+            query.current_identity(),
+            InvalidTokenError,
+            "instance not found")
+
+    # def test_stack_overflow(self):
+
+
+# query(
+#     CreateFunction(
+#         Obj(
+#             "name", Value("StackOverflowTest"),
+#             "body", Query(
+#                 Lambda(Value("x"), Call(Function("StackOverflowTest"), Var("x")))
+#             )
+#         )
+#     )
+# ).get();
+
+    def test_invalid_write_time(self):
+        self.client.query(create_collection({"name": "invalid_time"}))
+        r = self.client.query(create(collection("invalid_time"), {}))["ref"]
+        self._assert_query_error(
+            query.insert(
+                r,
+                query.time_add(query.now(), 5, "days"),
+                "create",
+                {"data": {"color": "yellow"}}
+            ),
+            InvalidWriteTimeError,
             "instance not found")
 
     def test_value_not_found(self):
