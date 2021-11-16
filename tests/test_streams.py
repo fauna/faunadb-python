@@ -225,5 +225,5 @@ class StreamTest(FaunaTestCase):
         error = self.assert_raises(Exception, lambda: client.stream(
             ref, options, on_start=on_start, on_error=on_error))
 
-        self.assertEqual(str(
-            error), "Valid fields options are {'diff', 'action', 'prev', 'document'}, provided ['invalid_url'].")
+        self.assertRegex(str(
+            error), r"Valid fields options are \{.*\}, provided \['invalid_url'\].")
