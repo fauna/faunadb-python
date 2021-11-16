@@ -1,12 +1,16 @@
 from faunadb import query
-from faunadb.errors import (BadRequest, ErrorData, Failure,
-                            InstanceAlreadyExistsError, InternalError,
-                            InvalidArgumentError, InvalidExpressionError,
-                            NotFound, PermissionDenied, Unauthorized,
-                            UnavailableError, UnexpectedError, ValidationError)
+from faunadb.errors import (AuthenticationFailedError, BadRequest, ErrorData,
+                            Failure, FunctionCallError,
+                            InstanceAlreadyExistsError, InstanceNotUniqueError,
+                            InternalError, InvalidArgumentError,
+                            InvalidExpressionError, InvalidTokenError,
+                            InvalidWriteTimeError, MissingIdentityError,
+                            NotFound, PermissionDenied, StackOverflowError,
+                            Unauthorized, UnavailableError, UnexpectedError,
+                            ValidationError)
 from faunadb.objects import Native
 from faunadb.query import (_Expr, add, collection, create, create_collection,
-                           create_key, get, ref, var)
+                           create_function, create_key, get, ref, var)
 from requests import codes
 
 from tests.helpers import FaunaTestCase, mock_client
@@ -114,6 +118,96 @@ class ErrorsTest(FaunaTestCase):
             get(ref(collection("foofaws"), "123")),
             NotFound,
             "instance not found")
+
+    def test_call_error(self):
+        self.client.query(query.create_function({"name": "failed", "body": query.query(
+            query.lambda_("x", query.divide(query.var("x"), 0))
+        )}))
+        self._assert_query_error(
+            query.call(query.function("failed"), "x"),
+            FunctionCallError,
+            "call error")
+
+    def test_invalid_currenct_identity(self):
+        self._assert_query_error(
+            query.current_identity(),
+            MissingIdentityError,
+            "missing identity")
+
+    def test_invalid_token(self):
+        self._assert_query_error(
+            query.current_token(),
+            InvalidTokenError,
+            "invalid token")
+
+    def test_invalid_write_time(self):
+        self.client.query(create_collection({"name": "invalid_time"}))
+        r = self.client.query(create(collection("invalid_time"), {}))["ref"]
+        self._assert_query_error(
+            query.insert(
+                r,
+                query.time_add(query.now(), 5, "days"),
+                "create",
+                {"data": {"color": "yellow"}}
+            ),
+            InvalidWriteTimeError,
+            "invalid write time")
+
+    def test_stack_overflow(self):
+        self.client.query(query.create_function({"name": "stack_overflow", "body": query.query(
+            query.lambda_("x", query.call(
+                query.function("stack_overflow"), query.var("x")))
+        )}))
+        self._assert_query_error(
+            query.call(query.function("stack_overflow")),
+            StackOverflowError,
+            "stack overflow",
+            ['expr']
+        )
+
+    def test_validation_failed(self):
+        self.client.query(query.create_collection(
+            {"name": "validation_failed"}))
+
+        self._assert_query_error(
+            query.create(
+                query.collection("validation_failed"),
+                {"data": []}
+            ),
+            ValidationError,
+            "validation failed", ["create"])
+
+    def test_instance_not_unique(self):
+        self.client.query(query.create_collection({"name": "unique"}))
+        self.client.query(query.create_index({
+            "name": "unique_email",
+            "source": query.collection("unique"),
+            "terms": [{"field": ["data", "email"]}],
+            "unique": True
+        }))
+        self.client.query(create(collection("unique"), {
+                          "data": {"email": "unique@email.com"}}))
+
+        self._assert_query_error(
+            query.create(
+                query.collection("unique"),
+                {"data": {"email": "unique@email.com"}}
+            ),
+            InstanceNotUniqueError,
+            "instance not unique", ["create"])
+
+    def test_authentication_failed(self):
+        self.client.query(query.create_collection({"name": "users"}))
+        self.client.query(query.create_index({
+            "name": "user_by_email",
+            "source": query.collection("users"),
+            "terms": [{"field": ["data", "email"]}]
+        }))
+        self._assert_query_error(
+            query.login(query.match(query.index("user_by_email"),
+                        "some@email.com"), {"password": "password"}),
+            AuthenticationFailedError,
+            "authentication failed")
 
     def test_value_not_found(self):
         self._assert_query_error(query.select(
