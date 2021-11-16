@@ -1,5 +1,6 @@
 from faunadb import query
-from faunadb.errors import (BadRequest, ErrorData, Failure, FunctionCallError,
+from faunadb.errors import (AuthenticationFailedError, BadRequest, ErrorData,
+                            Failure, FunctionCallError,
                             InstanceAlreadyExistsError, InternalError,
                             InvalidArgumentError, InvalidExpressionError,
                             InvalidTokenError, InvalidWriteTimeError,
@@ -124,33 +125,19 @@ class ErrorsTest(FaunaTestCase):
         self._assert_query_error(
             query.call(query.function("failed")),
             FunctionCallError,
-            "instance not found")
+            "call error")
 
     def test_invalid_currenct_identity(self):
         self._assert_query_error(
             query.current_identity(),
             MissingIdentityError,
-            "instance not found")
+            "missing identity")
 
     def test_invalid_token(self):
         self._assert_query_error(
-            query.current_identity(),
+            query.current_token(),
             InvalidTokenError,
-            "instance not found")
-
-    # def test_stack_overflow(self):
-
-
-# query(
-#     CreateFunction(
-#         Obj(
-#             "name", Value("StackOverflowTest"),
-#             "body", Query(
-#                 Lambda(Value("x"), Call(Function("StackOverflowTest"), Var("x")))
-#             )
-#         )
-#     )
-# ).get();
+            "invalid token")
 
     def test_invalid_write_time(self):
         self.client.query(create_collection({"name": "invalid_time"}))
@@ -163,7 +150,30 @@ class ErrorsTest(FaunaTestCase):
                 {"data": {"color": "yellow"}}
             ),
             InvalidWriteTimeError,
-            "instance not found")
+            "invalid write time")
+
+    def test_call_error(self):
+        self.client.query(query.create_function({"name": "stack_overflow", "body": query.query(
+            query.lambda_("x", query.call(
+                query.function("stack_overflow"), query.var("x")))
+        )}))
+        self._assert_query_error(
+            query.call(query.function("failed")),
+            FunctionCallError,
+            "stack overflow")
+
+    def test_authentication_failed(self):
+        self.client.query(query.create_collection("users"))
+        self.client.query(query.create_index({
+            "name": "user_by_email",
+            "source": query.collection("users"),
+            "terms": [{"field": ["data", "email"]}]
+        }))
+        self._assert_query_error(
+            query.login(query.match(query.index("user_by_email"),
+                        "some@email.com"), "password"),
+            AuthenticationFailedError,
+            "authenticationfailed")
 
     def test_value_not_found(self):
         self._assert_query_error(query.select(
