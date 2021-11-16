@@ -120,10 +120,10 @@ class ErrorsTest(FaunaTestCase):
 
     def test_call_error(self):
         self.client.query(query.create_function({"name": "failed", "body": query.query(
-            query.lambda_("x", query.add(query.var("x"), query.var("x")))
+            query.lambda_("x", query.divide(query.var("x"), 0))
         )}))
         self._assert_query_error(
-            query.call(query.function("failed")),
+            query.call(query.function("failed"), "x"),
             FunctionCallError,
             "call error")
 
@@ -163,7 +163,7 @@ class ErrorsTest(FaunaTestCase):
             "stack overflow")
 
     def test_authentication_failed(self):
-        self.client.query(query.create_collection("users"))
+        self.client.query(query.create_collection({"name": "users"}))
         self.client.query(query.create_index({
             "name": "user_by_email",
             "source": query.collection("users"),
@@ -171,7 +171,7 @@ class ErrorsTest(FaunaTestCase):
         }))
         self._assert_query_error(
             query.login(query.match(query.index("user_by_email"),
-                        "some@email.com"), "password"),
+                        "some@email.com"), {"password": "password"}),
             AuthenticationFailedError,
             "authenticationfailed")
 
