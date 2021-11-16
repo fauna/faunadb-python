@@ -1,10 +1,11 @@
 from faunadb import query
 from faunadb.errors import (AuthenticationFailedError, BadRequest, ErrorData,
                             Failure, FunctionCallError,
-                            InstanceAlreadyExistsError, InternalError,
-                            InvalidArgumentError, InvalidExpressionError,
-                            InvalidTokenError, InvalidWriteTimeError,
-                            MissingIdentityError, NotFound, PermissionDenied,
+                            InstanceAlreadyExistsError, InstanceNotUniqueError,
+                            InternalError, InvalidArgumentError,
+                            InvalidExpressionError, InvalidTokenError,
+                            InvalidWriteTimeError, MissingIdentityError,
+                            NotFound, PermissionDenied, StackOverflowError,
                             Unauthorized, UnavailableError, UnexpectedError,
                             ValidationError)
 from faunadb.objects import Native
@@ -152,15 +153,48 @@ class ErrorsTest(FaunaTestCase):
             InvalidWriteTimeError,
             "invalid write time")
 
-    def test_call_error(self):
+    def test_stack_overflow(self):
         self.client.query(query.create_function({"name": "stack_overflow", "body": query.query(
             query.lambda_("x", query.call(
                 query.function("stack_overflow"), query.var("x")))
         )}))
         self._assert_query_error(
-            query.call(query.function("failed")),
-            FunctionCallError,
-            "stack overflow")
+            query.call(query.function("stack_overflow")),
+            StackOverflowError,
+            "stack overflow",
+            ['expr']
+        )
+
+    def test_validation_failed(self):
+        self.client.query(query.create_collection(
+            {"name": "validation_failed"}))
+
+        self._assert_query_error(
+            query.create(
+                query.collection("validation_failed"),
+                {"data": []}
+            ),
+            ValidationError,
+            "validation failed", ["create"])
+
+    def test_instance_not_unique(self):
+        self.client.query(query.create_collection({"name": "unique"}))
+        self.client.query(query.create_index({
+            "name": "unique_email",
+            "source": query.collection("unique"),
+            "terms": [{"field": ["data", "email"]}],
+            "unique": True
+        }))
+        self.client.query(create(collection("unique"), {
+                          "data": {"email": "unique@email.com"}}))
+
+        self._assert_query_error(
+            query.create(
+                query.collection("unique"),
+                {"data": {"email": "unique@email.com"}}
+            ),
+            InstanceNotUniqueError,
+            "instance not unique", ["create"])
 
     def test_authentication_failed(self):
         self.client.query(query.create_collection({"name": "users"}))
@@ -173,7 +207,7 @@ class ErrorsTest(FaunaTestCase):
             query.login(query.match(query.index("user_by_email"),
                         "some@email.com"), {"password": "password"}),
             AuthenticationFailedError,
-            "authenticationfailed")
+            "authentication failed")
 
     def test_value_not_found(self):
         self._assert_query_error(query.select(
