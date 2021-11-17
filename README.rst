@@ -54,6 +54,30 @@ Basic Usage
 
     print(indexes)
 
+Exceptions handling
+-------------------
+
+With the 5.0.0 release, child classes of the base HttpError class now exist.
+For example:
+ - class PayloadTooLarge(HttpError)
+ - class InvalidArgumentError(HttpError)
+ - class InvalidExpressionError(HttpError)
+ - class InvalidUrlParameterError(HttpError)
+ - class SchemaNotFoundError(HttpError)
+
+Each class corresponds to an error code from Fauna.
+Inspect the [`errors.py`](https://github.com/fauna/faunadb-python/blob/v5/faunadb/errors.py)
+file for more information on how it is implemented.
+
+The following example demonstrates the methods that you can access from the exception object:
+```
+try:
+    self.client.query(add(1, "two"))
+except InvalidArgumentError as e:
+    print("Http status code: ", e.httpStatusCode)
+    print("Description: ", e.description)
+```
+
 Document Streaming
 ------------------
 Fauna supports document streaming, where changes to a streamed document are pushed to all clients subscribing to that document.

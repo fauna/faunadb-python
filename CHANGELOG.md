@@ -1,4 +1,8 @@
-## 4.1.1 [current]
+## 5.0.0rc1 [current]
+- Supports fauna database API v5
+- Implemented new driver exception hierarchy
+
+## 4.1.1
 - Exposes all the fields in the `errors` object
 - Allows setting select function's default parameter as None value 
 - Notifies about new package version
