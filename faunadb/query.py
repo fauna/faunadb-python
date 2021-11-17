@@ -64,7 +64,7 @@ def roles(scope=None):
   return _fn({"roles": scope})
 
 def access_providers(scope=None):
-  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/access_providers>`__."""
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/accessproviders>`__."""
   return _fn({"access_providers": scope})
 
 def keys(scope=None):
@@ -403,7 +403,7 @@ def remove(ref_, ts, action):
 
 @deprecated("use create_collection instead")
 def create_class(class_params):
-  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/create_class>`__."""
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/createclass>`__."""
   return _fn({"create_class": class_params})
 
 def create_collection(collection_params):
@@ -533,22 +533,22 @@ def identity():
 
 
 def current_identity():
-  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/current_identity>`__."""
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/currentidentity>`__."""
   return _fn({"current_identity": None})
 
 
 def has_current_identity():
-  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/has_current_identity>`__."""
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/hascurrentidentity>`__."""
   return _fn({"has_current_identity": None})
 
 
 def current_token():
-  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/current_token>`__."""
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/currenttoken>`__."""
   return _fn({"current_token": None})
 
 
 def has_current_token():
-  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/has_current_token>`__."""
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/hascurrenttoken>`__."""
   return _fn({"has_current_token": None})
 
 
@@ -773,7 +773,7 @@ def role(role_name, scope=None):
 
 
 def access_provider(access_provider_name, scope=None):
-  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/access_provider>`__."""
+  """See the `docs <https://docs.fauna.com/fauna/current/api/fql/functions/accessprovider>`__."""
   return _params({"access_provider": access_provider_name}, {"scope": scope})
 
 
