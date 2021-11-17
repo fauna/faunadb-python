@@ -7,9 +7,10 @@
 .coverage
 build
 dist
-docs/_build
+docs/
 htmlcov/
 faunadb.egg-info
 venv
 venv3
 results/
+.DS_Store

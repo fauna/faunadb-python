@@ -6,7 +6,7 @@ FaunaDB Python
 .. image:: https://img.shields.io/pypi/v/faunadb.svg?maxAge=21600
  :target: https://pypi.python.org/pypi/faunadb
 .. image:: https://img.shields.io/badge/license-MPL_2.0-blue.svg?maxAge=2592000
- :target: https://raw.githubusercontent.com/fauna/faunadb-python/master/LICENSE
+ :target: https://raw.githubusercontent.com/fauna/faunadb-python/main/LICENSE
 
 Python driver for `FaunaDB <https://fauna.com>`_.
 
@@ -24,18 +24,16 @@ Compatibility
 
 The following versions of Python are supported:
 
-* Python 2.7
-* Python 3.3
-* Python 3.4
 * Python 3.5
 * Python 3.6
 * Python 3.7
 * Python 3.8
+* Python 3.9
 
 Documentation
 -------------
 
-Driver documentation is available at https://fauna.github.io/faunadb-python/.
+Driver documentation is available at https://fauna.github.io/faunadb-python/4.1.1/api/.
 
 See the `FaunaDB Documentation <https://docs.fauna.com/>`_ for a complete API reference, or look in `tests`_
 for more examples.
@@ -154,4 +152,4 @@ implied. See the License for the specific language governing
 permissions and limitations under the License.
 
 
-.. _`tests`: https://github.com/fauna/faunadb-python/blob/master/tests/
+.. _`tests`: https://github.com/fauna/faunadb-python/blob/main/tests/

@@ -121,13 +121,13 @@ class ErrorsTest(FaunaTestCase):
 
   def test_repr(self):
     err = ErrorData("code", "desc", None, None)
-    self.assertEqual(repr(err), "ErrorData('code', 'desc', None, None)")
+    self.assertEqual(repr(err), "ErrorData(code='code', description='desc', position=None, failures=None)")
 
     failure = Failure("code", "desc", ["a", "b"])
     err = ErrorData("code", "desc", ["pos"], [failure])
     self.assertEqual(
       repr(err),
-      "ErrorData('code', 'desc', ['pos'], [Failure('code', 'desc', ['a', 'b'])])")
+      "ErrorData(code='code', description='desc', position=['pos'], failures=[Failure(code='code', description='desc', field=['a', 'b'])])")
 
   #region private
 
