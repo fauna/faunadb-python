@@ -16,7 +16,7 @@ requires = [
     "iso8601",
     "requests",
     "future",
-    "httpx"
+    "httpx[http2]"
 ]
 
 tests_requires = [

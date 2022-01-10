@@ -1,4 +1,4 @@
 iso8601==1.0.2
 requests==2.27.1
 future==0.18.2
-httpx==0.21.3
+httpx[http2]==0.21.3
