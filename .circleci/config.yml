@@ -13,8 +13,11 @@ executors:
     docker:
       - image: circleci/python:<<parameters.python_version>>
 
-      - image: fauna/faunadb
+      - image: gcr.io/faunadb-cloud/faunadb/enterprise/<<parameters.version>>:latest
         name: core
+        auth:
+          username: _json_key
+          password: $GCR_KEY
 
     environment:
       FAUNA_ENDPOINT: http://core:8443

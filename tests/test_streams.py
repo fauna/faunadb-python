@@ -35,25 +35,13 @@ class StreamTest(FaunaTestCase):
         return cls.client.query(query_json)
 
     @classmethod
-    def stream_sync(cls,
-                    expression,
-                    options=None,
-                    on_start=None,
-                    on_error=None,
-                    on_version=None,
-                    on_history=None,
-                    on_set=None):
+    def stream_sync(cls, expression, options=None,
+                    on_start=None, on_error=None, on_version=None,
+                    on_history=None):
         if on_error is None:
             on_error = _on_unhandled_error
-        return cls.client.stream(
-            expression,
-            options,
-            on_start,
-            on_error,
-            on_version,
-            on_history,
-            on_set
-        )
+        return cls.client.stream(expression, options,
+                                 on_start, on_error, on_version, on_history)
 
     # endregion
 
@@ -67,24 +55,6 @@ class StreamTest(FaunaTestCase):
             stream.close()
 
         stream = self.stream_sync(ref, None, on_start=on_start)
-        stream.start()
-
-    def test_stream_on_set(self):
-        stream = None
-
-        def on_start(evt):
-            self._create(None)
-
-        def on_set(evt):
-            self.assertEqual(evt.type, 'set')
-            self.assertEqual(evt.event['action'], 'add')
-            stream.close()
-
-        stream = self.stream_sync(
-            query.documents(self.collection_ref),
-            on_start = on_start,
-            on_set = on_set
-        )
         stream.start()
 
     def test_stream_max_open_streams(self):
