@@ -14,7 +14,7 @@ from hyper import HTTP20Connection
 from .errors import StreamError
 from .events import Error, parse_stream_request_result_or_none
 
-VALID_FIELDS = {"diff", "prev", "document", "action"}
+VALID_FIELDS = {"diff", "prev", "document", "action", "index"}
 
 
 class Connection(object):
