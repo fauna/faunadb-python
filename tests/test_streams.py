@@ -5,6 +5,7 @@ from time import sleep
 
 from faunadb import query
 from faunadb.errors import BadRequest, FaunaError
+
 from tests.helpers import FaunaTestCase
 
 
@@ -14,13 +15,15 @@ def _on_unhandled_error(event):
     else:
         raise Exception(event)
 
+
 class StreamTest(FaunaTestCase):
     @classmethod
     def setUpClass(cls):
         super(StreamTest, cls).setUpClass()
-        cls.collection_ref = cls._q(query.create_collection({"name":"stream_test_coll"}))["ref"]
+        cls.collection_ref = cls._q(query.create_collection(
+            {"name": "stream_test_coll"}))["ref"]
 
-    #region Helpers
+    # region Helpers
 
     @classmethod
     def _create(cls, n=0, **data):
@@ -52,7 +55,7 @@ class StreamTest(FaunaTestCase):
             on_set
         )
 
-    #endregion
+    # endregion
 
     def test_stream_on_document_reference(self):
         ref = self._create(None)["ref"]
@@ -88,6 +91,7 @@ class StreamTest(FaunaTestCase):
         m = 101
         expected = [i for i in range(m)]
         actual = []
+
         def threadFn(n):
             ref = self._create(n)["ref"]
             stream = None
@@ -105,14 +109,15 @@ class StreamTest(FaunaTestCase):
                     sleep(0.1)
                 stream.close()
 
-            stream = self.stream_sync(ref, None, on_start=on_start, on_version=on_version)
+            stream = self.stream_sync(
+                ref, None, on_start=on_start, on_version=on_version)
             stream.start()
         threads = []
         for i in range(m):
             th = Thread(target=threadFn, args=[i])
             th.start()
             threads.append(th)
-        for th  in threads:
+        for th in threads:
             th.join()
         actual.sort()
         self.assertEqual(actual, expected)
@@ -120,24 +125,26 @@ class StreamTest(FaunaTestCase):
     def test_stream_reject_non_readonly_query(self):
         q = query.create_collection({"name": "c"})
         stream = None
+
         def on_error(error):
             self.assertEqual(error.type, 'error')
             self.assertTrue(isinstance(error.error, BadRequest))
             self.assertEqual(error.error._get_description(),
-                              'Write effect in read-only query expression.')
+                             'Write effect in read-only query expression.')
             stream.close()
-        stream= self.stream_sync(q, on_error=on_error)
+        stream = self.stream_sync(q, on_error=on_error)
         stream.start()
 
     def test_stream_select_fields(self):
         ref = self._create()["ref"]
         stream = None
         fields = {"document", "diff"}
+
         def on_start(event):
             self.assertEqual(event.type, 'start')
             self.assertTrue(isinstance(event.event, int))
-            self._q(query.update(ref, {"data":{"k": "v"}}))
-        
+            self._q(query.update(ref, {"data": {"k": "v"}}))
+
         def on_version(event):
             self.assertEqual(event.type, 'version')
             self.assertTrue(isinstance(event.event, dict))
@@ -146,9 +153,9 @@ class StreamTest(FaunaTestCase):
             self.assertEqual(keys, {"document", "diff"})
             stream.close()
         options = {"fields": list(fields)}
-        stream = self.stream_sync(ref, options, on_start=on_start, on_version=on_version)
+        stream = self.stream_sync(
+            ref, options, on_start=on_start, on_version=on_version)
         stream.start()
-
 
     def test_stream_update_last_txn_time(self):
         ref = self._create()["ref"]
@@ -158,7 +165,7 @@ class StreamTest(FaunaTestCase):
         def on_start(event):
             self.assertEqual(event.type, 'start')
             self.assertTrue(self.client.get_last_txn_time() > last_txn_time)
-            #for start event, last_txn_time maybe be updated to response X-Txn-Time header
+            # for start event, last_txn_time maybe be updated to response X-Txn-Time header
             # or event.txn. What is guaranteed is the most recent is used- hence >=.
             self.assertTrue(self.client.get_last_txn_time() >= event.txn)
             self._q(query.update(ref, {"data": {"k": "v"}}))
@@ -168,17 +175,19 @@ class StreamTest(FaunaTestCase):
             self.assertEqual(event.txn, self.client.get_last_txn_time())
             stream.close()
 
-        stream = self.stream_sync(ref, on_start=on_start, on_version=on_version)
+        stream = self.stream_sync(
+            ref, on_start=on_start, on_version=on_version)
         stream.start()
 
     def test_stream_handle_request_failures(self):
-        stream=None
+        stream = None
+
         def on_error(event):
             self.assertEqual(event.type, 'error')
             self.assertTrue(isinstance(event.error, BadRequest))
             self.assertEqual(event.error._get_description(),
                              'Expected a Document Ref or Version, got String.')
-        stream=self.stream_sync('invalid stream', on_error=on_error )
+        stream = self.stream_sync('invalid stream', on_error=on_error)
         stream.start()
 
     def test_start_active_stream(self):
@@ -193,7 +202,6 @@ class StreamTest(FaunaTestCase):
 
         stream = self.stream_sync(ref, None, on_start=on_start)
         stream.start()
-
 
     def test_stream_auth_revalidation(self):
         ref = self._create()["ref"]
@@ -217,6 +225,35 @@ class StreamTest(FaunaTestCase):
                              'Authorization lost during stream evaluation.')
             stream.close()
 
-
         stream = client.stream(ref, on_start=on_start, on_error=on_error)
         stream.start()
+
+    def test_stream_invalid_url(self):
+        ref = self._create()["ref"]
+        stream = None
+
+        server_key = self.root_client.query(
+            query.create_key({"database": self.db_ref, "role": "server"}))
+        client = self.root_client.new_session_client(
+            secret=server_key["secret"])
+
+        def on_start(event):
+            self.assertEqual(event.type, 'start')
+            self.assertTrue(isinstance(event.event, int))
+            self.root_client.query(query.delete(server_key["ref"]))
+            self.client.query(query.update(ref, {"data": {"k": "v"}}))
+
+        def on_error(event):
+            self.assertEqual(event.type, 'error')
+            self.assertEqual(event.code, 'permission denied')
+            self.assertEqual(event.description,
+                             'Authorization lost during stream evaluation.')
+            stream.close()
+
+        options = {"fields": ["invalid_url"]}
+
+        error = self.assert_raises(Exception, lambda: client.stream(
+            ref, options, on_start=on_start, on_error=on_error))
+
+        self.assertRegex(str(
+            error), r"Valid fields options are \{.*\}, provided \['invalid_url'\].")

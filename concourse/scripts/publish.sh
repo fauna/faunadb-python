@@ -13,3 +13,5 @@ pip install twine
 
 twine check dist/*
 twine upload dist/*
+
+echo "faunadb-python@$PACKAGE_VERSION has been published to pypi [fyi <@ewan.edwards>]" > ../slack-message/publish
