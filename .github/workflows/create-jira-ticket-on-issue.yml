@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Login
-        uses: atlassian/gajira-login@main
+        uses: atlassian/gajira-login@master
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
@@ -18,7 +18,7 @@ jobs:
 
       - name: Create
         id: create
-        uses: atlassian/gajira-create@main
+        uses: atlassian/gajira-create@master
         with:
           project: DRV
           issuetype: Bug
@@ -27,7 +27,7 @@ jobs:
           fields: '{"labels": ["github"], "components": [{ "name": "Python Driver" }]}'
 
       - name: Set triage state
-        uses: atlassian/gajira-transition@main
+        uses: atlassian/gajira-transition@master
         with:
           issue: ${{ steps.create.outputs.issue }}
           transition: "TRIAGE"
