@@ -1,5 +1,5 @@
 ## 4.2.0 [current]
-- Add support for [set streaming](https://docs.fauna.com/fauna/current/drivers/streaming).
+- Add support for [set streaming](https://docs.fauna.com/fauna/current/drivers/streaming). Pull request for set streaming [here](https://github.com/fauna/faunadb-python/pull/221).
 
 ## 4.1.1
 - Exposes all the fields in the `errors` object
