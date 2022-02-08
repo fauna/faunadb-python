@@ -20,6 +20,8 @@ def parse_stream_request_result_or_none(request_result):
         event = Error(parsed)
     elif evt_type == 'version':
         event = Version(parsed)
+    elif evt_type == 'set':
+        event = Set(parsed)
     elif evt_type == 'history_rewrite':
         event = HistoryRewrite(parsed)
     else:
@@ -120,6 +122,22 @@ class Version(Event):
     def __repr__(self):
         return "stream:event:Version(event=%s, txn=%s)" % (self.event, self.txn)
 
+class Set(Event):
+    """
+    A set event occurs upon any modifications to the current state of the
+    subscribed set.
+
+    :param event: Data
+    :param txn: Timestamp
+    """
+    def __init__(self, parsed):
+        super(Set, self).__init__('set')
+        if isinstance(parsed, dict):
+            self.event = parsed.get('event', None)
+            self.txn = parsed.get('txn')
+
+    def __repr__(self):
+        return "stream:event:Set(event=%s, txn=%s)" % (self.event, self.txn)
 
 class UnknownEvent(Event):
     """

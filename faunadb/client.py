@@ -223,6 +223,7 @@ class FaunaClient(object):
             self.counter = _Counter(1)
 
             self.session.headers.update({
+                "Keep-Alive": "timeout=5",
                 "Accept-Encoding": "gzip",
                 "Content-Type": "application/json;charset=utf-8",
                 "X-Fauna-Driver": "python",
@@ -291,7 +292,7 @@ class FaunaClient(object):
         """
         return self._execute("POST", "", _wrap(expression), with_txn_time=True, query_timeout_ms=timeout_millis)
 
-    def stream(self, expression, options=None, on_start=None, on_error=None, on_version=None, on_history=None):
+    def stream(self, expression, options=None, on_start=None, on_error=None, on_version=None, on_history=None, on_set=None):
         """
         Creates a stream Subscription to the result of the given read-only expression. When
         executed.
@@ -307,12 +308,14 @@ class FaunaClient(object):
         :param   on_error:   Callback for the stream's error event.
         :param   on_version: Callback for the stream's version events.
         :param   on_history: Callback for the stream's history_rewrite events.
+        :param   on_set:     Callback for the stream's set events.
         """
         subscription = Subscription(self, expression, options)
         subscription.on('start', on_start)
         subscription.on('error', on_error)
         subscription.on('version', on_version)
         subscription.on('history_rewrite', on_history)
+        subscription.on('set', on_set)
         return subscription
 
     def ping(self, scope=None, timeout=None):
