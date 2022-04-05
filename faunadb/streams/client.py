@@ -47,8 +47,8 @@ class Connection(object):
         try:
             base_url = "https://%s:%s" % (self._client.domain, self._client.port)
             self.conn=httpx.Client(http2=True,http1=False, base_url=base_url, timeout=None)
-        except Exception as e:
-            raise StreamError(e)
+        except Exception as error_msg:
+            raise StreamError(error_msg)
 
     def close(self):
         """
@@ -81,10 +81,9 @@ class Connection(object):
             
             self._state = 'open'
             self._event_loop(id, on_event, start_time)
-        except Exception as e:
-            #print(self.conn.request("POST", "/stream%s" % (url_params), data=self._data, headers=dict(headers)))
+        except Exception as error_msg:
             if callable(on_event):
-                on_event(Error(e), None)
+                on_event(Error(error_msg), None)
 
     def _event_loop(self, stream_id, on_event, start_time):
         """ Event loop for the stream. """
@@ -114,10 +113,10 @@ class Connection(object):
                         on_event(event, request_result)
                         if self._client.observer is not None:
                             self._client.observer(request_result)
-            except Exception as e:
-                self.error = e
+            except Exception as error_msg:
+                self.error = error_msg
                 self.close()
-                on_event(Error(e), None)
+                on_event(Error(error_msg), None)
 
     def _stream_chunk_to_request_result(self, response, raw, content, start_time, end_time):
         """ Converts a stream chunk to a RequestResult. """
