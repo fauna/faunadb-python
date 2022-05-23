@@ -2,7 +2,7 @@ name: Create JIRA ticket for GH pull request
 
 on:
   pull_request:
-    types: [opened, edited]
+    types: [opened]
 
 jobs:
   log_context:
