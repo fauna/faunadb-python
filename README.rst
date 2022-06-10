@@ -92,7 +92,7 @@ The streaming API is blocking by default, the choice and mechanism for handling 
 Observing Metrics
 -----------------
 
-Its possible to observe the metrics your calls incur by plugging into the client's observer.
+Its possible to observe each query's metrics by providing an "observer" callback.
 
 More information on metrics is available in the `FaunaDB Documentation <https://docs.fauna.com/fauna/current/learn/understanding/billing#perquery>`_.
 
