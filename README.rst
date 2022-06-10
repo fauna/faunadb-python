@@ -112,7 +112,7 @@ Here is a simple example:
         print('writeOps:', h["x-byte-write-ops"])
         print('retries:', h["x-txn-retries"])
 
-
+    # Connect to a local Fauna Dev instance
     client = FaunaClient(
         secret="secret",
         domain="localhost",
