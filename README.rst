@@ -94,12 +94,12 @@ Observing Metrics
 
 Its possible to observe the metrics your calls incur by plugging into the client's observer.
 
-More information on metrics is available in the ``FaunaDB Documentation <https://docs.fauna.com/fauna/current/learn/understanding/billing#perquery>`_.
+More information on metrics is available in the `FaunaDB Documentation <https://docs.fauna.com/fauna/current/learn/understanding/billing#perquery>`_.
 
 Here is a simple example:
 
 .. code-block:: python
-    #!/usr/bin/env python3
+
     from faunadb import query as q
     from faunadb.client import FaunaClient
     from faunadb.errors import FaunaError

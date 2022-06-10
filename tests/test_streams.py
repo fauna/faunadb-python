@@ -177,7 +177,7 @@ class StreamTest(FaunaTestCase):
             self.assertEqual(event.type, 'error')
             self.assertTrue(isinstance(event.error, BadRequest))
             self.assertEqual(event.error._get_description(),
-                             'Expected a Document Ref or Version, got String.')
+                             'Expected a Document Ref or Version, or a Set Ref, got String.')
         stream=self.stream_sync('invalid stream', on_error=on_error )
         stream.start()
 
