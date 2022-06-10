@@ -89,6 +89,48 @@ The streaming API is blocking by default, the choice and mechanism for handling 
     stream = client.stream(doc["ref"], options, on_start, on_error, on_version)
     stream.start()
 
+Observing Metrics
+-----------------
+
+Its possible to observe each query's metrics by providing an "observer" callback.
+
+More information on query metrics is available in the `FaunaDB Documentation <https://docs.fauna.com/fauna/current/learn/understanding/billing#perquery>`_.
+
+Here is a simple example:
+
+.. code-block:: python
+
+    from faunadb import query as q
+    from faunadb.client import FaunaClient
+    from faunadb.errors import FaunaError
+
+    # The observer callback, which takes the HTTP response for a query
+    def observe(response):
+        h = response.response_headers
+        print('bytesOut:', h["x-compute-ops"])
+        print('queryTime:', h["x-query-time"])
+        print('readOps:', h["x-byte-read-ops"])
+        print('writeOps:', h["x-byte-write-ops"])
+        print('retries:', h["x-txn-retries"])
+
+    # Connect to a local Fauna Dev instance
+    client = FaunaClient(
+        secret="secret",
+        domain="localhost",
+        scheme="http",
+        port=8443,
+        observer=observe
+    )
+
+    try:
+        result = client.query(
+            q.paginate(q.collections())
+        )
+    except FaunaError as err:
+        print("err: ", err)
+    else:
+        print(result)
+
 Building it yourself
 --------------------
 
