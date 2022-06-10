@@ -124,10 +124,7 @@ Here is a simple example:
 
     try:
         result = client.query(
-            q.do(
-                q.create_collection({ "name": "_" }),
-                q.abort("Abort!")
-            )
+            q.paginate(q.collections())
         )
     except FaunaError as err:
         print("err: ", err)
