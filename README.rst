@@ -104,6 +104,7 @@ Here is a simple example:
     from faunadb.client import FaunaClient
     from faunadb.errors import FaunaError
 
+    # The observer callback, which takes the HTTP response for a query
     def observe(response):
         h = response.response_headers
         print('bytesOut:', h["x-compute-ops"])
