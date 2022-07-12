@@ -9,7 +9,7 @@ except ImportError:
 
 from faunadb._json import parse_json_or_none, stream_content_to_json, to_json
 from faunadb.request_result import RequestResult
-from hyper import HTTP20Connection
+import httpx
 
 from .errors import StreamError
 from .events import Error, parse_stream_request_result_or_none
@@ -45,10 +45,10 @@ class Connection(object):
         self._query = expression
         self._data = to_json(expression).encode()
         try:
-            self.conn = HTTP20Connection(
-                self._client.domain, port=self._client.port, enable_push=True)
-        except Exception as e:
-            raise StreamError(e)
+            base_url = "https://%s:%s" % (self._client.domain, self._client.port)
+            self.conn=httpx.Client(http2=True,http1=False, base_url=base_url, timeout=None)
+        except Exception as error_msg:
+            raise StreamError(error_msg)
 
     def close(self):
         """
@@ -76,47 +76,47 @@ class Connection(object):
             if isinstance(self._fields, list):
                 url_params = "?%s" % (
                     urlencode({'fields': ",".join(self._fields)}))
-            id = self.conn.request("POST", "/stream%s" %
-                                   (url_params), body=self._data, headers=headers)
+            id = self.conn.stream("POST", "/stream%s" %
+                                  (url_params), data=self._data, headers=dict(headers))
+            
             self._state = 'open'
             self._event_loop(id, on_event, start_time)
-        except Exception as e:
+        except Exception as error_msg:
             if callable(on_event):
-                on_event(Error(e), None)
+                on_event(Error(error_msg), None)
 
     def _event_loop(self, stream_id, on_event, start_time):
         """ Event loop for the stream. """
-        response = self.conn.get_response(stream_id)
-        if 'x-txn-time' in response.headers:
-            self._client.sync_last_txn_time(
-                int(response.headers['x-txn-time'][0].decode()))
-        try:
-            buffer = ''
-            for push in response.read_chunked():
+        with stream_id as response:
+            if 'x-txn-time' in response.headers:
+                self._client.sync_last_txn_time(int(response.headers['x-txn-time']))
+            try:
+                buffer = ''
+                for push in response.iter_bytes():
 
-                try:
-                    chunk = push.decode()
-                    buffer += chunk
-                except:
-                    continue
+                    try:
+                        chunk = push.decode()
+                        buffer += chunk
+                    except:
+                        continue
 
-                result = stream_content_to_json(buffer)
-                buffer = result["buffer"]
+                    result = stream_content_to_json(buffer)
+                    buffer = result["buffer"]
 
-                for value in result["values"]:
-                    request_result = self._stream_chunk_to_request_result(
-                        response, value["raw"], value["content"], start_time, time())
-                    event = parse_stream_request_result_or_none(request_result)
+                    for value in result["values"]:
+                        request_result = self._stream_chunk_to_request_result(
+                            response, value["raw"], value["content"], start_time, time())
+                        event = parse_stream_request_result_or_none(request_result)
 
-                    if event is not None and hasattr(event, 'txn'):
-                        self._client.sync_last_txn_time(int(event.txn))
-                    on_event(event, request_result)
-                    if self._client.observer is not None:
-                        self._client.observer(request_result)
-        except Exception as e:
-            self.error = e
-            self.close()
-            on_event(Error(e), None)
+                        if event is not None and hasattr(event, 'txn'):
+                            self._client.sync_last_txn_time(int(event.txn))
+                        on_event(event, request_result)
+                        if self._client.observer is not None:
+                            self._client.observer(request_result)
+            except Exception as error_msg:
+                self.error = error_msg
+                self.close()
+                on_event(Error(error_msg), None)
 
     def _stream_chunk_to_request_result(self, response, raw, content, start_time, end_time):
         """ Converts a stream chunk to a RequestResult. """
