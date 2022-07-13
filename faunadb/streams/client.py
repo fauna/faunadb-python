@@ -24,7 +24,7 @@ class Connection(object):
     subscription.
 
     Current limitations:
-    Python requests module uses HTTP1; hyper is used for HTTP/2
+    Python requests module uses HTTP1; httpx is used for HTTP/2
     """
 
     def __init__(self, client, expression, options):
