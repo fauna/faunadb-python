@@ -88,6 +88,19 @@ class FaunaTestCase(TestCase):
     non_null_args = {k: v for k, v in args.items() if v is not None}
     return FaunaClient(secret=_FAUNA_ROOT_KEY, **non_null_args)
 
+  @classmethod
+  def _get_client_from_endpoint(cls):
+    args = {
+      "endpoint": "%s://%s:%s" % (_FAUNA_SCHEME, _FAUNA_DOMAIN, _FAUNA_PORT),
+      "domain": "bad domain",
+      "scheme": "bad scheme",
+      "port": "bad port",
+      "query_timeout_ms": _FAUNA_QUERY_TIMEOUT_MS
+    }
+    # If None, use default instead
+    non_null_args = {k: v for k, v in args.items() if v is not None}
+    return FaunaClient(secret=_FAUNA_ROOT_KEY, **non_null_args)
+
   def assert_raises(self, exception_class, action):
     """Like self.assertRaises and returns the exception too."""
     with self.assertRaises(exception_class) as cm:
