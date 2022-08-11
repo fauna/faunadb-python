@@ -175,6 +175,7 @@ class FaunaClient(object):
             observer=None,
             pool_connections=10,
             pool_maxsize=10,
+            endpoint=None,
             **kwargs):
         """
         :param secret:
@@ -193,6 +194,8 @@ class FaunaClient(object):
           The number of connection pools to cache.
         :param pool_maxsize:
           The maximum number of connections to save in the pool.
+        :param endpoint:
+          Full URL for the FaunaDB server.
         """
 
         self.check_new_version()
@@ -203,7 +206,7 @@ class FaunaClient(object):
                      "https" else 80) if port is None else port
 
         self.auth = HTTPBearerAuth(secret)
-        self.base_url = "%s://%s:%s" % (self.scheme, self.domain, self.port)
+        self.base_url = endpoint if endpoint else "%s://%s:%s" % (self.scheme, self.domain, self.port)
         self.observer = observer
 
         self.pool_connections = pool_connections
