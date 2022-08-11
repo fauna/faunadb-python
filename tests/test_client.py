@@ -15,6 +15,14 @@ class ClientTest(FaunaTestCase):
 
     self.assertEqual(old_time, new_time) # client.ping should not update last-txn-time
 
+  def test_ping_using_endpoint(self):
+    client = self._get_client_from_endpoint()
+    old_time = client.get_last_txn_time()
+    self.assertEqual(client.ping("node"), "Scope node is OK")
+    new_time = client.get_last_txn_time()
+
+    self.assertEqual(old_time, new_time) # client.ping should not update last-txn-time
+
   def test_query_timeout(self):
     client = FaunaClient(secret="secret", query_timeout_ms=5000)
     self.assertEqual(client.get_query_timeout(), 5000)
