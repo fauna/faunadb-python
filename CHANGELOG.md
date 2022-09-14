@@ -1,9 +1,13 @@
-## 4.2.0 [current]
+## 4.3.0 [current]
+- Add optional endpoint parameter as an alternative to setting scheme, domain and port individually. The new parameter
+  will override scheme, domain and port if set. [#240](https://github.com/fauna/faunadb-python/pull/240)
+
+## 4.2.0
 - Add support for [set streaming](https://docs.fauna.com/fauna/current/drivers/streaming). Pull request for set streaming [here](https://github.com/fauna/faunadb-python/pull/221).
 
 ## 4.1.1
 - Exposes all the fields in the `errors` object
-- Allows setting select function's default parameter as None value 
+- Allows setting select function's default parameter as None value
 - Notifies about new package version
 
 ## 4.1.0
