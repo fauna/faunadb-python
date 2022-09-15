@@ -401,7 +401,6 @@ class FaunaClient(object):
     def _perform_request(self, action, path, data, query, headers):
         """Performs an HTTP action."""
         url = self.base_url + "/" + path
-        print("\nPerforming request to: " + url)
         req = Request(action, url, params=query, data=to_json(
             data), auth=self.auth, headers=headers)
         return self.session.send(self.session.prepare_request(req))
