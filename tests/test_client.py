@@ -12,7 +12,6 @@ class ClientTest(FaunaTestCase):
     old_time = self.client.get_last_txn_time()
     self.assertEqual(self.client.ping("node"), "Scope node is OK")
     new_time = self.client.get_last_txn_time()
-
     self.assertEqual(old_time, new_time) # client.ping should not update last-txn-time
 
   def test_ping_using_endpoint(self):
@@ -20,19 +19,23 @@ class ClientTest(FaunaTestCase):
     old_time = client.get_last_txn_time()
     self.assertEqual(client.ping("node"), "Scope node is OK")
     new_time = client.get_last_txn_time()
-
     self.assertEqual(old_time, new_time) # client.ping should not update last-txn-time
+
+  def test_endpoint_normalization(self):
+    endpoint = self._get_fauna_endpoint()
+    endpoints = [endpoint, endpoint + "/", endpoint + "//", endpoint + "\\", endpoint + "\\\\"]
+    for e in endpoints:
+      client = FaunaClient(secret="secret", endpoint=e)
+      self.assertEqual(client.ping("node"), "Scope node is OK")
 
   def test_query_timeout(self):
     client = FaunaClient(secret="secret", query_timeout_ms=5000)
     self.assertEqual(client.get_query_timeout(), 5000)
-    
 
   def test_last_txn_time(self):
     old_time = self.client.get_last_txn_time()
     self.client.query({})
     new_time = self.client.get_last_txn_time()
-
     self.assertTrue(old_time < new_time) # client.query should update last-txn-time
 
   def test_last_txn_time_upated(self):
@@ -77,5 +80,3 @@ class ClientTest(FaunaTestCase):
     )
 
     os.environ["PATH"] = originalPath
-
-
