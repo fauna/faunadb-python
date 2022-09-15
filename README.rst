@@ -35,7 +35,7 @@ Documentation
 
 Driver documentation is available at https://fauna.github.io/faunadb-python/4.1.1/api/.
 
-See the `FaunaDB Documentation <https://docs.fauna.com/>`_ for a complete API reference, or look in `tests`_
+See the `FaunaDB Documentation <https://docs.fauna.com/>`_ for a complete API reference, or look in `tests`__
 for more examples.
 
 
@@ -94,7 +94,7 @@ Observing Metrics
 
 Its possible to observe each query's metrics by providing an "observer" callback.
 
-More information on query metrics is available in the `FaunaDB Documentation <https://docs.fauna.com/fauna/current/learn/understanding/billing#perquery>`_.
+More information on query metrics is available in the `FaunaDB Documentation <https://docs.fauna.com/fauna/current/learn/understanding/billing#perquery>`__.
 
 Here is a simple example:
 
