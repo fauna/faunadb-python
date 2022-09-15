@@ -80,8 +80,3 @@ class ClientTest(FaunaTestCase):
     )
 
     os.environ["PATH"] = originalPath
-
-  def test_client_constructor(self):
-    client = FaunaClient(secret="secret", )
-
-
