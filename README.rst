@@ -35,7 +35,7 @@ Documentation
 
 Driver documentation is available at https://fauna.github.io/faunadb-python/4.1.1/api/.
 
-See the `FaunaDB Documentation <https://docs.fauna.com/>`_ for a complete API reference, or look in `tests`__
+See the `FaunaDB Documentation <https://docs.fauna.com/>`__ for a complete API reference, or look in `tests`_
 for more examples.
 
 
