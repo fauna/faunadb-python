@@ -206,7 +206,7 @@ class FaunaClient(object):
                      "https" else 80) if port is None else port
 
         self.auth = HTTPBearerAuth(secret)
-        self.base_url = endpoint if endpoint else "%s://%s:%s" % (self.scheme, self.domain, self.port)
+        self.base_url = endpoint.strip("/\\") if endpoint else "%s://%s:%s" % (self.scheme, self.domain, self.port)
         self.observer = observer
 
         self.pool_connections = pool_connections

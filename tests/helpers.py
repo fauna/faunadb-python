@@ -89,9 +89,13 @@ class FaunaTestCase(TestCase):
     return FaunaClient(secret=_FAUNA_ROOT_KEY, **non_null_args)
 
   @classmethod
+  def _get_fauna_endpoint(cls):
+    return "%s://%s:%s" % (_FAUNA_SCHEME, _FAUNA_DOMAIN, _FAUNA_PORT)
+
+  @classmethod
   def _get_client_from_endpoint(cls):
     args = {
-      "endpoint": "%s://%s:%s" % (_FAUNA_SCHEME, _FAUNA_DOMAIN, _FAUNA_PORT),
+      "endpoint": cls._get_fauna_endpoint(),
       "domain": "bad domain",
       "scheme": "bad scheme",
       "port": "bad port",
