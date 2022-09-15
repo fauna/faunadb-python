@@ -21,9 +21,9 @@ class ClientTest(FaunaTestCase):
     new_time = client.get_last_txn_time()
     self.assertEqual(old_time, new_time) # client.ping should not update last-txn-time
 
-    # test endpoints with trailing slashes etc
+  def test_endpoint_normalization(self):
     endpoint = self._get_fauna_endpoint()
-    endpoints = [endpoint + "/", endpoint + "//", endpoint + "\\", endpoint + "\\\\"]
+    endpoints = [endpoint, endpoint + "/", endpoint + "//", endpoint + "\\", endpoint + "\\\\"]
     for e in endpoints:
       client = FaunaClient(secret="secret", endpoint=e)
       self.assertEqual(client.ping("node"), "Scope node is OK")

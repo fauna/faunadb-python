@@ -206,7 +206,8 @@ class FaunaClient(object):
                      "https" else 80) if port is None else port
 
         self.auth = HTTPBearerAuth(secret)
-        self.base_url = endpoint.strip("/\\") if endpoint else "%s://%s:%s" % (self.scheme, self.domain, self.port)
+        constructed_url = "%s://%s:%s" % (self.scheme, self.domain, self.port)
+        self.base_url = self._normalize_endpoint(endpoint) if endpoint else constructed_url
         self.observer = observer
 
         self.pool_connections = pool_connections
@@ -280,6 +281,9 @@ class FaunaClient(object):
         Get the query timeout for all queries.
         """
         return self._query_timeout_ms
+
+    def _normalize_endpoint(self, endpoint):
+      return endpoint.rstrip("/\\")
 
     def __del__(self):
         if self.counter.decrement() == 0:
