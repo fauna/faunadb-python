@@ -4,7 +4,7 @@ image_resource:
   type: registry-image
   source:
     repository: python
-    tag: 3.9.5-alpine3.13
+    tag: 3.9.14-alpine3.16
 
 params:
   TWINE_USERNAME:
