@@ -78,7 +78,7 @@ class FaunaTestCase(TestCase):
 
   @classmethod
   def _get_client(cls):
-    print("Initializing client with: " + _FAUNA_DOMAIN + ", " + _FAUNA_SCHEME + ", " + _FAUNA_PORT)
+    print("\nInitializing client with: " + _FAUNA_DOMAIN + ", " + _FAUNA_SCHEME + ", " + _FAUNA_PORT)
     args = {
       "domain": _FAUNA_DOMAIN,
       "scheme": _FAUNA_SCHEME,
