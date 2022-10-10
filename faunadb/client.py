@@ -249,7 +249,7 @@ class FaunaClient(object):
         if latest_version > pkg_version:
             msg1 = "New fauna version available {} => {}".format(
                 pkg_version, latest_version)
-            msg2 = "Changelog: https://github.com/fauna/faunadb-python/blob/main/CHANGELOG.md"
+            msg2 = "Changelog: https://github.com/fauna/faunadb-python/blob/v4/CHANGELOG.md"
             width = 80
             print('+' + '-' * width + '+')
             print('| ' + msg1 + ' ' * (width - len(msg1) - 1) + '|')
