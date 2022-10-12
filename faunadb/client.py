@@ -111,12 +111,12 @@ class _LastTxnTime(object):
 
     @property
     def request_header(self):
-        """Produces a dictionary with a non-zero `X-Last-Txn-Time` header; or,
+        """Produces a dictionary with a non-zero `X-Last-Seen-Txn` header; or,
         if one has not yet been set, the empty header dictionary."""
         t = self.time
         if t is None:
             return {}
-        return {"X-Last-Txn-Time": str(t)}
+        return {"X-Last-Seen-Txn": str(t)}
 
     def update_txn_time(self, new_txn_time):
         """Updates the internal transaction time.
