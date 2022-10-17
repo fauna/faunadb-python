@@ -1,4 +1,8 @@
-## 4.3.0 [current]
+## 4.3.1 [current]
+- Fix the X-Last-Seen-Txn header. [#250](https://github.com/fauna/faunadb-python/pull/250)
+- Fix the changelog link emitted from upgrade prompt. [#249])(https://github.com/fauna/faunadb-python/pull/249)
+
+## 4.3.0
 - Add optional endpoint parameter as an alternative to setting scheme, domain and port individually. The new parameter
   will override scheme, domain and port if set. [#240](https://github.com/fauna/faunadb-python/pull/240)
 
