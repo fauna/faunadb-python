@@ -7,6 +7,13 @@ resources:
       uri: https://github.com/fauna/faunadb-python
       branch: v4
 
+  - name: fauna-python-repository-staging
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/fauna/faunadb-python
+      branch: v4-staging
+
   - name: fauna-python-repository-docs
     type: git
     icon: github
@@ -14,6 +21,26 @@ resources:
       uri: git@github.com:fauna/faunadb-python.git
       branch: gh-pages
       private_key: ((github_repo_key))
+
+  - name: notify
+    type: slack-notification
+    source:
+      url: ((slack-webhook))
+
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+      tag: latest
+
+groups:
+  - name: standard-release
+    jobs:
+      - release
+  - name: staging-tests
+    jobs:
+      - run-staging-tests
 
 jobs:
   - name: release
@@ -37,6 +64,10 @@ jobs:
 
       - task: publish
         file: fauna-python-repository/concourse/tasks/publish.yml
+        on_success:
+          params:
+            text_file: slack-message/publish
+          put: notify
         params:
           TWINE_USERNAME: ((pypi-username))
           TWINE_PASSWORD: ((pypi-password))
@@ -47,3 +78,17 @@ jobs:
       - put: fauna-python-repository-docs
         params:
           repository: fauna-python-repository-updated-docs
+  - name: run-staging-tests
+    serial: true
+    public: false
+    plan:
+      - get: fauna-python-repository-staging
+
+      - task: integration-tests
+        file: fauna-python-repository-staging/concourse/tasks/integration-tests.yml
+        privileged: true
+        params:
+          FAUNA_ROOT_KEY: ((fauna.secret))
+          FAUNA_DOMAIN: ((fauna.domain))
+          FAUNA_SCHEME: ((fauna.scheme))
+          FAUNA_PORT: ((fauna.port))
