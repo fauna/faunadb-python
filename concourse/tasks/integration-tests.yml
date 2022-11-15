@@ -21,6 +21,7 @@ run:
     - -ceu
     - |
       # start containers
+      docker-compose -f fauna-python-repository/concourse/tasks/integration.yml run tests-310
       docker-compose -f fauna-python-repository/concourse/tasks/integration.yml run tests-39
       docker-compose -f fauna-python-repository/concourse/tasks/integration.yml run tests-38
       docker-compose -f fauna-python-repository/concourse/tasks/integration.yml run tests-37
