@@ -5,10 +5,26 @@ services:
     image: fauna/faunadb
     container_name: faunadb
     healthcheck:
-      test: ["CMD", "curl" ,"http://faunadb:8443/ping"]
+      test: ["CMD", "curl", "http://faunadb:8443/ping"]
       interval: 1s
       timeout: 3s
       retries: 30
+
+  tests-310:
+    environment:
+      - FAUNA_ROOT_KEY
+      - FAUNA_DOMAIN
+      - FAUNA_SCHEME
+      - FAUNA_PORT
+    image: python:3.10-alpine3.15
+    container_name: mytests-310
+    depends_on:
+      - faunadb
+    volumes:
+      - "../../:/tmp/app"
+    working_dir: "/tmp/app"
+    command:
+      - concourse/scripts/integration-tests.sh
 
   tests-39:
     environment:
