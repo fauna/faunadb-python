@@ -129,7 +129,6 @@ class ErrorData(object):
     @staticmethod
     def get_cause(dct, request_result):
         if "cause" in dct:
-            print(dct["cause"])
             return [ErrorData.from_dict(cause, request_result) for cause in dct["cause"]]
         return None
 
