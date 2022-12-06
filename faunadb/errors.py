@@ -117,7 +117,8 @@ class ErrorData(object):
             _get_or_raise(request_result, dct, "code"),
             _get_or_raise(request_result, dct, "description"),
             dct.get("position"),
-            ErrorData.get_failures(dct, request_result))
+            ErrorData.get_failures(dct, request_result),
+            ErrorData.get_cause(dct, request_result))
 
     @staticmethod
     def get_failures(dct, request_result):
@@ -125,7 +126,13 @@ class ErrorData(object):
             return [Failure.from_dict(failure, request_result) for failure in dct["failures"]]
         return None
 
-    def __init__(self, code, description, position, failures):
+    @staticmethod
+    def get_cause(dct, request_result):
+        if "cause" in dct:
+            return [ErrorData.from_dict(cause, request_result) for cause in dct["cause"]]
+        return None
+
+    def __init__(self, code, description, position, failures, cause=None):
         self.code = code
         """Error code. See all error codes `here <https://fauna.com/documentation#errors>`__."""
         self.description = description
@@ -133,21 +140,25 @@ class ErrorData(object):
         self.position = position
         """Position of the error in a query. May be None."""
         self.failures = failures
+        """Cause of the error. May be None."""
+        self.cause = cause
         """
     List of all :py:class:`Failure` objects returned by the server.
     None unless code == "validation failed".
     """
 
     def __repr__(self):
-        return "ErrorData(code=%s, description=%s, position=%s, failures=%s)" % \
+        return "ErrorData(code=%s, description=%s, position=%s, failures=%s, cause=%s)" % \
                (repr(self.code), repr(self.description),
-                repr(self.position), repr(self.failures))
+                repr(self.position), repr(self.failures),
+                repr(self.cause))
 
     def __eq__(self, other):
         return self.__class__ == other.__class__ and \
             self.description == other.description and \
             self.position == other.position and \
-            self.failures == other.failures
+            self.failures == other.failures and \
+            self.cause == other.cause
 
     def __ne__(self, other):
         # pylint: disable=unneeded-not
