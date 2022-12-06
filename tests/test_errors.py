@@ -52,6 +52,27 @@ class ErrorsTest(FaunaTestCase):
       lambda: client.query(query.paginate(Native.DATABASES)))
     self._assert_error(exception, "permission denied", ["paginate"])
 
+  def test_error_cause(self):
+    # Create client with server key, so that it can create `my_abort_func`
+    client = self.root_client.new_session_client(
+      secret=self.root_client.query(
+        create_key({"database": self.db_ref, "role": "server"}))["secret"]
+    )
+
+    # Create a function which will abort with a custom message
+    client.query(query.create_function({
+      "name": "my_abort_func",
+      "body": query.query(query.lambda_([], query.abort("custom error here"))),
+    }))
+
+    # Make sure we can get that cusom message back
+    exception = self.assert_raises(
+      BadRequest,
+      lambda: client.query(query.call("my_abort_func")))
+    self._assert_error(exception, "call error", [], cause=[
+      ErrorData(code="transaction aborted", description="custom error here", position=["expr"], failures=None)
+    ])
+
   def test_internal_error(self):
     # pylint: disable=line-too-long
     code_client = mock_client(
@@ -140,10 +161,11 @@ class ErrorsTest(FaunaTestCase):
   def _assert_http_error(self, action, exception_cls, code):
     self._assert_error(self.assert_raises(exception_cls, action), code)
 
-  def _assert_error(self, exception, code, position=None):
+  def _assert_error(self, exception, code, position=None, cause=None):
     self.assertEqual(len(exception.errors), 1)
     error = exception.errors[0]
     self.assertEqual(error.code, code)
     self.assertEqual(error.position, position)
+    self.assertEqual(error.cause, cause)
 
   #endregion
