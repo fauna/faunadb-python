@@ -48,6 +48,10 @@ lint-faunadb:
 lint-tests:
 	pylint tests --reports=n --indent-string='  ' --indent-after-paren=2 --disable=invalid-name,locally-disabled,missing-docstring,too-few-public-methods,too-many-arguments,no-member,no-self-use,protected-access,relative-import,too-many-public-methods
 
+docker-test:
+	docker build -f Dockerfile.test -t faunadb-python-test:latest --build-arg RUNTIME_IMAGE=$(RUNTIME_IMAGE) .
+	docker run $(DOCKER_RUN_FLAGS) faunadb-python-test:latest
+
 jenkins-test:
 	python -Wd -m nose2 --with-coverage --coverage-report xml --plugin nose2.plugins.junitxml --junit-xml && mv coverage.xml nose2-junit.xml results/ || { code=$$?; mv coverage.xml nose2-junit.xml results/; exit $$code; }
 

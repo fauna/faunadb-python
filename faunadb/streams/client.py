@@ -30,7 +30,6 @@ class Connection(object):
     def __init__(self, client, expression, options):
         self._client = client
         self.options = options
-        self.conn = None
         self._fields = None
         if isinstance(self.options, dict):
             self._fields = self.options.get("fields", None)
@@ -44,25 +43,28 @@ class Connection(object):
         self._state = "idle"
         self._query = expression
         self._data = to_json(expression).encode()
-        try:
-            base_url = "https://%s:%s" % (self._client.domain, self._client.port)
-            self.conn=httpx.Client(http2=True,http1=False, base_url=base_url, timeout=None)
-        except Exception as error_msg:
-            raise StreamError(error_msg)
 
     def close(self):
         """
         Closes the stream subscription by aborting its underlying http request.
         """
-        if self.conn is None:
+        if self._state == 'closed':
             raise StreamError('Cannot close inactive stream subscription.')
-        self.conn.close()
+
         self._state = 'closed'
 
     def subscribe(self, on_event):
         """Initiates the stream subscription."""
         if self._state != "idle":
             raise StreamError('Stream subscription already started.')
+
+        try:
+            base_url = f"{self._client.scheme}://{self._client.domain}:{self._client.port}"
+            timeout = httpx.Timeout(connect=None, read=None, write=None, pool=10)
+            conn = httpx.Client(http2=True, http1=False, base_url=base_url, timeout=timeout)
+        except Exception as error_msg:
+            raise StreamError(error_msg)
+
         try:
             self._state = 'connecting'
             headers = self._client.session.headers
@@ -76,14 +78,17 @@ class Connection(object):
             if isinstance(self._fields, list):
                 url_params = "?%s" % (
                     urlencode({'fields': ",".join(self._fields)}))
-            id = self.conn.stream("POST", "/stream%s" %
-                                  (url_params), data=self._data, headers=dict(headers))
-            
+
+            stream_id = conn.stream("POST", "/stream%s" %
+                                  (url_params), content=self._data, headers=dict(headers))
             self._state = 'open'
-            self._event_loop(id, on_event, start_time)
+            self._event_loop(stream_id, on_event, start_time)
         except Exception as error_msg:
             if callable(on_event):
                 on_event(Error(error_msg), None)
+        finally:
+            conn.close()
+
 
     def _event_loop(self, stream_id, on_event, start_time):
         """ Event loop for the stream. """
@@ -113,9 +118,11 @@ class Connection(object):
                         on_event(event, request_result)
                         if self._client.observer is not None:
                             self._client.observer(request_result)
+
+                    if self._state == 'closed':
+                        break
             except Exception as error_msg:
                 self.error = error_msg
-                self.close()
                 on_event(Error(error_msg), None)
 
     def _stream_chunk_to_request_result(self, response, raw, content, start_time, end_time):
@@ -124,3 +131,4 @@ class Connection(object):
             "POST", "/stream", self._query, self._data,
             raw, content, None, response.headers,
             start_time, end_time)
+
