@@ -1,6 +1,8 @@
 import sys
 import os
 import platform
+import random
+import string
 from faunadb.client import FaunaClient
 from faunadb.errors import UnexpectedError
 from tests.helpers import FaunaTestCase
@@ -80,3 +82,73 @@ class ClientTest(FaunaTestCase):
     )
 
     os.environ["PATH"] = originalPath
+
+  def test_tags_header(self):
+    self.client.observer = lambda rr: self.assertEqual(rr.response_headers["x-fauna-tags"], "baz=biz,foo=bar")
+    test_tags = {
+      "foo": "bar",
+      "baz": "biz",
+    }
+    self.client.query({}, tags=test_tags)
+
+    self.client.observer = None
+
+  def test_invalid_tags_keys(self):
+    invalid_keys = [
+      "foo bar",
+      "foo*bar",
+      ''.join(random.choice(string.ascii_lowercase) for _ in range(45)),
+    ]
+    for key in invalid_keys:
+      self.assertRaisesRegex(Exception,
+                             "One or more tag keys are invalid",
+                             lambda: self.client.query({}, tags={ key: "value" }))
+
+  def test_invalid_tags_values(self):
+    invalid_values = [
+      "foo bar",
+      "foo*bar",
+      ''.join(random.choice(string.ascii_lowercase) for _ in range(85)),
+    ]
+    for value in invalid_values:
+      self.assertRaisesRegex(Exception,
+                             "One or more tag values are invalid",
+                             lambda: self.client.query({}, tags={ "key": value }))
+
+  def test_too_many_tags(self):
+    too_many_keys = [ (''.join(random.choice(string.ascii_lowercase) for _ in range(10))) for _ in range(30) ]
+    too_many_tags = { k: "value" for k in too_many_keys }
+    self.assertRaisesRegex(Exception,
+                           "Tags header only supports up to 25 key-value pairs",
+                           lambda: self.client.query({}, tags=too_many_tags))
+
+  def test_traceparent_header(self):
+    token = ''.join(random.choice(string.hexdigits.lower()) for _ in range(32))
+    token2 = ''.join(random.choice(string.hexdigits.lower()) for _ in range(16))
+    self.client.observer = lambda rr: self.assertRegex(rr.response_headers["traceparent"], f"^00-{token}-\w{{16}}-\d{{2}}$")
+    self.client.query({}, traceparent=f"00-{token}-{token2}-01")
+
+    self.client.observer = None
+
+  def test_invalid_traceparent_header(self):
+    self.assertRaisesRegex(Exception,
+                           "Traceparent format is incorrect",
+                           lambda: self.client.query({}, traceparent="foo"))
+
+  def test_empty_traceparent_header(self):
+    tp_header = None
+    tp_part = None
+
+    def _test_and_save_traceparent(rr):
+      self.assertIsNotNone(rr.response_headers["traceparent"])
+      nonlocal tp_header, tp_part
+      tp_header = rr.response_headers["traceparent"]
+      tp_part = tp_header.split('-')[1]
+
+    self.client.observer = _test_and_save_traceparent
+    self.client.query({}, traceparent=None)
+
+    self.client.observer = lambda rr: self.assertRegex(rr.response_headers["traceparent"], f"^00-{tp_part}-\w{{16}}-\d{{2}}$")
+    self.client.query({}, traceparent=tp_header)
+
+    self.client.observer = None
