@@ -415,20 +415,8 @@ class FaunaClient(object):
     def _get_tags_string(self, tags_dict):
         if not isinstance(tags_dict, dict):
             raise Exception("Tags must be a dictionary")
-
-        if len(tags_dict) > 25:
-            raise Exception("Tags header only supports up to 25 key-value pairs")
-
-        if any([not bool(re.match("^\w{1,40}$", k)) for k in tags_dict]):
-            raise Exception("One or more tag keys are invalid; keys can be up to 40 characters long and can only include letters, numbers, and '_'")
-
-        if any([not bool(re.match("^\w{1,80}$", v)) for v in tags_dict.values()]):
-            raise Exception("One or more tag values are invalid; values can be up to 80 characters long and can only include letters, numbers, and '_'")
         
         return ",".join(["=".join([k, tags_dict[k]]) for k in tags_dict])
 
     def _is_valid_traceparent(self, traceparent):
-        if not bool(re.match("^[\da-f]{2}-[\da-f]{32}-[\da-f]{16}-[\da-f]{2}$", traceparent)):
-            raise Exception("Traceparent format is incorrect")
-
-        return True
+        return bool(re.match("^[\da-f]{2}-[\da-f]{32}-[\da-f]{16}-[\da-f]{2}$", traceparent))
