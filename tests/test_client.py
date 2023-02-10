@@ -101,8 +101,8 @@ class ClientTest(FaunaTestCase):
     ]
     for key in invalid_keys:
       self.assertRaisesRegexCompat(Exception,
-                             "One or more tag keys are invalid",
-                             lambda: self.client.query({}, tags={ key: "value" }))
+                                   "One or more tag keys are invalid",
+                                   lambda: self.client.query({}, tags={ key: "value" }))
 
   def test_invalid_tags_values(self):
     invalid_values = [
@@ -112,15 +112,15 @@ class ClientTest(FaunaTestCase):
     ]
     for value in invalid_values:
       self.assertRaisesRegexCompat(Exception,
-                             "One or more tag values are invalid",
-                             lambda: self.client.query({}, tags={ "key": value }))
+                                   "One or more tag values are invalid",
+                                   lambda: self.client.query({}, tags={ "key": value }))
 
   def test_too_many_tags(self):
     too_many_keys = [ (''.join(random.choice(string.ascii_lowercase) for _ in range(10))) for _ in range(30) ]
     too_many_tags = { k: "value" for k in too_many_keys }
     self.assertRaisesRegexCompat(Exception,
-                           "Tags header only supports up to 25 key-value pairs",
-                           lambda: self.client.query({}, tags=too_many_tags))
+                                 "Tags header only supports up to 25 key-value pairs",
+                                 lambda: self.client.query({}, tags=too_many_tags))
 
   def test_traceparent_header(self):
     token = ''.join(random.choice(string.hexdigits.lower()) for _ in range(32))
@@ -132,8 +132,8 @@ class ClientTest(FaunaTestCase):
 
   def test_invalid_traceparent_header(self):
     self.assertRaisesRegexCompat(Exception,
-                           "Traceparent format is incorrect",
-                           lambda: self.client.query({}, traceparent="foo"))
+                                 "Traceparent format is incorrect",
+                                 lambda: self.client.query({}, traceparent="foo"))
 
   def test_empty_traceparent_header(self):
     tp_header = None
