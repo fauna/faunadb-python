@@ -84,7 +84,7 @@ class ClientTest(FaunaTestCase):
     os.environ["PATH"] = originalPath
 
   def test_tags_header(self):
-    self.client.observer = lambda rr: self.assertEqual(rr.response_headers["x-fauna-tags"], "baz=biz,foo=bar")
+    self.client.observer = lambda rr: self.assertCountEqual(rr.response_headers["x-fauna-tags"].split(","), ["foo=bar", "baz=biz"])
     test_tags = {
       "foo": "bar",
       "baz": "biz",
