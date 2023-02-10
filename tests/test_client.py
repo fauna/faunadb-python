@@ -100,7 +100,7 @@ class ClientTest(FaunaTestCase):
       ''.join(random.choice(string.ascii_lowercase) for _ in range(41)),
     ]
     for key in invalid_keys:
-      self.assertRaisesRegex(Exception,
+      self.assertRaisesRegexCompat(Exception,
                              "One or more tag keys are invalid",
                              lambda: self.client.query({}, tags={ key: "value" }))
 
@@ -111,27 +111,27 @@ class ClientTest(FaunaTestCase):
       ''.join(random.choice(string.ascii_lowercase) for _ in range(81)),
     ]
     for value in invalid_values:
-      self.assertRaisesRegex(Exception,
+      self.assertRaisesRegexCompat(Exception,
                              "One or more tag values are invalid",
                              lambda: self.client.query({}, tags={ "key": value }))
 
   def test_too_many_tags(self):
     too_many_keys = [ (''.join(random.choice(string.ascii_lowercase) for _ in range(10))) for _ in range(30) ]
     too_many_tags = { k: "value" for k in too_many_keys }
-    self.assertRaisesRegex(Exception,
+    self.assertRaisesRegexCompat(Exception,
                            "Tags header only supports up to 25 key-value pairs",
                            lambda: self.client.query({}, tags=too_many_tags))
 
   def test_traceparent_header(self):
     token = ''.join(random.choice(string.hexdigits.lower()) for _ in range(32))
     token2 = ''.join(random.choice(string.hexdigits.lower()) for _ in range(16))
-    self.client.observer = lambda rr: self.assertRegex(rr.response_headers["traceparent"], f"^00-{token}-\w{{16}}-\d{{2}}$")
+    self.client.observer = lambda rr: self.assertRegexCompat(rr.response_headers["traceparent"], f"^00-{token}-\w{{16}}-\d{{2}}$")
     self.client.query({}, traceparent=f"00-{token}-{token2}-01")
 
     self.client.observer = None
 
   def test_invalid_traceparent_header(self):
-    self.assertRaisesRegex(Exception,
+    self.assertRaisesRegexCompat(Exception,
                            "Traceparent format is incorrect",
                            lambda: self.client.query({}, traceparent="foo"))
 
@@ -148,7 +148,7 @@ class ClientTest(FaunaTestCase):
     self.client.observer = _test_and_save_traceparent
     self.client.query({}, traceparent=None)
 
-    self.client.observer = lambda rr: self.assertRegex(rr.response_headers["traceparent"], f"^00-{tp_part}-\w{{16}}-\d{{2}}$")
+    self.client.observer = lambda rr: self.assertRegexCompat(rr.response_headers["traceparent"], f"^00-{tp_part}-\w{{16}}-\d{{2}}$")
     self.client.query({}, traceparent=tp_header)
 
     self.client.observer = None
