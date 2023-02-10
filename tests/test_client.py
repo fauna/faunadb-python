@@ -125,7 +125,7 @@ class ClientTest(FaunaTestCase):
   def test_traceparent_header(self):
     token = ''.join(random.choice(string.hexdigits.lower()) for _ in range(32))
     token2 = ''.join(random.choice(string.hexdigits.lower()) for _ in range(16))
-    self.client.observer = lambda rr: self.assertRegex(rr.response_headers["traceparent"], f"^00-{token}-\w{{16}}-\d{{2}}$")
+    self.client.observer = lambda rr: self.assertRegex(rr.response_headers["traceparent"], f"\A00-{token}-\w{{16}}-\d{{2}}\z")
     self.client.query({}, traceparent=f"00-{token}-{token2}-01")
 
     self.client.observer = None
@@ -148,7 +148,7 @@ class ClientTest(FaunaTestCase):
     self.client.observer = _test_and_save_traceparent
     self.client.query({}, traceparent=None)
 
-    self.client.observer = lambda rr: self.assertRegex(rr.response_headers["traceparent"], f"^00-{tp_part}-\w{{16}}-\d{{2}}$")
+    self.client.observer = lambda rr: self.assertRegex(rr.response_headers["traceparent"], f"\A00-{tp_part}-\w{{16}}-\d{{2}}\z")
     self.client.query({}, traceparent=tp_header)
 
     self.client.observer = None
