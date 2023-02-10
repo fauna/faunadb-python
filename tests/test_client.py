@@ -126,7 +126,7 @@ class ClientTest(FaunaTestCase):
     token = ''.join(random.choice(string.hexdigits.lower()) for _ in range(32))
     token2 = ''.join(random.choice(string.hexdigits.lower()) for _ in range(16))
     self.client.observer = lambda rr: self.assertRegexCompat(rr.response_headers["traceparent"], "^00-%s-\w{16}-\d{2}$"%(token))
-    self.client.query({}, traceparent=f"00-{token}-{token2}-01")
+    self.client.query({}, traceparent="00-%s-%s-01"%(token, token2))
 
     self.client.observer = None
 
