@@ -1,5 +1,6 @@
 import os
 import platform
+import re
 import sys
 import threading
 # pylint: disable=redefined-builtin
@@ -289,7 +290,7 @@ class FaunaClient(object):
         if self.counter.decrement() == 0:
             self.session.close()
 
-    def query(self, expression, timeout_millis=None):
+    def query(self, expression, timeout_millis=None, tags=None, traceparent=None):
         """
         Use the FaunaDB query API.
 
@@ -297,7 +298,7 @@ class FaunaClient(object):
         :param timeout_millis: Query timeout in milliseconds.
         :return: Converted JSON response.
         """
-        return self._execute("POST", "", _wrap(expression), with_txn_time=True, query_timeout_ms=timeout_millis)
+        return self._execute("POST", "", _wrap(expression), with_txn_time=True, query_timeout_ms=timeout_millis, tags=tags, traceparent=traceparent)
 
     def stream(self, expression, options=None, on_start=None, on_error=None, on_version=None, on_history=None, on_set=None):
         """
@@ -359,7 +360,7 @@ class FaunaClient(object):
             raise UnexpectedError(
                 "Cannnot create a session client from a closed session", None)
 
-    def _execute(self, action, path, data=None, query=None, with_txn_time=False, query_timeout_ms=None):
+    def _execute(self, action, path, data=None, query=None, with_txn_time=False, query_timeout_ms=None, tags=None, traceparent=None):
         """Performs an HTTP action, logs it, and looks for errors."""
         if query is not None:
             query = {k: v for k, v in query.items() if v is not None}
@@ -371,6 +372,12 @@ class FaunaClient(object):
 
         if with_txn_time:
             headers.update(self._last_txn_time.request_header)
+
+        if tags is not None:
+            headers["x-fauna-tags"] = self._get_tags_string(tags)
+
+        if traceparent is not None and self._is_valid_traceparent(traceparent):
+            headers["traceparent"] = traceparent
 
         start_time = time()
         response = self._perform_request(action, path, data, query, headers)
@@ -404,3 +411,24 @@ class FaunaClient(object):
         req = Request(action, url, params=query, data=to_json(
             data), auth=self.auth, headers=headers)
         return self.session.send(self.session.prepare_request(req))
+
+    def _get_tags_string(self, tags_dict):
+        if not isinstance(tags_dict, dict):
+            raise Exception("Tags must be an object of type dict")
+
+        if len(tags_dict) > 25:
+            raise Exception("Tags header only supports up to 25 key-value pairs")
+
+        if any([len(k) > 40 or not re.match("^\w+$", k) for k in tags_dict]):
+            raise Exception("One or more tag keys are invalid; keys can be up to 40 characters long and can only include letters, numbers, and '_'")
+
+        if any([len(v) > 80 or not re.match("^\w+$", v) for v in tags_dict.values()]):
+            raise Exception("One or more tag values are invalid; values can be up to 80 characters long and can only include letters, numbers, and '_'")
+        
+        return ",".join(["=".join([k, tags_dict[k]]) for k in tags_dict])
+
+    def _is_valid_traceparent(self, traceparent):
+        if not bool(re.match("^[\da-f]{2}-[\da-f]{32}-[\da-f]{16}-[\da-f]{2}$", traceparent)):
+            raise Exception("Traceparent format is incorrect")
+
+        return True
