@@ -414,7 +414,7 @@ class FaunaClient(object):
 
     def _get_tags_string(self, tags_dict):
         if not isinstance(tags_dict, dict):
-            raise Exception("Tags must be an object of type dict")
+            raise Exception("Tags must be a dictionary")
 
         if len(tags_dict) > 25:
             raise Exception("Tags header only supports up to 25 key-value pairs")
