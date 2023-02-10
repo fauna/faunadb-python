@@ -1,4 +1,7 @@
-## 4.3.1 [current]
+## 4.4.0 [current]
+- Add `tags` and `traceparent` headers. [#256](https://github.com/fauna/faunadb-python/pull/256)
+
+## 4.3.1
 - Fix the X-Last-Seen-Txn header. [#250](https://github.com/fauna/faunadb-python/pull/250)
 - Fix the changelog link emitted from upgrade prompt. [#249])(https://github.com/fauna/faunadb-python/pull/249)
 
