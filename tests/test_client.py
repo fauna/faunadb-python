@@ -97,7 +97,7 @@ class ClientTest(FaunaTestCase):
     invalid_keys = [
       "foo bar",
       "foo*bar",
-      ''.join(random.choice(string.ascii_lowercase) for _ in range(45)),
+      ''.join(random.choice(string.ascii_lowercase) for _ in range(41)),
     ]
     for key in invalid_keys:
       self.assertRaisesRegex(Exception,
@@ -108,7 +108,7 @@ class ClientTest(FaunaTestCase):
     invalid_values = [
       "foo bar",
       "foo*bar",
-      ''.join(random.choice(string.ascii_lowercase) for _ in range(85)),
+      ''.join(random.choice(string.ascii_lowercase) for _ in range(81)),
     ]
     for value in invalid_values:
       self.assertRaisesRegex(Exception,

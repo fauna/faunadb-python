@@ -419,10 +419,10 @@ class FaunaClient(object):
         if len(tags_dict) > 25:
             raise Exception("Tags header only supports up to 25 key-value pairs")
 
-        if any([len(k) > 40 or not re.match("^\w+$", k) for k in tags_dict]):
+        if any([not bool(re.match("^\w{1,40}$", k)) for k in tags_dict]):
             raise Exception("One or more tag keys are invalid; keys can be up to 40 characters long and can only include letters, numbers, and '_'")
 
-        if any([len(v) > 80 or not re.match("^\w+$", v) for v in tags_dict.values()]):
+        if any([not bool(re.match("^\w{1,80}$", v)) for v in tags_dict.values()]):
             raise Exception("One or more tag values are invalid; values can be up to 80 characters long and can only include letters, numbers, and '_'")
         
         return ",".join(["=".join([k, tags_dict[k]]) for k in tags_dict])
