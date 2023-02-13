@@ -1,8 +1,10 @@
 import sys
 import os
 import platform
+import random
+import string
 from faunadb.client import FaunaClient
-from faunadb.errors import UnexpectedError
+from faunadb.errors import UnexpectedError, BadRequest
 from tests.helpers import FaunaTestCase
 from faunadb import __version__ as pkg_version, __api_version__ as api_version
 
@@ -80,3 +82,73 @@ class ClientTest(FaunaTestCase):
     )
 
     os.environ["PATH"] = originalPath
+
+  def test_tags_header(self):
+    self.client.observer = lambda rr: self.assertCountEqual(rr.response_headers["x-fauna-tags"].split(","), ["foo=bar", "baz=biz"])
+    test_tags = {
+      "foo": "bar",
+      "baz": "biz",
+    }
+    self.client.query({}, tags=test_tags)
+
+    self.client.observer = None
+
+  def test_invalid_tags_keys(self):
+    invalid_keys = [
+      "foo bar",
+      "foo*bar",
+      ''.join(random.choice(string.ascii_lowercase) for _ in range(41)),
+    ]
+    for key in invalid_keys:
+      self.assertRaisesRegexCompat(BadRequest,
+                                   "invalid (tags|key)",
+                                   lambda: self.client.query({}, tags={ key: "value" }))
+
+  def test_invalid_tags_values(self):
+    invalid_values = [
+      "foo bar",
+      "foo*bar",
+      ''.join(random.choice(string.ascii_lowercase) for _ in range(81)),
+    ]
+    for value in invalid_values:
+      self.assertRaisesRegexCompat(BadRequest,
+                                   "invalid (tags|value)",
+                                   lambda: self.client.query({}, tags={ "key": value }))
+
+  def test_too_many_tags(self):
+    too_many_keys = [ (''.join(random.choice(string.ascii_lowercase) for _ in range(10))) for _ in range(30) ]
+    too_many_tags = { k: "value" for k in too_many_keys }
+    self.assertRaisesRegexCompat(BadRequest,
+                                 "too many tags",
+                                 lambda: self.client.query({}, tags=too_many_tags))
+
+  def test_traceparent_header(self):
+    token = ''.join(random.choice(string.hexdigits.lower()) for _ in range(32))
+    token2 = ''.join(random.choice(string.hexdigits.lower()) for _ in range(16))
+    req_tp = "00-%s-%s-01"%(token, token2)
+    self.client.observer = lambda rr: self.assertRegexCompat(rr.response_headers["traceparent"], "^00-%s-\w{16}-\d{2}$"%(token))
+    self.client.query({}, traceparent=req_tp)
+
+    self.client.observer = None
+
+  def test_invalid_traceparent_header(self):
+    self.client.observer = lambda rr: self.assertIsNotNone(rr.response_headers["traceparent"]) and not self.assertRegexCompat(".*foo.*", rr.response_headers["traceparent"])
+    self.client.query({}, traceparent="foo")
+
+  def test_empty_traceparent_header(self):
+    tp_header = None
+    tp_part = None
+
+    def _test_and_save_traceparent(rr):
+      self.assertIsNotNone(rr.response_headers["traceparent"])
+      nonlocal tp_header, tp_part
+      tp_header = rr.response_headers["traceparent"]
+      tp_part = tp_header.split('-')[1]
+
+    self.client.observer = _test_and_save_traceparent
+    self.client.query({}, traceparent=None)
+
+    self.client.observer = lambda rr: self.assertRegexCompat(rr.response_headers["traceparent"], "^00-%s-\w{16}-\d{2}$"%(tp_part))
+    self.client.query({}, traceparent=tp_header)
+
+    self.client.observer = None
