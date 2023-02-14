@@ -40,7 +40,7 @@ groups:
       - release
   - name: staging-tests
     jobs:
-      - run-staging-tests
+      - run-3.10-tests
 
 jobs:
   - name: release
@@ -78,14 +78,14 @@ jobs:
       - put: fauna-python-repository-docs
         params:
           repository: fauna-python-repository-updated-docs
-  - name: run-staging-tests
+  - name: run-3.10-tests
     serial: true
     public: false
     plan:
       - get: fauna-python-repository-staging
 
       - task: integration-tests
-        file: fauna-python-repository-staging/concourse/tasks/integration-tests.yml
+        file: fauna-python-repository-staging/concourse/tasks/integration-tests-310.yml
         privileged: true
         input_mapping:
           { fauna-python-repository: fauna-python-repository-staging }
