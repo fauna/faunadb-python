@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>faunadb.errors API documentation</title>
+<meta name="description" content="Error types that methods in the FaunaDB client throw." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>faunadb.errors</code></h1>
+</header>
+<section id="section-intro">
+<p>Error types that methods in the FaunaDB client throw.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Error types that methods in the FaunaDB client throw.&#34;&#34;&#34;
+# pylint: disable=redefined-builtin
+from builtins import object
+
+from requests import codes
+
+
+def _get_or_raise(request_result, dct, key):
+    if isinstance(dct, dict) and key in dct:
+        return dct[key]
+    else:
+        raise UnexpectedError(
+            &#34;Response JSON does not contain expected key %s&#34; % key, request_result)
+
+# region FaunaError
+
+
+class FaunaError(Exception):
+    &#34;&#34;&#34;
+    Error returned by the FaunaDB server.
+    For documentation of error types, see the `docs &lt;https://fauna.com/documentation#errors&gt;`__.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def raise_for_status_code(request_result):
+        code = request_result.status_code
+        # pylint: disable=no-member, too-many-return-statements
+        if 200 &lt;= code &lt;= 299:
+            pass
+        elif code == codes.bad_request:
+            raise BadRequest(request_result)
+        elif code == codes.unauthorized:
+            raise Unauthorized(request_result)
+        elif code == codes.forbidden:
+            raise PermissionDenied(request_result)
+        elif code == codes.not_found:
+            raise NotFound(request_result)
+        elif code == codes.internal_server_error:
+            raise InternalError(request_result)
+        elif code == codes.unavailable:
+            raise UnavailableError(request_result)
+        else:
+            raise UnexpectedError(&#34;Unexpected status code.&#34;, request_result)
+
+    def __init__(self, description, request_result):
+        super(FaunaError, self).__init__(description)
+        self.request_result = request_result
+        &#34;&#34;&#34;:any:`RequestResult` for the request that caused this error.&#34;&#34;&#34;
+
+
+class UnexpectedError(FaunaError):
+    &#34;&#34;&#34;Error for when the server returns an unexpected kind of response.&#34;&#34;&#34;
+    pass
+
+
+class HttpError(FaunaError):
+    def __init__(self, request_result):
+        self.errors = HttpError._get_errors(request_result)
+        &#34;&#34;&#34;List of all :py:class:`ErrorData` objects sent by the server.&#34;&#34;&#34;
+        super(HttpError, self).__init__(
+            self._get_description(), request_result)
+
+    @staticmethod
+    def _get_errors(request_result):
+        response = request_result.response_content
+        errors = _get_or_raise(request_result, response, &#34;errors&#34;)
+        return [ErrorData.from_dict(error, request_result) for error in errors]
+
+    def __str__(self):
+        return repr(self.errors[0])
+
+    def _get_description(self):
+        return self.errors[0].description if self.errors else &#34;(empty `errors`)&#34;
+
+
+class BadRequest(HttpError):
+    &#34;&#34;&#34;HTTP 400 error.&#34;&#34;&#34;
+    pass
+
+
+class Unauthorized(HttpError):
+    def __init__(self, request_result):
+        super(Unauthorized, self).__init__(request_result)
+        self.errors[0].description = &#34;Unauthorized. Check that endpoint, schema, port and secret are correct during client’s instantiation&#34;
+
+
+class PermissionDenied(HttpError):
+    &#34;&#34;&#34;HTTP 403 error.&#34;&#34;&#34;
+    pass
+
+
+class NotFound(HttpError):
+    &#34;&#34;&#34;HTTP 404 error.&#34;&#34;&#34;
+    pass
+
+
+class InternalError(HttpError):
+    &#34;&#34;&#34;HTTP 500 error.&#34;&#34;&#34;
+    pass
+
+
+class UnavailableError(HttpError):
+    &#34;&#34;&#34;HTTP 503 error.&#34;&#34;&#34;
+    pass
+
+
+# endregion
+
+class ErrorData(object):
+    &#34;&#34;&#34;
+    Data for one error returned by the server.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def from_dict(dct, request_result):
+        return ErrorData(
+            _get_or_raise(request_result, dct, &#34;code&#34;),
+            _get_or_raise(request_result, dct, &#34;description&#34;),
+            dct.get(&#34;position&#34;),
+            ErrorData.get_failures(dct, request_result),
+            ErrorData.get_cause(dct, request_result))
+
+    @staticmethod
+    def get_failures(dct, request_result):
+        if &#34;failures&#34; in dct:
+            return [Failure.from_dict(failure, request_result) for failure in dct[&#34;failures&#34;]]
+        return None
+
+    @staticmethod
+    def get_cause(dct, request_result):
+        if &#34;cause&#34; in dct:
+            return [ErrorData.from_dict(cause, request_result) for cause in dct[&#34;cause&#34;]]
+        return None
+
+    def __init__(self, code, description, position, failures, cause=None):
+        self.code = code
+        &#34;&#34;&#34;Error code. See all error codes `here &lt;https://fauna.com/documentation#errors&gt;`__.&#34;&#34;&#34;
+        self.description = description
+        &#34;&#34;&#34;Error description.&#34;&#34;&#34;
+        self.position = position
+        &#34;&#34;&#34;Position of the error in a query. May be None.&#34;&#34;&#34;
+        self.failures = failures
+        &#34;&#34;&#34;Cause of the error. May be None.&#34;&#34;&#34;
+        self.cause = cause
+        &#34;&#34;&#34;
+    List of all :py:class:`Failure` objects returned by the server.
+    None unless code == &#34;validation failed&#34;.
+    &#34;&#34;&#34;
+
+    def __repr__(self):
+        return &#34;ErrorData(code=%s, description=%s, position=%s, failures=%s, cause=%s)&#34; % \
+               (repr(self.code), repr(self.description),
+                repr(self.position), repr(self.failures),
+                repr(self.cause))
+
+    def __eq__(self, other):
+        return self.__class__ == other.__class__ and \
+            self.description == other.description and \
+            self.position == other.position and \
+            self.failures == other.failures and \
+            self.cause == other.cause
+
+    def __ne__(self, other):
+        # pylint: disable=unneeded-not
+        return not self == other
+
+
+class Failure(object):
+    &#34;&#34;&#34;
+    Part of the ``failures`` of an :py:class:`ErrorData`.
+    See the ``Invalid Data`` section of the `docs &lt;https://fauna.com/documentation#errors&gt;`__.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def from_dict(dct, request_result):
+        return Failure(
+            _get_or_raise(request_result, dct, &#34;code&#34;),
+            _get_or_raise(request_result, dct, &#34;description&#34;),
+            _get_or_raise(request_result, dct, &#34;field&#34;))
+
+    def __init__(self, code, description, field):
+        self.code = code
+        &#34;&#34;&#34;Failure code.&#34;&#34;&#34;
+        self.description = description
+        &#34;&#34;&#34;Failure description.&#34;&#34;&#34;
+        self.field = field
+        &#34;&#34;&#34;Field of the failure in the instance.&#34;&#34;&#34;
+
+    def __repr__(self):
+        return &#34;Failure(code=%s, description=%s, field=%s)&#34; % (repr(self.code), repr(self.description), repr(self.field))
+
+    def __eq__(self, other):
+        return self.code == other.code and \
+            self.description == other.description and \
+            self.field == other.field
+
+    def __ne__(self, other):
+        # pylint: disable=unneeded-not
+        return not self == other</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="faunadb.errors.BadRequest"><code class="flex name class">
+<span>class <span class="ident">BadRequest</span></span>
+<span>(</span><span>request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>HTTP 400 error.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BadRequest(HttpError):
+    &#34;&#34;&#34;HTTP 400 error.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></li>
+<li><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></b></code>:
+<ul class="hlist">
+<li><code><a title="faunadb.errors.HttpError.errors" href="#faunadb.errors.HttpError.errors">errors</a></code></li>
+<li><code><a title="faunadb.errors.HttpError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="faunadb.errors.ErrorData"><code class="flex name class">
+<span>class <span class="ident">ErrorData</span></span>
+<span>(</span><span>code, description, position, failures, cause=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Data for one error returned by the server.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ErrorData(object):
+    &#34;&#34;&#34;
+    Data for one error returned by the server.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def from_dict(dct, request_result):
+        return ErrorData(
+            _get_or_raise(request_result, dct, &#34;code&#34;),
+            _get_or_raise(request_result, dct, &#34;description&#34;),
+            dct.get(&#34;position&#34;),
+            ErrorData.get_failures(dct, request_result),
+            ErrorData.get_cause(dct, request_result))
+
+    @staticmethod
+    def get_failures(dct, request_result):
+        if &#34;failures&#34; in dct:
+            return [Failure.from_dict(failure, request_result) for failure in dct[&#34;failures&#34;]]
+        return None
+
+    @staticmethod
+    def get_cause(dct, request_result):
+        if &#34;cause&#34; in dct:
+            return [ErrorData.from_dict(cause, request_result) for cause in dct[&#34;cause&#34;]]
+        return None
+
+    def __init__(self, code, description, position, failures, cause=None):
+        self.code = code
+        &#34;&#34;&#34;Error code. See all error codes `here &lt;https://fauna.com/documentation#errors&gt;`__.&#34;&#34;&#34;
+        self.description = description
+        &#34;&#34;&#34;Error description.&#34;&#34;&#34;
+        self.position = position
+        &#34;&#34;&#34;Position of the error in a query. May be None.&#34;&#34;&#34;
+        self.failures = failures
+        &#34;&#34;&#34;Cause of the error. May be None.&#34;&#34;&#34;
+        self.cause = cause
+        &#34;&#34;&#34;
+    List of all :py:class:`Failure` objects returned by the server.
+    None unless code == &#34;validation failed&#34;.
+    &#34;&#34;&#34;
+
+    def __repr__(self):
+        return &#34;ErrorData(code=%s, description=%s, position=%s, failures=%s, cause=%s)&#34; % \
+               (repr(self.code), repr(self.description),
+                repr(self.position), repr(self.failures),
+                repr(self.cause))
+
+    def __eq__(self, other):
+        return self.__class__ == other.__class__ and \
+            self.description == other.description and \
+            self.position == other.position and \
+            self.failures == other.failures and \
+            self.cause == other.cause
+
+    def __ne__(self, other):
+        # pylint: disable=unneeded-not
+        return not self == other</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="faunadb.errors.ErrorData.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>dct, request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_dict(dct, request_result):
+    return ErrorData(
+        _get_or_raise(request_result, dct, &#34;code&#34;),
+        _get_or_raise(request_result, dct, &#34;description&#34;),
+        dct.get(&#34;position&#34;),
+        ErrorData.get_failures(dct, request_result),
+        ErrorData.get_cause(dct, request_result))</code></pre>
+</details>
+</dd>
+<dt id="faunadb.errors.ErrorData.get_cause"><code class="name flex">
+<span>def <span class="ident">get_cause</span></span>(<span>dct, request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_cause(dct, request_result):
+    if &#34;cause&#34; in dct:
+        return [ErrorData.from_dict(cause, request_result) for cause in dct[&#34;cause&#34;]]
+    return None</code></pre>
+</details>
+</dd>
+<dt id="faunadb.errors.ErrorData.get_failures"><code class="name flex">
+<span>def <span class="ident">get_failures</span></span>(<span>dct, request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_failures(dct, request_result):
+    if &#34;failures&#34; in dct:
+        return [Failure.from_dict(failure, request_result) for failure in dct[&#34;failures&#34;]]
+    return None</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="faunadb.errors.ErrorData.cause"><code class="name">var <span class="ident">cause</span></code></dt>
+<dd>
+<div class="desc"><p>List of all :py:class:<code><a title="faunadb.errors.Failure" href="#faunadb.errors.Failure">Failure</a></code> objects returned by the server.
+None unless code == "validation failed".</p></div>
+</dd>
+<dt id="faunadb.errors.ErrorData.code"><code class="name">var <span class="ident">code</span></code></dt>
+<dd>
+<div class="desc"><p>Error code. See all error codes <code>here &lt;https://fauna.com/documentation#errors&gt;</code>__.</p></div>
+</dd>
+<dt id="faunadb.errors.ErrorData.description"><code class="name">var <span class="ident">description</span></code></dt>
+<dd>
+<div class="desc"><p>Error description.</p></div>
+</dd>
+<dt id="faunadb.errors.ErrorData.failures"><code class="name">var <span class="ident">failures</span></code></dt>
+<dd>
+<div class="desc"><p>Cause of the error. May be None.</p></div>
+</dd>
+<dt id="faunadb.errors.ErrorData.position"><code class="name">var <span class="ident">position</span></code></dt>
+<dd>
+<div class="desc"><p>Position of the error in a query. May be None.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="faunadb.errors.Failure"><code class="flex name class">
+<span>class <span class="ident">Failure</span></span>
+<span>(</span><span>code, description, field)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Part of the <code>failures</code> of an :py:class:<code><a title="faunadb.errors.ErrorData" href="#faunadb.errors.ErrorData">ErrorData</a></code>.
+See the <code>Invalid Data</code> section of the <code>docs &lt;https://fauna.com/documentation#errors&gt;</code>__.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Failure(object):
+    &#34;&#34;&#34;
+    Part of the ``failures`` of an :py:class:`ErrorData`.
+    See the ``Invalid Data`` section of the `docs &lt;https://fauna.com/documentation#errors&gt;`__.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def from_dict(dct, request_result):
+        return Failure(
+            _get_or_raise(request_result, dct, &#34;code&#34;),
+            _get_or_raise(request_result, dct, &#34;description&#34;),
+            _get_or_raise(request_result, dct, &#34;field&#34;))
+
+    def __init__(self, code, description, field):
+        self.code = code
+        &#34;&#34;&#34;Failure code.&#34;&#34;&#34;
+        self.description = description
+        &#34;&#34;&#34;Failure description.&#34;&#34;&#34;
+        self.field = field
+        &#34;&#34;&#34;Field of the failure in the instance.&#34;&#34;&#34;
+
+    def __repr__(self):
+        return &#34;Failure(code=%s, description=%s, field=%s)&#34; % (repr(self.code), repr(self.description), repr(self.field))
+
+    def __eq__(self, other):
+        return self.code == other.code and \
+            self.description == other.description and \
+            self.field == other.field
+
+    def __ne__(self, other):
+        # pylint: disable=unneeded-not
+        return not self == other</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="faunadb.errors.Failure.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>dct, request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_dict(dct, request_result):
+    return Failure(
+        _get_or_raise(request_result, dct, &#34;code&#34;),
+        _get_or_raise(request_result, dct, &#34;description&#34;),
+        _get_or_raise(request_result, dct, &#34;field&#34;))</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="faunadb.errors.Failure.code"><code class="name">var <span class="ident">code</span></code></dt>
+<dd>
+<div class="desc"><p>Failure code.</p></div>
+</dd>
+<dt id="faunadb.errors.Failure.description"><code class="name">var <span class="ident">description</span></code></dt>
+<dd>
+<div class="desc"><p>Failure description.</p></div>
+</dd>
+<dt id="faunadb.errors.Failure.field"><code class="name">var <span class="ident">field</span></code></dt>
+<dd>
+<div class="desc"><p>Field of the failure in the instance.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="faunadb.errors.FaunaError"><code class="flex name class">
+<span>class <span class="ident">FaunaError</span></span>
+<span>(</span><span>description, request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Error returned by the FaunaDB server.
+For documentation of error types, see the <code>docs &lt;https://fauna.com/documentation#errors&gt;</code>__.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FaunaError(Exception):
+    &#34;&#34;&#34;
+    Error returned by the FaunaDB server.
+    For documentation of error types, see the `docs &lt;https://fauna.com/documentation#errors&gt;`__.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def raise_for_status_code(request_result):
+        code = request_result.status_code
+        # pylint: disable=no-member, too-many-return-statements
+        if 200 &lt;= code &lt;= 299:
+            pass
+        elif code == codes.bad_request:
+            raise BadRequest(request_result)
+        elif code == codes.unauthorized:
+            raise Unauthorized(request_result)
+        elif code == codes.forbidden:
+            raise PermissionDenied(request_result)
+        elif code == codes.not_found:
+            raise NotFound(request_result)
+        elif code == codes.internal_server_error:
+            raise InternalError(request_result)
+        elif code == codes.unavailable:
+            raise UnavailableError(request_result)
+        else:
+            raise UnexpectedError(&#34;Unexpected status code.&#34;, request_result)
+
+    def __init__(self, description, request_result):
+        super(FaunaError, self).__init__(description)
+        self.request_result = request_result
+        &#34;&#34;&#34;:any:`RequestResult` for the request that caused this error.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></li>
+<li><a title="faunadb.errors.UnexpectedError" href="#faunadb.errors.UnexpectedError">UnexpectedError</a></li>
+<li><a title="faunadb.streams.errors.StreamError" href="streams/errors.html#faunadb.streams.errors.StreamError">StreamError</a></li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="faunadb.errors.FaunaError.raise_for_status_code"><code class="name flex">
+<span>def <span class="ident">raise_for_status_code</span></span>(<span>request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def raise_for_status_code(request_result):
+    code = request_result.status_code
+    # pylint: disable=no-member, too-many-return-statements
+    if 200 &lt;= code &lt;= 299:
+        pass
+    elif code == codes.bad_request:
+        raise BadRequest(request_result)
+    elif code == codes.unauthorized:
+        raise Unauthorized(request_result)
+    elif code == codes.forbidden:
+        raise PermissionDenied(request_result)
+    elif code == codes.not_found:
+        raise NotFound(request_result)
+    elif code == codes.internal_server_error:
+        raise InternalError(request_result)
+    elif code == codes.unavailable:
+        raise UnavailableError(request_result)
+    else:
+        raise UnexpectedError(&#34;Unexpected status code.&#34;, request_result)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="faunadb.errors.FaunaError.request_result"><code class="name">var <span class="ident">request_result</span></code></dt>
+<dd>
+<div class="desc"><p>:any:<code>RequestResult</code> for the request that caused this error.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="faunadb.errors.HttpError"><code class="flex name class">
+<span>class <span class="ident">HttpError</span></span>
+<span>(</span><span>request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Error returned by the FaunaDB server.
+For documentation of error types, see the <code>docs &lt;https://fauna.com/documentation#errors&gt;</code>__.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class HttpError(FaunaError):
+    def __init__(self, request_result):
+        self.errors = HttpError._get_errors(request_result)
+        &#34;&#34;&#34;List of all :py:class:`ErrorData` objects sent by the server.&#34;&#34;&#34;
+        super(HttpError, self).__init__(
+            self._get_description(), request_result)
+
+    @staticmethod
+    def _get_errors(request_result):
+        response = request_result.response_content
+        errors = _get_or_raise(request_result, response, &#34;errors&#34;)
+        return [ErrorData.from_dict(error, request_result) for error in errors]
+
+    def __str__(self):
+        return repr(self.errors[0])
+
+    def _get_description(self):
+        return self.errors[0].description if self.errors else &#34;(empty `errors`)&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.BadRequest" href="#faunadb.errors.BadRequest">BadRequest</a></li>
+<li><a title="faunadb.errors.InternalError" href="#faunadb.errors.InternalError">InternalError</a></li>
+<li><a title="faunadb.errors.NotFound" href="#faunadb.errors.NotFound">NotFound</a></li>
+<li><a title="faunadb.errors.PermissionDenied" href="#faunadb.errors.PermissionDenied">PermissionDenied</a></li>
+<li><a title="faunadb.errors.Unauthorized" href="#faunadb.errors.Unauthorized">Unauthorized</a></li>
+<li><a title="faunadb.errors.UnavailableError" href="#faunadb.errors.UnavailableError">UnavailableError</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="faunadb.errors.HttpError.errors"><code class="name">var <span class="ident">errors</span></code></dt>
+<dd>
+<div class="desc"><p>List of all :py:class:<code><a title="faunadb.errors.ErrorData" href="#faunadb.errors.ErrorData">ErrorData</a></code> objects sent by the server.</p></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></b></code>:
+<ul class="hlist">
+<li><code><a title="faunadb.errors.FaunaError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="faunadb.errors.InternalError"><code class="flex name class">
+<span>class <span class="ident">InternalError</span></span>
+<span>(</span><span>request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>HTTP 500 error.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InternalError(HttpError):
+    &#34;&#34;&#34;HTTP 500 error.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></li>
+<li><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></b></code>:
+<ul class="hlist">
+<li><code><a title="faunadb.errors.HttpError.errors" href="#faunadb.errors.HttpError.errors">errors</a></code></li>
+<li><code><a title="faunadb.errors.HttpError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="faunadb.errors.NotFound"><code class="flex name class">
+<span>class <span class="ident">NotFound</span></span>
+<span>(</span><span>request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>HTTP 404 error.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NotFound(HttpError):
+    &#34;&#34;&#34;HTTP 404 error.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></li>
+<li><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></b></code>:
+<ul class="hlist">
+<li><code><a title="faunadb.errors.HttpError.errors" href="#faunadb.errors.HttpError.errors">errors</a></code></li>
+<li><code><a title="faunadb.errors.HttpError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="faunadb.errors.PermissionDenied"><code class="flex name class">
+<span>class <span class="ident">PermissionDenied</span></span>
+<span>(</span><span>request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>HTTP 403 error.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PermissionDenied(HttpError):
+    &#34;&#34;&#34;HTTP 403 error.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></li>
+<li><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></b></code>:
+<ul class="hlist">
+<li><code><a title="faunadb.errors.HttpError.errors" href="#faunadb.errors.HttpError.errors">errors</a></code></li>
+<li><code><a title="faunadb.errors.HttpError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="faunadb.errors.Unauthorized"><code class="flex name class">
+<span>class <span class="ident">Unauthorized</span></span>
+<span>(</span><span>request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Error returned by the FaunaDB server.
+For documentation of error types, see the <code>docs &lt;https://fauna.com/documentation#errors&gt;</code>__.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Unauthorized(HttpError):
+    def __init__(self, request_result):
+        super(Unauthorized, self).__init__(request_result)
+        self.errors[0].description = &#34;Unauthorized. Check that endpoint, schema, port and secret are correct during client’s instantiation&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></li>
+<li><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></b></code>:
+<ul class="hlist">
+<li><code><a title="faunadb.errors.HttpError.errors" href="#faunadb.errors.HttpError.errors">errors</a></code></li>
+<li><code><a title="faunadb.errors.HttpError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="faunadb.errors.UnavailableError"><code class="flex name class">
+<span>class <span class="ident">UnavailableError</span></span>
+<span>(</span><span>request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>HTTP 503 error.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnavailableError(HttpError):
+    &#34;&#34;&#34;HTTP 503 error.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></li>
+<li><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></b></code>:
+<ul class="hlist">
+<li><code><a title="faunadb.errors.HttpError.errors" href="#faunadb.errors.HttpError.errors">errors</a></code></li>
+<li><code><a title="faunadb.errors.HttpError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="faunadb.errors.UnexpectedError"><code class="flex name class">
+<span>class <span class="ident">UnexpectedError</span></span>
+<span>(</span><span>description, request_result)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Error for when the server returns an unexpected kind of response.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnexpectedError(FaunaError):
+    &#34;&#34;&#34;Error for when the server returns an unexpected kind of response.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></b></code>:
+<ul class="hlist">
+<li><code><a title="faunadb.errors.FaunaError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="faunadb" href="index.html">faunadb</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="faunadb.errors.BadRequest" href="#faunadb.errors.BadRequest">BadRequest</a></code></h4>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.ErrorData" href="#faunadb.errors.ErrorData">ErrorData</a></code></h4>
+<ul class="two-column">
+<li><code><a title="faunadb.errors.ErrorData.cause" href="#faunadb.errors.ErrorData.cause">cause</a></code></li>
+<li><code><a title="faunadb.errors.ErrorData.code" href="#faunadb.errors.ErrorData.code">code</a></code></li>
+<li><code><a title="faunadb.errors.ErrorData.description" href="#faunadb.errors.ErrorData.description">description</a></code></li>
+<li><code><a title="faunadb.errors.ErrorData.failures" href="#faunadb.errors.ErrorData.failures">failures</a></code></li>
+<li><code><a title="faunadb.errors.ErrorData.from_dict" href="#faunadb.errors.ErrorData.from_dict">from_dict</a></code></li>
+<li><code><a title="faunadb.errors.ErrorData.get_cause" href="#faunadb.errors.ErrorData.get_cause">get_cause</a></code></li>
+<li><code><a title="faunadb.errors.ErrorData.get_failures" href="#faunadb.errors.ErrorData.get_failures">get_failures</a></code></li>
+<li><code><a title="faunadb.errors.ErrorData.position" href="#faunadb.errors.ErrorData.position">position</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.Failure" href="#faunadb.errors.Failure">Failure</a></code></h4>
+<ul class="">
+<li><code><a title="faunadb.errors.Failure.code" href="#faunadb.errors.Failure.code">code</a></code></li>
+<li><code><a title="faunadb.errors.Failure.description" href="#faunadb.errors.Failure.description">description</a></code></li>
+<li><code><a title="faunadb.errors.Failure.field" href="#faunadb.errors.Failure.field">field</a></code></li>
+<li><code><a title="faunadb.errors.Failure.from_dict" href="#faunadb.errors.Failure.from_dict">from_dict</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.FaunaError" href="#faunadb.errors.FaunaError">FaunaError</a></code></h4>
+<ul class="">
+<li><code><a title="faunadb.errors.FaunaError.raise_for_status_code" href="#faunadb.errors.FaunaError.raise_for_status_code">raise_for_status_code</a></code></li>
+<li><code><a title="faunadb.errors.FaunaError.request_result" href="#faunadb.errors.FaunaError.request_result">request_result</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.HttpError" href="#faunadb.errors.HttpError">HttpError</a></code></h4>
+<ul class="">
+<li><code><a title="faunadb.errors.HttpError.errors" href="#faunadb.errors.HttpError.errors">errors</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.InternalError" href="#faunadb.errors.InternalError">InternalError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.NotFound" href="#faunadb.errors.NotFound">NotFound</a></code></h4>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.PermissionDenied" href="#faunadb.errors.PermissionDenied">PermissionDenied</a></code></h4>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.Unauthorized" href="#faunadb.errors.Unauthorized">Unauthorized</a></code></h4>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.UnavailableError" href="#faunadb.errors.UnavailableError">UnavailableError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="faunadb.errors.UnexpectedError" href="#faunadb.errors.UnexpectedError">UnexpectedError</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
