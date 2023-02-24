@@ -31,7 +31,7 @@ commands:
 
       - run:
           name: Install codecov
-          command:  |
+          command: |
             sudo pip install codecov
 
       - run:
@@ -54,12 +54,28 @@ commands:
 
       - store_test_results:
           path: results/
-        
+
       - store_artifacts:
           path: results/
           destination: tr1
 
 jobs:
+  core-stable-310:
+    executor:
+      name: core
+      python_version: "3.10"
+      version: stable
+    steps:
+      - build_and_test
+
+  core-nightly-310:
+    executor:
+      name: core
+      python_version: "3.10"
+      version: nightly
+    steps:
+      - build_and_test
+
   core-stable-39:
     executor:
       name: core
@@ -124,27 +140,14 @@ jobs:
     steps:
       - build_and_test
 
-  core-stable-35:
-    executor:
-      name: core
-      python_version: "3.5"
-      version: stable
-    steps:
-      - build_and_test
-
-  core-nightly-35:
-    executor:
-      name: core
-      python_version: "3.5"
-      version: nightly
-    steps:
-      - build_and_test
-
-
 workflows:
   version: 2
   build_and_test:
     jobs:
+      - core-stable-310:
+          context: faunadb-drivers
+      - core-nightly-310:
+          context: faunadb-drivers
       - core-stable-39:
           context: faunadb-drivers
       - core-nightly-39:
@@ -160,8 +163,4 @@ workflows:
       - core-stable-36:
           context: faunadb-drivers
       - core-nightly-36:
-          context: faunadb-drivers
-      - core-stable-35:
-          context: faunadb-drivers
-      - core-nightly-35:
           context: faunadb-drivers
