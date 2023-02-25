@@ -1,4 +1,7 @@
-## 4.4.0 [current]
+## 4.5.0 [current]
+- Move from `hyper` to `httpx` to unblock usage of python-3.10. [#258](https://github.com/fauna/faunadb-python/pull/258)
+
+## 4.4.0
 - Add `tags` and `traceparent` headers. [#256](https://github.com/fauna/faunadb-python/pull/256)
 
 ## 4.3.1
