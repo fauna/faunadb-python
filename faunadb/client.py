@@ -296,6 +296,8 @@ class FaunaClient(object):
 
         :param expression: A query. See :doc:`query` for information on queries.
         :param timeout_millis: Query timeout in milliseconds.
+        :param tags: A dict of key-value pairs to send as the 'x-fauna-tags' header with the query
+        :param traceparent: A W3C-compliant traceparent header to be sent with the query
         :return: Converted JSON response.
         """
         return self._execute("POST", "", _wrap(expression), with_txn_time=True, query_timeout_ms=timeout_millis, tags=tags, traceparent=traceparent)
