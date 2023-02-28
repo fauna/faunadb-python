@@ -7,13 +7,6 @@ resources:
       uri: https://github.com/fauna/faunadb-python
       branch: v4
 
-  - name: fauna-python-repository-staging
-    type: git
-    icon: github
-    source:
-      uri: https://github.com/fauna/faunadb-python
-      branch: v4-staging
-
   - name: fauna-python-repository-docs
     type: git
     icon: github
@@ -38,10 +31,6 @@ groups:
   - name: standard-release
     jobs:
       - release
-  - name: staging-tests
-    jobs:
-      - run-3.10-tests
-
 jobs:
   - name: release
     serial: true
@@ -78,19 +67,3 @@ jobs:
       - put: fauna-python-repository-docs
         params:
           repository: fauna-python-repository-updated-docs
-  - name: run-3.10-tests
-    serial: true
-    public: false
-    plan:
-      - get: fauna-python-repository-staging
-
-      - task: integration-tests
-        file: fauna-python-repository-staging/concourse/tasks/integration-tests-310.yml
-        privileged: true
-        input_mapping:
-          { fauna-python-repository: fauna-python-repository-staging }
-        params:
-          FAUNA_ROOT_KEY: ((fauna.secret))
-          FAUNA_DOMAIN: ((fauna.domain))
-          FAUNA_SCHEME: ((fauna.scheme))
-          FAUNA_PORT: ((fauna.port))
