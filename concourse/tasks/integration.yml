@@ -89,19 +89,3 @@ services:
     working_dir: "/tmp/app"
     command:
       - concourse/scripts/integration-tests.sh
-
-  tests-35:
-    environment:
-      - FAUNA_ROOT_KEY
-      - FAUNA_DOMAIN
-      - FAUNA_SCHEME
-      - FAUNA_PORT
-    image: python:3.5.9-alpine3.12
-    container_name: mytests-35
-    depends_on:
-      - faunadb
-    volumes:
-      - "../../:/tmp/app"
-    working_dir: "/tmp/app"
-    command:
-      - concourse/scripts/integration-tests.sh

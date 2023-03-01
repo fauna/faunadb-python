@@ -24,16 +24,16 @@ Compatibility
 
 The following versions of Python are supported:
 
-* Python 3.5
 * Python 3.6
 * Python 3.7
 * Python 3.8
 * Python 3.9
+* Python 3.10
 
 Documentation
 -------------
 
-Driver documentation is available at https://fauna.github.io/faunadb-python/4.1.1/api/.
+Driver documentation is available at https://fauna.github.io/faunadb-python/4.5.0/api/.
 
 See the `FaunaDB Documentation <https://docs.fauna.com/>`__ for a complete API reference, or look in `tests`_
 for more examples.
