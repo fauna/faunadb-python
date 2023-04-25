@@ -35,6 +35,8 @@ class FaunaError(Exception):
             raise PermissionDenied(request_result)
         elif code == codes.not_found:
             raise NotFound(request_result)
+        elif code == codes.conflict:
+            raise ContendedTransaction(request_result)
         elif code == codes.internal_server_error:
             raise InternalError(request_result)
         elif code == codes.unavailable:
@@ -91,6 +93,11 @@ class PermissionDenied(HttpError):
 
 class NotFound(HttpError):
     """HTTP 404 error."""
+    pass
+
+
+class ContendedTransaction(HttpError):
+    """HTTP 409 error."""
     pass
 
 
