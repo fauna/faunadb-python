@@ -28,6 +28,10 @@ commands:
     description: "Run Python tests"
     steps:
       - checkout
+      
+      - setup_remote_docker:
+          version: 24.0
+          docker_layer_caching: true
 
       - run:
           name: Install codecov
