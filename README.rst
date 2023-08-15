@@ -1,5 +1,5 @@
-FaunaDB Python
-==============
+The Official Python driver for v4 API of Fauna
+==============================================
 
 .. image:: https://img.shields.io/codecov/c/github/fauna/faunadb-python/master.svg?maxAge=21600
  :target: https://codecov.io/gh/fauna/faunadb-python
@@ -10,6 +10,8 @@ FaunaDB Python
 
 Python driver for `FaunaDB <https://fauna.com>`_.
 
+Note: This driver supports an older version of the Fauna API. The latest version of the official
+Fauna Python Driver is located [here](https://pypi.org/project/faunadb/).
 
 Installation
 ------------
@@ -35,7 +37,7 @@ Documentation
 
 Driver documentation is available at https://fauna.github.io/faunadb-python/4.5.0/api/.
 
-See the `FaunaDB Documentation <https://docs.fauna.com/>`__ for a complete API reference, or look in `tests`_
+See the `FaunaDB Documentation <https://docs.fauna.com/fauna/v4/api/fql/>`__ for a complete API reference, or look in `tests`_
 for more examples.
 
 
@@ -94,7 +96,7 @@ Observing Metrics
 
 Its possible to observe each query's metrics by providing an "observer" callback.
 
-More information on query metrics is available in the `FaunaDB Documentation <https://docs.fauna.com/fauna/current/learn/understanding/billing#perquery>`__.
+More information on query metrics is available in the `FaunaDB Documentation <https://docs.fauna.com/fauna/v4/learn/understanding/plan_billing/billing#perquery>`__.
 
 Here is a simple example:
 
