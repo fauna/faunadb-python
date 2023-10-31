@@ -11,7 +11,7 @@ The Official Python driver for v4 API of Fauna
 Python driver for `FaunaDB <https://fauna.com>`_.
 
 Note: This driver supports an older version of the Fauna API. The latest version of the official
-Fauna Python Driver is located [here](https://pypi.org/project/faunadb/) (we encourage all new
+Fauna Python Driver is located [here](https://github.com/fauna/fauna-python) (we encourage all new
 development to use this new version where possible).
 
 Installation
