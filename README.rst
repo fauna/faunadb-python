@@ -1,4 +1,4 @@
-The Official Python driver for v4 API of Fauna
+Official Python driver for Fauna v4
 ==============================================
 
 .. image:: https://img.shields.io/codecov/c/github/fauna/faunadb-python/master.svg?maxAge=21600
@@ -8,11 +8,18 @@ The Official Python driver for v4 API of Fauna
 .. image:: https://img.shields.io/badge/license-MPL_2.0-blue.svg?maxAge=2592000
  :target: https://raw.githubusercontent.com/fauna/faunadb-python/main/LICENSE
 
-Python driver for `FaunaDB <https://fauna.com>`_.
+----
 
-Note: This driver supports an older version of the Fauna API. The latest version of the official
-Fauna Python Driver is located [here](https://pypi.org/project/faunadb/) (we encourage all new
-development to use this new version where possible).
+**\*\*** **CAUTION** **\*\***
+
+This driver is not compatible with Fauna v10, the latest version.
+
+For new development, use the official Fauna v10 driver:
+`https://github.com/fauna/fauna-python <https://github.com/fauna/fauna-python>`_
+
+----
+
+The offical Python driver for `Fauna v4 <https://docs.fauna.com/fauna/v4/>`_
 
 Installation
 ------------
