@@ -12,7 +12,7 @@ Official Python driver for Fauna v4
 
 **\*\*** **WARNING** **\*\***
 
-Fauna is decomissioning FQL v4. See the `v4 end of life (EOL) announcement
+Fauna is decomissioning FQL v4 on June 30, 2025. See the `v4 end of life (EOL) announcement
 <https://docs.fauna.com/fauna/v4/#fql-v4-end-of-life>`_ and `related FAQ
 <https://docs.fauna.com/fauna/v4/migration/faq>`_.
 
