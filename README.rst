@@ -10,11 +10,14 @@ Official Python driver for Fauna v4
 
 ----
 
-**\*\*** **CAUTION** **\*\***
+**\*\*** **WARNING** **\*\***
 
-This driver is not compatible with Fauna v10, the latest version.
+Fauna is decomissioning FQL v4 on June 30, 2025. See the `v4 end of life (EOL) announcement
+<https://docs.fauna.com/fauna/v4/#fql-v4-end-of-life>`_ and `related FAQ
+<https://docs.fauna.com/fauna/v4/migration/faq>`_.
 
-For new development, use the official Fauna v10 driver:
+This driver is not compatible with FQL v10, the latest version. Ensure you
+migrate existing projects to the official v10 driver by the v4 EOL date:
 `https://github.com/fauna/fauna-python <https://github.com/fauna/fauna-python>`_
 
 ----
