@@ -1,4 +1,4 @@
-Official Python driver for Fauna v4
+Python driver for Fauna v4 (deprecated)
 ==============================================
 
 .. image:: https://img.shields.io/codecov/c/github/fauna/faunadb-python/master.svg?maxAge=21600
