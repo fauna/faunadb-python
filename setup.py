@@ -32,14 +32,14 @@ extras_require = {
 setup(
     name="faunadb",
     version=pkg_version,
-    description="FaunaDB Python driver",
+    description="Python driver for Fauna v4 (deprecated)",
     long_description=long_description,
     url="https://github.com/fauna/faunadb-python",
     author=pkg_author,
     author_email="priority@fauna.com",
     license=pkg_license,
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 7 - Inactive",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
         "Programming Language :: Python :: 3.6",
