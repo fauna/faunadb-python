@@ -124,7 +124,7 @@ class StreamTest(FaunaTestCase):
             self.assertEqual(error.type, 'error')
             self.assertTrue(isinstance(error.error, BadRequest))
             self.assertEqual(error.error._get_description(),
-                              'Write effect in read-only query expression.')
+                              'Call performs a write, which is not allowed in stream requests.')
             stream.close()
         stream= self.stream_sync(q, on_error=on_error)
         stream.start()
