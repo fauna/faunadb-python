@@ -21,7 +21,8 @@ services:
     image: python:3.10-alpine3.15
     container_name: mytests-310
     depends_on:
-      - faunadb
+      faunadb:
+        condition: service_healthy
     volumes:
       - "../../:/tmp/app"
     working_dir: "/tmp/app"
@@ -37,7 +38,8 @@ services:
     image: python:3.9.5-alpine3.13
     container_name: mytests-39
     depends_on:
-      - faunadb
+      faunadb:
+        condition: service_healthy
     volumes:
       - "../../:/tmp/app"
     working_dir: "/tmp/app"
@@ -53,7 +55,8 @@ services:
     image: python:3.8.12-alpine3.13
     container_name: mytests-38
     depends_on:
-      - faunadb
+      faunadb:
+        condition: service_healthy
     volumes:
       - "../../:/tmp/app"
     working_dir: "/tmp/app"
@@ -69,7 +72,8 @@ services:
     image: python:3.7.11-alpine3.13
     container_name: mytests-37
     depends_on:
-      - faunadb
+      faunadb:
+        condition: service_healthy
     volumes:
       - "../../:/tmp/app"
     working_dir: "/tmp/app"
@@ -85,7 +89,8 @@ services:
     image: python:3.6.14-alpine3.13
     container_name: mytests-36
     depends_on:
-      - faunadb
+      faunadb:
+        condition: service_healthy
     volumes:
       - "../../:/tmp/app"
     working_dir: "/tmp/app"
